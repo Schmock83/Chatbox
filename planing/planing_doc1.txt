@@ -1,0 +1,20 @@
+TODO:
+-hashing password... and sending through socket
+-encrypting messages (qt-libs?)
+
+
+
+
+Client-Functionality:
+-register
+-login
+	-> after authentication:
+	-modify profile-information (Picture, Status-Message, Status(e.g. online, offline, dnd))
+	-add or remove friends -> need clear indication of friend or stranger
+			-> dont show profile-information for strangers
+	-read/write messages with friends and/or strangers
+
+
+Server-Functionality:
+-register new users
+-give user a way to authenticate

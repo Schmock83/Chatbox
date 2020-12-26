@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client_Chatbox", "Client_Chatbox.vcxproj", "{04578EA4-7D53-3FA7-8E72-E184CE10D7B7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{04578EA4-7D53-3FA7-8E72-E184CE10D7B7}.Debug|x64.ActiveCfg = Debug|x64
+		{04578EA4-7D53-3FA7-8E72-E184CE10D7B7}.Debug|x64.Build.0 = Debug|x64
+		{04578EA4-7D53-3FA7-8E72-E184CE10D7B7}.Release|x64.ActiveCfg = Release|x64
+		{04578EA4-7D53-3FA7-8E72-E184CE10D7B7}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C9FF8BB8-26C5-4A7D-BAFE-3E12BFA86ABD}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/userIcons">
+        <file>imgs/offline.png</file>
+        <file>imgs/online.png</file>
+    </qresource>
+    <qresource prefix="/loadingGifs">
+        <file>imgs/loading1.gif</file>
+        <file>imgs/loading2.gif</file>
+        <file>imgs/loading3.gif</file>
+    </qresource>
+</RCC>
