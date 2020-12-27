@@ -48,3 +48,4 @@ build*
 
 .qmake.stash
 *.vcxproj*
+*.sln
