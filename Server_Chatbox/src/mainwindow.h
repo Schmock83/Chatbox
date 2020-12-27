@@ -18,17 +18,17 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+	MainWindow(QWidget* parent = nullptr);
+	~MainWindow();
 private slots:
-    void newConnection();
-    void readNewData();
+	void newConnection();
+	void readNewData();
 private:
-    Ui::MainWindow *ui;
-    QTcpServer server;
-    //MySslServer server;
+	Ui::MainWindow* ui;
+	QTcpServer server;
+	//MySslServer server;
 };
 #endif // MAINWINDOW_H
