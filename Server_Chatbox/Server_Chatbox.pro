@@ -9,16 +9,18 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../chatbox_includes/message.cpp \
-    main.cpp \
-    mainwindow.cpp
+    ../core_includes/core.cpp \
+    ../core_includes/message.cpp \
+    src/main.cpp \
+    src/mainwindow.cpp
 
 HEADERS += \
-    ../chatbox_includes/message.h \
-    mainwindow.h
+    ../core_includes/core.h \
+    ../core_includes/message.h \
+    src/mainwindow.h
 
 FORMS += \
-    mainwindow.ui
+    forms/mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

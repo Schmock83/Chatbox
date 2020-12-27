@@ -1,8 +1,0 @@
-<RCC>
-    <qresource prefix="/stylesheets">
-        <file>QDarkStyleSheet/style.qss</file>
-    </qresource>
-    <qresource prefix="/">
-        <file>testStyleSheet.txt</file>
-    </qresource>
-</RCC>
