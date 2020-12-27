@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget* parent)
 
 	ui->contacts_grid_layout->addWidget(new QPushButton("Contact 123"));
 
-    ui->sceneWidget->setCurrentIndex(Scene::loadingScene);
+	ui->sceneWidget->setCurrentIndex(Scene::loadingScene);
 }
 
 void MainWindow::establishSocketConnection()
