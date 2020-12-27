@@ -47,3 +47,4 @@ compile_commands.json
 build*
 
 .qmake.stash
+*.vcxproj*
