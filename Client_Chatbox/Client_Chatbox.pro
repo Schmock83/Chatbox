@@ -22,6 +22,26 @@ HEADERS += \
 FORMS += \
     forms/mainwindow.ui
 
+message("Clear your project when changing kits")
+
+#FOR MINGW x64
+*-g++{
+    INCLUDEPATH += $$PWD/../dependencies\libsodium\libsodium-mingw-win64\include
+    LIBS += $$PWD/../dependencies/libsodium/libsodium-mingw-win64/lib/libsodium.a
+}
+
+
+#FOR MSVC-2019 x64
+*-msvc*{
+    LIBS += -L$$PWD/../dependencies/libsodium/libsodium-msvc-2019/x64/Release/v142/dynamic/ -llibsodium
+    INCLUDEPATH += $$PWD/../dependencies/libsodium/libsodium-msvc-2019/include
+    DEPENDPATH += $$PWD/../dependencies/libsodium/libsodium-msvc-2019/include
+    PRE_TARGETDEPS += $$PWD/../dependencies/libsodium/libsodium-msvc-2019/x64/Release/v142/dynamic/libsodium.lib
+}
+
+
+
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
