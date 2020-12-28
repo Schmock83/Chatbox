@@ -22,6 +22,11 @@ HEADERS += \
 FORMS += \
     forms/mainwindow.ui
 
+RESOURCES += \
+    resources/images.qrc \
+    resources/qDarkStyleSheet/style.qrc
+
+
 message("Clear your project when changing kits")
 
 #FOR MINGW x64
@@ -39,14 +44,7 @@ message("Clear your project when changing kits")
     PRE_TARGETDEPS += $$PWD/../dependencies/libsodium/libsodium-msvc-2019/x64/Release/v142/dynamic/libsodium.lib
 }
 
-
-
-
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-RESOURCES += \
-    resources/images.qrc \
-    resources/qDarkStyleSheet/style.qrc
