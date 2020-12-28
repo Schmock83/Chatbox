@@ -1,6 +1,16 @@
 TODO:
--hashing password... and sending through socket
--encrypting messages (qt-libs?)
+-Message-class
+
+-implement Login
+	Client:
+		->hashing password + encryption
+	Server:
+		->salt + encryption - save in db
+
+-implement Registration
+-Chat-class, that uses Message-class (has a-relation) 
+	->CLient&Server only interact with chat-class
+	-> should keep track of chat-recipients, messages(time)
 
 
 

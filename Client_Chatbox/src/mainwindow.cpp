@@ -12,25 +12,16 @@ MainWindow::MainWindow(QWidget* parent)
 
 	setUpSignalSlotConnections();
 
-	//establishSocketConnection();
-	for (int i = 0; i < 32; i++) {
-		QPushButton* push_btn = new QPushButton(tr("Chat - %1").arg(QString::number(i + 1)));
-		ui->chats_grid_layout->addWidget(push_btn);
-	}
+	establishSocketConnection();
+}
 
-	ui->contacts_grid_layout->addWidget(new QPushButton("Contact 123"));
-
-	ui->sceneWidget->setCurrentIndex(Scene::loadingScene);
+MainWindow::~MainWindow()
+{
+	delete ui;
 }
 
 void MainWindow::establishSocketConnection()
 {
-	/*if(socket->state() == QTcpSocket::ConnectedState){
-		qDebug() << "nothing to do in establishSocketCOnnection";
-		return;
-	}*/
-
-	qDebug() << "establishingSOcketConnection called...";
 	//update labels
 	ui->loadingErrorLabel->clear();
 	ui->loadingStatusLabel->setText(tr("Establishing connection..."));
@@ -41,23 +32,6 @@ void MainWindow::establishSocketConnection()
 
 	//try to establish socket connection
 	socket->connectToHost(SERVER_IP, SERVER_PORT);
-}
-
-MainWindow::~MainWindow()
-{
-	delete ui;
-}
-
-void MainWindow::socketError(QAbstractSocket::SocketError socketError)
-{
-	qDebug() << "socket-error called";
-	//show error in loading-screen
-	if (ui->sceneWidget->currentIndex() == Scene::loadingScene) {
-		ui->loadingErrorLabel->setText(tr("Error establishing connection: %1").arg(socket->errorString()));
-		checkIfSocketConnected();
-	}
-
-	//TODO handle errors
 }
 
 void MainWindow::setUpUi()
@@ -77,9 +51,36 @@ void MainWindow::setUpUi()
 
 void MainWindow::setUpSignalSlotConnections()
 {
+	//socket-connections
 	connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
 	connect(socket, SIGNAL(connected()), this, SLOT(connected()));
-	connect(socket, SIGNAL(errorOccurred(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
+	connect(socket, SIGNAL(errorOccurred(QAbstractSocket::SocketError)), this, SLOT(socketError()));
+
+	//buttons
+	connect(ui->login_Button, SIGNAL(clicked()), this, SLOT(attemptLogin()));
+	connect(ui->registration_Button, SIGNAL(clicked()), this, SLOT(attemptRegistration()));
+}
+
+void MainWindow::disconnected()
+{
+	establishSocketConnection();
+}
+
+void MainWindow::connected()
+{
+	ui->sceneWidget->setCurrentIndex(Scene::welcomeScene);
+}
+
+void MainWindow::socketError()
+{
+	qDebug() << "SocketError...";
+	//show error in loading-screen
+	if (ui->sceneWidget->currentIndex() == Scene::loadingScene) {
+		ui->loadingErrorLabel->setText(tr("Error establishing connection: %1").arg(socket->errorString()));
+		checkIfSocketConnected();
+	}
+	else if (!socket->isValid())
+		emit socket->disconnected();
 }
 
 /*void MainWindow::on_pushButton_clicked()
@@ -115,16 +116,7 @@ void MainWindow::updateChatList()
 		ui->chats_grid_layout->addWidget(button);
 }
 
-void MainWindow::disconnected()
-{
-	establishSocketConnection();
-}
-
-void MainWindow::connected()
-{
-	ui->sceneWidget->setCurrentIndex(Scene::welcomeScene);
-}
-
+#pragma region LOADING-SCENE
 void MainWindow::checkIfSocketConnected()
 {
 	if (socket->state() != QTcpSocket::ConnectedState) {
@@ -145,3 +137,66 @@ void MainWindow::updateLoadingScreenLabel()
 	else
 		establishSocketConnection();
 }
+#pragma endregion LOADING-SCENE
+
+//TODO hash + encrypt password
+//for login and registration
+#pragma region WELCOME-SCENE
+void MainWindow::attemptLogin()
+{
+	qDebug() << "attempting login...";
+
+	//hide/clear errorLabels
+	ui->login_errorLabel->clear();
+	ui->registration_errorLabel->clear();
+
+	//check if username and password were entered and are long enough
+	if (ui->login_UsernameEdit->text().length() < 5) {
+		ui->login_errorLabel->setText("<div style='color: red'>The Username has to be at least 5 Characters long !</div>");
+		return;
+	}
+	else if (ui->login_PasswordEdit->text().length() < 8) {
+		ui->login_errorLabel->setText("<div style='color: red'>The Pasword has to be at least 8 Characters long !</div>");
+		return;
+	}
+
+	QString username = ui->login_UsernameEdit->text();
+	QString password = ui->login_PasswordEdit->text();
+	Message loginMessage = Message::createLoginMessage(QDateTime::currentDateTime(), username, password);
+
+	//send message through socket
+	Message::sendThroughSocket(socket, loginMessage);
+
+	//clear password-field
+	ui->login_PasswordEdit->clear();
+}
+
+void MainWindow::attemptRegistration()
+{
+	qDebug() << "attempt registration...";
+
+	//hide/clear errorLabels
+	ui->login_errorLabel->clear();
+	ui->registration_errorLabel->clear();
+
+	//check if username and password were entered and are long enough
+	if (ui->registration_UsernameEdit->text().length() < 5) {
+		ui->registration_errorLabel->setText("<div style='color: red'>The Username has to be at least 5 Characters long !</div>");
+		return;
+	}
+	else if (ui->registration_PasswordEdit->text().length() < 8) {
+		ui->registration_errorLabel->setText("<div style='color: red'>The Pasword has to be at least 8 Characters long !</div>");
+		return;
+	}
+
+	QString username = ui->registration_UsernameEdit->text();
+	QString password = ui->registration_PasswordEdit->text();
+	Message loginMessage = Message::createRegistrationMessage(QDateTime::currentDateTime(), username, password);
+
+	//send message through socket
+	Message::sendThroughSocket(socket, loginMessage);
+
+	//clear password-field
+	ui->registration_PasswordEdit->clear();
+}
+#pragma endregion WELCOME-SCENE

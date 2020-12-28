@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-
 #include <QTcpSocket>
 #include <QDataStream>
 #include <QPushButton>
@@ -37,11 +36,19 @@ public:
 	~MainWindow();
 
 private slots:
-	void socketError(QAbstractSocket::SocketError);
+	//socket-handling
 	void disconnected();
 	void connected();
+	void socketError();
+
+	//for loading-screen
 	void checkIfSocketConnected();
 	void updateLoadingScreenLabel();
+
+	//login
+	void attemptLogin();
+	//registration
+	void attemptRegistration();
 
 private:
 	Ui::MainWindow* ui;
