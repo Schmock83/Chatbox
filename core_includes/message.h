@@ -2,28 +2,58 @@
 #define MESSAGE_H
 
 #include <QDataStream>
+#include <QTcpSocket>
+#include <QDateTime>
 
 #include <QDebug>
 
+enum MessageType {
+	chatMessage = 0,
+	loginMessage,
+	registrationMessage
+};
+
 class Message
 {
+private:
+	MessageType messageType;
+	QDateTime dateTime;
+	QString messageContents;
+	QString sender;
+	QString receiver;
+
+	Message(MessageType messageType, QDateTime dateTime, QString sender, QString content = "", QString receiver = "")
+		:messageType(messageType), dateTime(dateTime), messageContents(content), sender(sender), receiver(receiver)
+	{}
+
 public:
-	Message(QString name = "Name", int age = 0, double money = 0.00);
-	friend QDataStream& operator<<(QDataStream& stream, const Message& message) {
-		stream << message.name << message.age << message.money;
+	static Message createLoginMessage(QDateTime dateTime, QString username, QString password);
+	static Message createRegistrationMessage(QDateTime dateTime, QString username, QString password);
+	static Message createDefaultMessage(QDateTime dateTime, QString sender, QString receiver, QString content);
+
+	static Message readFromStream(QDataStream& stream);
+	static Message readFromSocket(QTcpSocket* socket);
+	static QDataStream& writeToStream(QDataStream& stream, const Message& message);
+	static void sendThroughSocket(QTcpSocket* socket, const Message& message);
+
+	/*friend QDataStream& operator<<(QDataStream& stream, const Message& message) {
+		stream << message.messageType << message.dateTime << message.sender << message.receiver << message.messageContents;
 		return stream;
 	}
 	friend QDataStream& operator>>(QDataStream& stream, Message& message) {
-		stream >> message.name >> message.age >> message.money;
+		stream >> message.messageType >> message.dateTime >> message.sender >> message.receiver >> message.messageContents;
 		return stream;
-	}
+	}*/
+
+	MessageType getMessageType()const { return messageType; }
+	QString getSender()const { return sender; }
+	QString getReceiver()const { return receiver; }
+	QDateTime getDateTime()const { return dateTime; }
+	QString getContent()const { return messageContents; }
+
 	void print()const {
-		qDebug() << name << " - " << age << " - " << money;
+		qDebug() << messageType << dateTime << sender << receiver << messageContents;
 	}
-private:
-	QString name;
-	int age;
-	double money;
 };
 
 #endif // MESSAGE_H
