@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QMovie>
 #include <QTimer>
+#include <QThread>
 
 #include "../core_includes/message.h"
 #include "../core_includes/core.h"
@@ -21,6 +22,11 @@ enum Scene {
 enum ChatContactPage {
 	chatPage = 0,
 	contactPage
+};
+
+enum welcomeForm {
+	loginForm = 0,
+	registrationForm
 };
 
 QT_BEGIN_NAMESPACE
@@ -55,6 +61,7 @@ private:
 	QTcpSocket* socket;
 	QMovie* loadingAnimation;
 	std::list<QPushButton*> chatButtons;
+	QThread* hashingThread = nullptr;
 
 	//for timer in loadingScene
 	const int cooldown_secs = 6;
@@ -65,5 +72,6 @@ private:
 	void addTopChatButton(QPushButton*);
 	void updateChatList();
 	void establishSocketConnection();
+	void hashPasswordThread(welcomeForm form);
 };
 #endif // MAINWINDOW_H

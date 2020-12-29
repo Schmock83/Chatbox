@@ -41,8 +41,12 @@ void MainWindow::setUpUi()
 
 	//initiate loading animation
 	loadingAnimation = new QMovie(":/loadingGifs/imgs/loading3.gif");
-	ui->gif_label->setMovie(loadingAnimation);
 	loadingAnimation->start();
+	ui->gif_label->setMovie(loadingAnimation);
+
+	//loading animation for welcomeScene
+	ui->welcome_loading_label->setMovie(loadingAnimation);
+	ui->welcome_loading_label->hide();
 
 	UI::setUpDarkTheme();
 
@@ -82,17 +86,6 @@ void MainWindow::socketError()
 	else if (!socket->isValid())
 		emit socket->disconnected();
 }
-
-/*void MainWindow::on_pushButton_clicked()
-{
-	Message m1("Ingrid", 53, 133.70);
-		m1.print();
-
-		QDataStream in(&socket);
-		in << m1;
-		socket.flush();
-		qDebug() << "Send...";
-}*/
 
 //puts newTopButton to the front of chatButtons-list (adds or re-adds if already in list)
 void MainWindow::addTopChatButton(QPushButton* newTopButton)
@@ -139,64 +132,99 @@ void MainWindow::updateLoadingScreenLabel()
 }
 #pragma endregion LOADING-SCENE
 
-//TODO hash + encrypt password
 //for login and registration
 #pragma region WELCOME-SCENE
 void MainWindow::attemptLogin()
 {
-	qDebug() << "attempting login...";
-
 	//hide/clear errorLabels
-	ui->login_errorLabel->clear();
-	ui->registration_errorLabel->clear();
+	ui->login_statusLabel->clear();
+	ui->registration_statusLabel->clear();
 
 	//check if username and password were entered and are long enough
 	if (ui->login_UsernameEdit->text().length() < 5) {
-		ui->login_errorLabel->setText("<div style='color: red'>The Username has to be at least 5 Characters long !</div>");
+		ui->login_statusLabel->setText("<div style='color: red'>The Username has to be at least 5 Characters long !</div>");
 		return;
 	}
 	else if (ui->login_PasswordEdit->text().length() < 8) {
-		ui->login_errorLabel->setText("<div style='color: red'>The Pasword has to be at least 8 Characters long !</div>");
+		ui->login_statusLabel->setText("<div style='color: red'>The Pasword has to be at least 8 Characters long !</div>");
 		return;
 	}
 
-	QString username = ui->login_UsernameEdit->text();
-	QString password = ui->login_PasswordEdit->text();
-	Message loginMessage = Message::createLoginMessage(QDateTime::currentDateTime(), username, password);
-
-	//send message through socket
-	Message::sendThroughSocket(socket, loginMessage);
-
-	//clear password-field
-	ui->login_PasswordEdit->clear();
+	ui->welcome_loading_label->show();
+	//encrypt password in thread -> so mainWindow stays responsive //TODO with 3..2..1.. loginButton(terminate thread ...)
+	hashingThread = QThread::create([&] {hashPasswordThread(welcomeForm::loginForm); });
+	hashingThread->start();
 }
 
 void MainWindow::attemptRegistration()
 {
-	qDebug() << "attempt registration...";
-
 	//hide/clear errorLabels
-	ui->login_errorLabel->clear();
-	ui->registration_errorLabel->clear();
+	ui->login_statusLabel->clear();
+	ui->registration_statusLabel->clear();
 
 	//check if username and password were entered and are long enough
 	if (ui->registration_UsernameEdit->text().length() < 5) {
-		ui->registration_errorLabel->setText("<div style='color: red'>The Username has to be at least 5 Characters long !</div>");
+		ui->registration_statusLabel->setText("<div style='color: red'>The Username has to be at least 5 Characters long !</div>");
 		return;
 	}
 	else if (ui->registration_PasswordEdit->text().length() < 8) {
-		ui->registration_errorLabel->setText("<div style='color: red'>The Pasword has to be at least 8 Characters long !</div>");
+		ui->registration_statusLabel->setText("<div style='color: red'>The Pasword has to be at least 8 Characters long !</div>");
 		return;
 	}
 
-	QString username = ui->registration_UsernameEdit->text();
-	QString password = ui->registration_PasswordEdit->text();
-	Message loginMessage = Message::createRegistrationMessage(QDateTime::currentDateTime(), username, password);
+	ui->welcome_loading_label->show();
+	//encrypt password in thread -> so mainWindow stays responsive //TODO with 3..2..1.. loginButton(terminate thread ...)
+	hashingThread = QThread::create([&] {hashPasswordThread(welcomeForm::registrationForm); });
+	hashingThread->start();
+}
+void MainWindow::hashPasswordThread(welcomeForm form)
+{
+	//disable Buttons
+	ui->login_Button->setDisabled(true);
+	ui->registration_Button->setDisabled(true);
 
-	//send message through socket
-	Message::sendThroughSocket(socket, loginMessage);
+	QString username, unhashed_password;
+	//get username, entered password and update statusLabel
+	if (form == welcomeForm::loginForm) {
+		ui->login_statusLabel->setText("Encrypting your password ...");
+		username = ui->login_UsernameEdit->text();
+		unhashed_password = ui->login_PasswordEdit->text();
+	}
+	else {//inputs from registrationForm
+		ui->registration_statusLabel->setText("Encrypting your password ...");
+		username = ui->registration_UsernameEdit->text();
+		unhashed_password = ui->registration_PasswordEdit->text();
+    }
 
-	//clear password-field
-	ui->registration_PasswordEdit->clear();
+    //build message(message hashes password)
+	if (form == welcomeForm::loginForm) {
+        Message loginMessage = Message::createLoginMessage(QDateTime::currentDateTime(), username, unhashed_password);
+        loginMessage.print();
+		//send message through socket
+		Message::sendThroughSocket(socket, loginMessage);
+	}
+	else {
+        Message registrationMessage = Message::createRegistrationMessage(QDateTime::currentDateTime(), username, unhashed_password);
+        registrationMessage.print();
+        //send message through socket
+		Message::sendThroughSocket(socket, registrationMessage);
+	}
+
+	//enable Buttons
+	ui->login_Button->setDisabled(false);
+	ui->registration_Button->setDisabled(false);
+
+	//clear password-field and statusLabels
+	if (form == welcomeForm::loginForm) {
+		ui->login_PasswordEdit->clear();
+		ui->login_statusLabel->clear();
+	}
+	else {
+		ui->registration_PasswordEdit->clear();
+		ui->registration_statusLabel->clear();
+	}
+
+	//hide loading animation
+	ui->welcome_loading_label->hide();
 }
 #pragma endregion WELCOME-SCENE
