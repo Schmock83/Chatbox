@@ -7,6 +7,8 @@
 
 #include <QDebug>
 
+#include "core.h"
+
 enum MessageType {
 	chatMessage = 0,
 	loginMessage,
@@ -27,8 +29,8 @@ private:
 	{}
 
 public:
-	static Message createLoginMessage(QDateTime dateTime, QString username, QString password);
-	static Message createRegistrationMessage(QDateTime dateTime, QString username, QString password);
+    static Message createLoginMessage(QDateTime dateTime, QString username, QString unhashed_password);
+    static Message createRegistrationMessage(QDateTime dateTime, QString username, QString unhashed_password);
 	static Message createDefaultMessage(QDateTime dateTime, QString sender, QString receiver, QString content);
 
 	static Message readFromStream(QDataStream& stream);
