@@ -32,7 +32,7 @@ void MainWindow::newConnection()
 void MainWindow::readNewData()
 {
 	qDebug() << "received new Data";
-	QTcpSocket* clientSocket = (QSslSocket*)sender();
+	QTcpSocket* clientSocket = (QTcpSocket*)sender();
 	Message msg = Message::readFromSocket(clientSocket);
 	msg.print();
 }
