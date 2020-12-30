@@ -2,12 +2,12 @@
 
 Message Message::createLoginMessage(QDateTime dateTime, QString username, QString unhashed_password)
 {
-    QString hashed_password = CRYPTO::hashPassword(unhashed_password);
+    QString hashed_password = CRYPTO::encryptPassword(unhashed_password);
     return Message(MessageType::loginMessage, dateTime, username, hashed_password);
 }
 Message Message::createRegistrationMessage(QDateTime dateTime, QString username, QString unhashed_password)
 {
-    QString hashed_password = CRYPTO::hashPassword(unhashed_password);
+    QString hashed_password = CRYPTO::encryptPassword(unhashed_password);
     return Message(MessageType::registrationMessage, dateTime, username, hashed_password);
 }
 Message Message::createDefaultMessage(QDateTime dateTime, QString sender, QString receiver, QString content)
