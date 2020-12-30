@@ -4,6 +4,12 @@
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 1338
 
+//database defines
+#define DATABASENAME "qt_server_chatbox.db"
+#define USER_TABLE QString("registered_users")
+
+#define USER_TABLE_SCHEME QString("CREATE TABLE IF NOT EXISTS %1 (user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL DEFAULT(0), user_name VARCHAR(25) UNIQUE NOT NULL, user_password VARCHAR(150) NOT NULL, registry_date DATETIME DEFAULT CURRENT_TIMESTAMP, last_login DATETIME DEFAULT NULL);").arg(USER_TABLE)
+
 //UI-includes
 #include <QFile>
 #include <QTextStream>
@@ -17,17 +23,22 @@ namespace UI {
 #include <sodium.h>
 
 namespace CRYPTO {
-	bool hashPassword(char* hashed_password, char* unhashed_password);
-	QString hashPassword(const QString& unhashed_password);
-	bool verifyPassword(const QString& hashed_password, const QString& password_to_verify);
+	bool hashPassword(unsigned char* hashed_password, const unsigned char* unhashed_pass);
+	QString hashPassword(const QString& unhashed_pass);
+	bool encryptPassword(char* hashed_password, char* unhashed_password);
+	QString encryptPassword(const QString& unhashed_password);
 	bool verifyPassword(const char* hashed_password, const char* password_to_verify);
+	bool verifyPassword(const QString& hashed_password, const QString& password_to_verify);
 }
+
 //Helper-Functions
 #include <QByteArray>
 
 namespace HELPER {
 	char* QStringToCString(const QString& q_str);
 	QString CStringToQString(const char* c_str);
+	QString UnsignedCharToQString(const unsigned char* str, int length);
+	unsigned char* QStringToUnsignedChar(const QString& q_str);
 }
 
 #endif // CORE_H
