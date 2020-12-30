@@ -1,4 +1,4 @@
-QT       += core gui network
+QT       += core gui network sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -11,13 +11,17 @@ CONFIG += c++11
 SOURCES += \
     ../core_includes/core.cpp \
     ../core_includes/message.cpp \
+    src/databasehelper.cpp \
     src/main.cpp \
-    src/mainwindow.cpp
+    src/mainwindow.cpp \
+    src/user.cpp
 
 HEADERS += \
     ../core_includes/core.h \
     ../core_includes/message.h \
-    src/mainwindow.h
+    src/databasehelper.h \
+    src/mainwindow.h \
+    src/user.h
 
 FORMS += \
     forms/mainwindow.ui
