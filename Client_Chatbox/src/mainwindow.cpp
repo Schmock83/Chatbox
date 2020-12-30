@@ -152,7 +152,7 @@ void MainWindow::attemptLogin()
 
 	ui->welcome_loading_label->show();
 	//encrypt password in thread -> so mainWindow stays responsive //TODO with 3..2..1.. loginButton(terminate thread ...)
-	hashingThread = QThread::create([&] {hashPasswordThread(welcomeForm::loginForm); });
+	hashingThread = QThread::create([&] {encryptPasswordThread(welcomeForm::loginForm); });
 	hashingThread->start();
 }
 
@@ -174,10 +174,10 @@ void MainWindow::attemptRegistration()
 
 	ui->welcome_loading_label->show();
 	//encrypt password in thread -> so mainWindow stays responsive //TODO with 3..2..1.. loginButton(terminate thread ...)
-	hashingThread = QThread::create([&] {hashPasswordThread(welcomeForm::registrationForm); });
+	hashingThread = QThread::create([&] {encryptPasswordThread(welcomeForm::registrationForm); });
 	hashingThread->start();
 }
-void MainWindow::hashPasswordThread(welcomeForm form)
+void MainWindow::encryptPasswordThread(welcomeForm form)
 {
 	//disable Buttons
 	ui->login_Button->setDisabled(true);
@@ -194,19 +194,19 @@ void MainWindow::hashPasswordThread(welcomeForm form)
 		ui->registration_statusLabel->setText("Encrypting your password ...");
 		username = ui->registration_UsernameEdit->text();
 		unhashed_password = ui->registration_PasswordEdit->text();
-    }
+	}
 
-    //build message(message hashes password)
+	//build message(message hashes password)
 	if (form == welcomeForm::loginForm) {
-        Message loginMessage = Message::createLoginMessage(QDateTime::currentDateTime(), username, unhashed_password);
-        loginMessage.print();
+		Message loginMessage = Message::createLoginMessage(QDateTime::currentDateTime(), username, unhashed_password);
+		loginMessage.print();
 		//send message through socket
 		Message::sendThroughSocket(socket, loginMessage);
 	}
 	else {
-        Message registrationMessage = Message::createRegistrationMessage(QDateTime::currentDateTime(), username, unhashed_password);
-        registrationMessage.print();
-        //send message through socket
+		Message registrationMessage = Message::createRegistrationMessage(QDateTime::currentDateTime(), username, unhashed_password);
+		registrationMessage.print();
+		//send message through socket
 		Message::sendThroughSocket(socket, registrationMessage);
 	}
 

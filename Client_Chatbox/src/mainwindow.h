@@ -72,6 +72,6 @@ private:
 	void addTopChatButton(QPushButton*);
 	void updateChatList();
 	void establishSocketConnection();
-	void hashPasswordThread(welcomeForm form);
+	void encryptPasswordThread(welcomeForm form);
 };
 #endif // MAINWINDOW_H
