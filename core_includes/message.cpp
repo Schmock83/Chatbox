@@ -11,7 +11,7 @@ Message Message::createRegistrationMessage(QDateTime dateTime, QString username,
 	//hash + encrypt
 	QString hashed_password = CRYPTO::hashPassword(unhashed_password);
 	QString encrypted_password = CRYPTO::encryptPassword(hashed_password);
-	return Message(MessageType::registrationMessage, dateTime, username, hashed_password);
+	return Message(MessageType::registrationMessage, dateTime, username, encrypted_password);
 }
 Message Message::createDefaultMessage(QDateTime dateTime, QString sender, QString receiver, QString content)
 {
