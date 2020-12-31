@@ -21,10 +21,13 @@ namespace CRYPTO {
 		if (crypto_hash_sha512(hashed_pass_ucstr, (unsigned char*)unhashed_pass_ucstr, unhashed_pass.size()) == 0)
 			return HELPER::UnsignedCharToQString(hashed_pass_ucstr, crypto_hash_sha512_BYTES);
 		else
-			return QString();
+			throw Crypto_Error("Not enough RAM available.");
 	}
 	bool hashPassword(unsigned char* hashed_password, const unsigned char* unhashed_pass) {
-		return (crypto_hash_sha512(hashed_password, unhashed_pass, strlen((char*)unhashed_pass)) == 0);
+		if (crypto_hash_sha512(hashed_password, unhashed_pass, strlen((char*)unhashed_pass)) != 0)
+			throw Crypto_Error("Not enough RAM available.");
+		else
+			return true;
 	}
 	QString encryptPassword(const QString& unhashed_password)
 	{
@@ -37,9 +40,14 @@ namespace CRYPTO {
 	bool encryptPassword(char* hashed_password, char* unhashed_password)
 	{
 		if (crypto_pwhash_str(hashed_password, unhashed_password, strlen(unhashed_password), crypto_pwhash_OPSLIMIT_SENSITIVE, crypto_pwhash_MEMLIMIT_SENSITIVE) != 0) {
-			//not enough memory -> try again with less memory usage
-			return (crypto_pwhash_str(hashed_password, unhashed_password, strlen(unhashed_password), crypto_pwhash_OPSLIMIT_MIN, crypto_pwhash_MEMLIMIT_MIN) == 0);
+			if (crypto_pwhash_str(hashed_password, unhashed_password, strlen(unhashed_password), crypto_pwhash_OPSLIMIT_SENSITIVE, crypto_pwhash_MEMLIMIT_SENSITIVE) != 0) {
+				//not enough memory -> try again with less memory usage
+				if (crypto_pwhash_str(hashed_password, unhashed_password, strlen(unhashed_password), crypto_pwhash_OPSLIMIT_MIN, crypto_pwhash_MEMLIMIT_MIN) != 0)
+					throw Crypto_Error("Not enough RAM available.");
+			}
 		}
+
+		//no error -> return true
 		return true;
 	}
 	bool verifyPassword(const char* hashed_password, const char* password_to_verify)
