@@ -2,49 +2,52 @@
 
 Message Message::createLoginMessage(QDateTime dateTime, QString username, QString unhashed_password)
 {
-    QString hashed_password = CRYPTO::encryptPassword(unhashed_password);
-    return Message(MessageType::loginMessage, dateTime, username, hashed_password);
+	//hash
+	QString hashed_password = CRYPTO::hashPassword(unhashed_password);
+	return Message(MessageType::loginMessage, dateTime, username, hashed_password);
 }
 Message Message::createRegistrationMessage(QDateTime dateTime, QString username, QString unhashed_password)
 {
-    QString hashed_password = CRYPTO::encryptPassword(unhashed_password);
-    return Message(MessageType::registrationMessage, dateTime, username, hashed_password);
+	//hash + encrypt
+	QString hashed_password = CRYPTO::hashPassword(unhashed_password);
+	QString encrypted_password = CRYPTO::encryptPassword(hashed_password);
+	return Message(MessageType::registrationMessage, dateTime, username, hashed_password);
 }
 Message Message::createDefaultMessage(QDateTime dateTime, QString sender, QString receiver, QString content)
 {
-    return Message(MessageType::chatMessage, dateTime, sender, content, receiver);
+	return Message(MessageType::chatMessage, dateTime, sender, content, receiver);
 }
 
 Message Message::readFromStream(QDataStream& stream) {
-    MessageType messageType;
-    QDateTime dateTime;
-    QString messageContents;
-    QString sender;
-    QString receiver;
+	MessageType messageType;
+	QDateTime dateTime;
+	QString messageContents;
+	QString sender;
+	QString receiver;
 
-    stream >> messageType >> dateTime >> sender >> receiver >> messageContents;
+	stream >> messageType >> dateTime >> sender >> receiver >> messageContents;
 
-    return Message(messageType, dateTime, sender, messageContents, receiver);
+	return Message(messageType, dateTime, sender, messageContents, receiver);
 }
 QDataStream& Message::writeToStream(QDataStream& stream, const Message& message) {
-    stream << message.messageType << message.dateTime << message.sender << message.receiver << message.messageContents;
-    return stream;
+	stream << message.messageType << message.dateTime << message.sender << message.receiver << message.messageContents;
+	return stream;
 }
 Message Message::readFromSocket(QTcpSocket* socket) {
-    //check if socket readable
-    if (!socket->isValid())
-        emit socket->disconnected();
+	//check if socket readable
+	if (!socket->isValid())
+		emit socket->disconnected();
 
-    QDataStream in(socket);
-    return Message::readFromStream(in);
+	QDataStream in(socket);
+	return Message::readFromStream(in);
 }
 
 void Message::sendThroughSocket(QTcpSocket* socket, const Message& message) {
-    //check if socket readable
-    if (!socket->isValid())
-        emit socket->disconnected();
+	//check if socket readable
+	if (!socket->isValid())
+		emit socket->disconnected();
 
-    QDataStream out(socket);
-    Message::writeToStream(out, message);
-    socket->flush();
+	QDataStream out(socket);
+	Message::writeToStream(out, message);
+	socket->flush();
 }
