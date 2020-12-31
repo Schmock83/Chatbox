@@ -4,15 +4,17 @@
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
 	, ui(new Ui::MainWindow)
-	, socket(new QTcpSocket(this))
+	, client(new Chatbox_Client(this))
 {
 	ui->setupUi(this);
 
-	setUpUi();
-
 	setUpSignalSlotConnections();
 
-	establishSocketConnection();
+	setUpUi();
+
+	//do this or with signal (emit establishSocketConnection())?
+	//client->establishSocketConnection();
+	emit establishSocketConnection_signal();
 }
 
 MainWindow::~MainWindow()
@@ -20,18 +22,35 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-void MainWindow::establishSocketConnection()
+void MainWindow::setUpSignalSlotConnections()
 {
-	//update labels
-	ui->loadingErrorLabel->clear();
-	ui->loadingStatusLabel->setText(tr("Establishing connection..."));
+	//buttons
+	connect(ui->login_Button, SIGNAL(clicked()), this, SLOT(login_button_pressed()));
+	connect(ui->registration_Button, SIGNAL(clicked()), this, SLOT(registration_button_pressed()));
 
-	//show loading screen
-	ui->sceneWidget->setCurrentIndex(Scene::loadingScene);
-	loadingAnimation->start();
+	connect(this, SIGNAL(establishSocketConnection_signal()), client, SLOT(establishSocketConnection()));
 
-	//try to establish socket connection
-	socket->connectToHost(SERVER_IP, SERVER_PORT);
+	//UI
+	connect(client, SIGNAL(clearLoadingErrorLabel()), this, SLOT(clearLoadingErrorLabel()));
+	connect(client, SIGNAL(setScene(UI::Scene)), this, SLOT(setScene(UI::Scene)));
+	connect(this, SIGNAL(sceneChanged(UI::Scene)), client, SLOT(sceneChanged(UI::Scene)));
+	connect(client, SIGNAL(setLoadingError(QString)), this, SLOT(setLoadingError(QString)));
+	connect(client, SIGNAL(setLoadingStatus(QString)), this, SLOT(setLoadingStatus(QString)));
+	connect(client, SIGNAL(startLoadingTimer()), this, SLOT(startLoadingTimer()));
+	connect(client, SIGNAL(startLoadingPageAnimation()), this, SLOT(startLoadingPageAnimation()));
+	connect(client, SIGNAL(stopLoadingPageAnimation()), this, SLOT(stopLoadingPageAnimation()));
+	connect(client, SIGNAL(startWelcomePageAnimation()), this, SLOT(startWelcomePageAnimation()));
+	connect(client, SIGNAL(stopWelcomePageAnimation()), this, SLOT(stopWelcomePageAnimation()));
+	connect(client, SIGNAL(enableButtons()), this, SLOT(enableButtons()));
+	connect(client, SIGNAL(disableButtons()), this, SLOT(disableButtons()));
+	connect(client, SIGNAL(clearRegistrationPasswordEdit()), this, SLOT(clearRegistrationPasswordEdit()));
+	connect(client, SIGNAL(clearRegistrationStatusLabel()), this, SLOT(clearRegistrationStatusLabel()));
+	connect(client, SIGNAL(clearLoginPasswordEdit()), this, SLOT(clearLoginPasswordEdit()));
+	connect(client, SIGNAL(clearLoginStatusLabel()), this, SLOT(clearLoginStatusLabel()));
+	connect(client, SIGNAL(setRegistrationStatus(QString)), this, SLOT(setRegistrationStatus(QString)));
+	connect(client, SIGNAL(setLoginStatus(QString)), this, SLOT(setLoginStatus(QString)));
+	connect(client, SIGNAL(setLoginError(QString)), this, SLOT(setLoginError(QString)));
+	connect(client, SIGNAL(setRegistrationError(QString)), this, SLOT(setRegistrationError(QString)));
 }
 
 void MainWindow::setUpUi()
@@ -42,49 +61,43 @@ void MainWindow::setUpUi()
 	//initiate loading animation
 	loadingAnimation = new QMovie(":/loadingGifs/imgs/loading3.gif");
 	loadingAnimation->start();
-	ui->gif_label->setMovie(loadingAnimation);
+	ui->loadingPage_loading_label->setMovie(loadingAnimation);
+	stopLoadingPageAnimation();
 
 	//loading animation for welcomeScene
-	ui->welcome_loading_label->setMovie(loadingAnimation);
-	ui->welcome_loading_label->hide();
+	ui->welcomePage_loading_label->setMovie(loadingAnimation);
+	stopWelcomePageAnimation();
 
 	UI::setUpDarkTheme();
 
-	ui->chat_contacts_stackedWidget->setCurrentIndex(ChatContactPage::chatPage);
+	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::chatPage);
+
+	setScene(UI::Scene::loadingScene);
 }
 
-void MainWindow::setUpSignalSlotConnections()
+void MainWindow::startLoadingTimer()
 {
-	//socket-connections
-	connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-	connect(socket, SIGNAL(connected()), this, SLOT(connected()));
-	connect(socket, SIGNAL(errorOccurred(QAbstractSocket::SocketError)), this, SLOT(socketError()));
+	//wait 6 seconds and then call establishSocketConnection again...
+	cooldown_timer = cooldown_secs;
 
-	//buttons
-	connect(ui->login_Button, SIGNAL(clicked()), this, SLOT(attemptLogin()));
-	connect(ui->registration_Button, SIGNAL(clicked()), this, SLOT(attemptRegistration()));
+	//timer for every second to update text
+	updateLoadingScreenLabel();
 }
 
-void MainWindow::disconnected()
+void MainWindow::updateLoadingScreenLabel()
 {
-	establishSocketConnection();
+	setLoadingStatus(tr("Trying again in %2 seconds...").arg(QString::number(cooldown_timer)));
+	cooldown_timer--;
+	if (cooldown_timer >= 0)
+		QTimer::singleShot(1000, this, SLOT(updateLoadingScreenLabel()));
+	else
+		emit client->establishSocketConnection();
 }
 
-void MainWindow::connected()
+void MainWindow::setScene(UI::Scene scene)
 {
-	ui->sceneWidget->setCurrentIndex(Scene::welcomeScene);
-}
-
-void MainWindow::socketError()
-{
-	qDebug() << "SocketError...";
-	//show error in loading-screen
-	if (ui->sceneWidget->currentIndex() == Scene::loadingScene) {
-		ui->loadingErrorLabel->setText(tr("Error establishing connection: %1").arg(socket->errorString()));
-		checkIfSocketConnected();
-	}
-	else if (!socket->isValid())
-		emit socket->disconnected();
+	ui->sceneWidget->setCurrentIndex(scene);
+	emit sceneChanged(scene);
 }
 
 //puts newTopButton to the front of chatButtons-list (adds or re-adds if already in list)
@@ -108,123 +121,88 @@ void MainWindow::updateChatList()
 	for (const auto& button : chatButtons)
 		ui->chats_grid_layout->addWidget(button);
 }
-
-#pragma region LOADING-SCENE
-void MainWindow::checkIfSocketConnected()
-{
-	if (socket->state() != QTcpSocket::ConnectedState) {
-		//wait 6 seconds and then call establishSocketConnection again...
-		cooldown_timer = cooldown_secs;
-
-		//timer for every second to update text
-		updateLoadingScreenLabel();
-	}
+void MainWindow::disableButtons() {
+	ui->login_Button->setDisabled(true);
+	ui->registration_Button->setDisabled(true);
+}
+void MainWindow::enableButtons() {
+	ui->login_Button->setDisabled(false);
+	ui->registration_Button->setDisabled(false);
+}
+void MainWindow::startLoadingPageAnimation() {
+	setScene(UI::Scene::loadingScene);
+	ui->loadingPage_loading_label->show();
 }
 
-void MainWindow::updateLoadingScreenLabel()
-{
-	ui->loadingStatusLabel->setText(tr("Trying again in %2 seconds...").arg(QString::number(cooldown_timer)));
-	cooldown_timer--;
-	if (cooldown_timer >= 0)
-		QTimer::singleShot(1000, this, SLOT(updateLoadingScreenLabel()));
-	else
-		establishSocketConnection();
-}
-#pragma endregion LOADING-SCENE
+void MainWindow::clearLoadingErrorLabel() { ui->loadingErrorLabel->clear(); }
+void MainWindow::clearLoginStatusLabel() { ui->login_statusLabel->clear(); }
+void MainWindow::clearRegistrationStatusLabel() { ui->registration_statusLabel->clear(); }
+void MainWindow::setLoadingStatus(QString new_status) { ui->loadingStatusLabel->setText(new_status); }
+void MainWindow::setLoadingError(QString new_error) { ui->loadingErrorLabel->setText(new_error); }
+void MainWindow::setRegistrationStatus(QString new_status) { ui->registration_statusLabel->setText(new_status); }
+void MainWindow::setRegistrationError(QString new_error) { ui->registration_statusLabel->setText(QString("<div style='color: red'>%1</div>").arg(new_error)); }
+void MainWindow::setLoginStatus(QString new_status) { ui->login_statusLabel->setText(new_status); }
+void MainWindow::setLoginError(QString new_error) { ui->login_statusLabel->setText(QString("<div style='color: red'>%1</div>").arg(new_error)); }
+void MainWindow::startWelcomePageAnimation() { ui->welcomePage_loading_label->show(); }
+void MainWindow::stopLoadingPageAnimation() { ui->loadingPage_loading_label->hide(); }
+void MainWindow::stopWelcomePageAnimation() { ui->welcomePage_loading_label->hide(); }
+void MainWindow::clearRegistrationPasswordEdit() { ui->registration_PasswordEdit->clear(); }
+void MainWindow::clearLoginPasswordEdit() { ui->login_PasswordEdit->clear(); }
 
-//for login and registration
-#pragma region WELCOME-SCENE
-void MainWindow::attemptLogin()
+void MainWindow::login_button_pressed()
 {
-	//hide/clear errorLabels
-	ui->login_statusLabel->clear();
-	ui->registration_statusLabel->clear();
+	//hide/clear errorLabel
+	clearLoginStatusLabel();
 
 	//check if username and password were entered and are long enough
 	if (ui->login_UsernameEdit->text().length() < 5) {
-		ui->login_statusLabel->setText("<div style='color: red'>The Username has to be at least 5 Characters long !</div>");
+		setLoginError("The Username has to be at least 5 Characters long !");
 		return;
 	}
 	else if (ui->login_PasswordEdit->text().length() < 8) {
-		ui->login_statusLabel->setText("<div style='color: red'>The Pasword has to be at least 8 Characters long !</div>");
+		setLoginError("The Pasword has to be at least 8 Characters long !");
 		return;
 	}
 
-	ui->welcome_loading_label->show();
-	//encrypt password in thread -> so mainWindow stays responsive //TODO with 3..2..1.. loginButton(terminate thread ...)
-	hashingThread = QThread::create([&] {encryptPasswordThread(welcomeForm::loginForm); });
-	hashingThread->start();
+	//disable login/registration-button
+	disableButtons();
+
+	//show loading animation
+	startWelcomePageAnimation();
+
+	//get username, entered password and update statusLabel
+	QString username = ui->login_UsernameEdit->text();
+	QString unhashed_password = ui->login_PasswordEdit->text();
+
+	//give control to chatbox_client
+	client->attemptLogin(username, unhashed_password);
 }
 
-void MainWindow::attemptRegistration()
+void MainWindow::registration_button_pressed()
 {
 	//hide/clear errorLabels
-	ui->login_statusLabel->clear();
-	ui->registration_statusLabel->clear();
+	clearRegistrationStatusLabel();
 
 	//check if username and password were entered and are long enough
 	if (ui->registration_UsernameEdit->text().length() < 5) {
-		ui->registration_statusLabel->setText("<div style='color: red'>The Username has to be at least 5 Characters long !</div>");
+		setRegistrationError("The Username has to be at least 5 Characters long !");
 		return;
 	}
 	else if (ui->registration_PasswordEdit->text().length() < 8) {
-		ui->registration_statusLabel->setText("<div style='color: red'>The Pasword has to be at least 8 Characters long !</div>");
+		setRegistrationError("The Pasword has to be at least 8 Characters long !");
 		return;
 	}
 
-	ui->welcome_loading_label->show();
-	//encrypt password in thread -> so mainWindow stays responsive //TODO with 3..2..1.. loginButton(terminate thread ...)
-	hashingThread = QThread::create([&] {encryptPasswordThread(welcomeForm::registrationForm); });
-	hashingThread->start();
-}
-void MainWindow::encryptPasswordThread(welcomeForm form)
-{
-	//disable Buttons
-	ui->login_Button->setDisabled(true);
-	ui->registration_Button->setDisabled(true);
+	//disable login/registration-button
+	disableButtons();
 
-	QString username, unhashed_password;
+	//show loading animation
+	startWelcomePageAnimation();
+
 	//get username, entered password and update statusLabel
-	if (form == welcomeForm::loginForm) {
-		ui->login_statusLabel->setText("Encrypting your password ...");
-		username = ui->login_UsernameEdit->text();
-		unhashed_password = ui->login_PasswordEdit->text();
-	}
-	else {//inputs from registrationForm
-		ui->registration_statusLabel->setText("Encrypting your password ...");
-		username = ui->registration_UsernameEdit->text();
-		unhashed_password = ui->registration_PasswordEdit->text();
-	}
+	QString username = ui->registration_UsernameEdit->text();
+	QString unhashed_password = ui->registration_PasswordEdit->text();
 
-	//build message(message hashes password)
-	if (form == welcomeForm::loginForm) {
-		Message loginMessage = Message::createLoginMessage(QDateTime::currentDateTime(), username, unhashed_password);
-		loginMessage.print();
-		//send message through socket
-		Message::sendThroughSocket(socket, loginMessage);
-	}
-	else {
-		Message registrationMessage = Message::createRegistrationMessage(QDateTime::currentDateTime(), username, unhashed_password);
-		registrationMessage.print();
-		//send message through socket
-		Message::sendThroughSocket(socket, registrationMessage);
-	}
-
-	//enable Buttons
-	ui->login_Button->setDisabled(false);
-	ui->registration_Button->setDisabled(false);
-
-	//clear password-field and statusLabels
-	if (form == welcomeForm::loginForm) {
-		ui->login_PasswordEdit->clear();
-		ui->login_statusLabel->clear();
-	}
-	else {
-		ui->registration_PasswordEdit->clear();
-		ui->registration_statusLabel->clear();
-	}
-
-	//hide loading animation
-	ui->welcome_loading_label->hide();
+	//give control to chatbox_client
+	client->attemptRegistration(username, unhashed_password);
 }
-#pragma endregion WELCOME-SCENE

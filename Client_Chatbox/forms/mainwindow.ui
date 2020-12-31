@@ -76,12 +76,12 @@
     <item row="1" column="0">
      <widget class="QStackedWidget" name="sceneWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="loadingPage">
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="3" column="0">
-         <widget class="QLabel" name="gif_label">
+         <widget class="QLabel" name="loadingPage_loading_label">
           <property name="text">
            <string/>
           </property>
@@ -104,7 +104,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Status</string>
+             <string/>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -116,14 +116,14 @@
             <property name="font">
              <font>
               <family>Century Gothic</family>
-              <pointsize>20</pointsize>
+              <pointsize>16</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Error</string>
+             <string/>
             </property>
             <property name="alignment">
-             <set>Qt::AlignHCenter|Qt::AlignTop</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -238,7 +238,7 @@
              <number>100</number>
             </property>
             <item row="1" column="0">
-             <widget class="QLabel" name="welcome_loading_label">
+             <widget class="QLabel" name="welcomePage_loading_label">
               <property name="text">
                <string/>
               </property>

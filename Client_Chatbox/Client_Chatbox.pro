@@ -11,12 +11,14 @@ CONFIG += c++11
 SOURCES += \
     ../core_includes/core.cpp \
     ../core_includes/message.cpp \
+    src/chatbox_client.cpp \
     src/main.cpp \
     src/mainwindow.cpp
 
 HEADERS += \
     ../core_includes/core.h \
     ../core_includes/message.h \
+    src/chatbox_client.h \
     src/mainwindow.h
 
 FORMS += \

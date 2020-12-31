@@ -2,32 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QTcpSocket>
-#include <QDataStream>
 #include <QPushButton>
 #include <QMovie>
 #include <QTimer>
 #include <QThread>
 
-#include "../core_includes/message.h"
 #include "../core_includes/core.h"
-
-enum Scene {
-	loadingScene = 0,
-	welcomeScene,
-	mainScene
-};
-
-//left side (show contacts or chats)
-enum ChatContactPage {
-	chatPage = 0,
-	contactPage
-};
-
-enum welcomeForm {
-	loginForm = 0,
-	registrationForm
-};
+#include "chatbox_client.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -36,32 +17,11 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
-
-public:
-	MainWindow(QWidget* parent = nullptr);
-	~MainWindow();
-
-private slots:
-	//socket-handling
-	void disconnected();
-	void connected();
-	void socketError();
-
-	//for loading-screen
-	void checkIfSocketConnected();
-	void updateLoadingScreenLabel();
-
-	//login
-	void attemptLogin();
-	//registration
-	void attemptRegistration();
-
 private:
 	Ui::MainWindow* ui;
-	QTcpSocket* socket;
+	Chatbox_Client* client;
 	QMovie* loadingAnimation;
 	std::list<QPushButton*> chatButtons;
-	QThread* hashingThread = nullptr;
 
 	//for timer in loadingScene
 	const int cooldown_secs = 6;
@@ -71,7 +31,38 @@ private:
 	void setUpSignalSlotConnections();
 	void addTopChatButton(QPushButton*);
 	void updateChatList();
-	void establishSocketConnection();
-	void encryptPasswordThread(welcomeForm form);
+
+public:
+	MainWindow(QWidget* parent = nullptr);
+	~MainWindow();
+
+signals:
+	void establishSocketConnection_signal();
+	void sceneChanged(UI::Scene);
+
+private slots:
+	void setScene(UI::Scene scene);
+	void setLoadingStatus(QString new_status);
+	void setLoadingError(QString new_error);
+	void setRegistrationStatus(QString new_status);
+	void setRegistrationError(QString new_error);
+	void setLoginStatus(QString new_status);
+	void setLoginError(QString new_error);
+	void enableButtons();
+	void disableButtons();
+	void startLoadingPageAnimation();
+	void startWelcomePageAnimation();
+	void stopLoadingPageAnimation();
+	void stopWelcomePageAnimation();
+	void clearLoadingErrorLabel();
+	void clearLoginStatusLabel();
+	void clearRegistrationStatusLabel();
+	void clearLoginPasswordEdit();
+	void clearRegistrationPasswordEdit();
+	void startLoadingTimer();
+	void updateLoadingScreenLabel();
+
+	void login_button_pressed();
+	void registration_button_pressed();
 };
 #endif // MAINWINDOW_H
