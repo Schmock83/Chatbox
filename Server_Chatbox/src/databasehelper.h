@@ -8,22 +8,24 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QMutex>
 
 class DatabaseHelper
 {
 private:
 	QSqlDatabase data_base;
 	QSqlQuery sql_query;	//for prepared statements
+	mutable QMutex mutex;
 
-	bool setupTable(const QString& table_scheme);
-	bool setupTables();
+	void setupTable(const QString& table_scheme);
+	void setupTables();
 public:
 	DatabaseHelper() {};
 	~DatabaseHelper() { close(); }
-	bool initiate_sqlite_database();
+	void initiate_sqlite_database();
 	void close() { data_base.close(); }
 	bool user_registered(const QString& user_name);
-	bool register_user(const QString& user_name, const QString& encrypted_password);
+	void register_user(const QString& user_name, const QString& encrypted_password);
 	bool verify_user(const QString& user_name, const QString& unhashed_password);
 };
 
