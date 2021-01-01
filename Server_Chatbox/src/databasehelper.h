@@ -9,8 +9,6 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
-#include <QDebug>
-
 class DatabaseHelper
 {
 private:
@@ -25,7 +23,7 @@ public:
 	bool initiate_sqlite_database();
 	void close() { data_base.close(); }
 	bool user_registered(const QString& user_name);
-	bool register_user(const QString& user_name, const QString& hashed_password);
+	bool register_user(const QString& user_name, const QString& encrypted_password);
 	bool verify_user(const QString& user_name, const QString& unhashed_password);
 };
 
