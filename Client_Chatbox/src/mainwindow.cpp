@@ -156,11 +156,11 @@ void MainWindow::login_button_pressed()
 
 	//check if username and password were entered and are long enough
 	if (ui->login_UsernameEdit->text().length() < 5) {
-		setLoginError("The Username has to be at least 5 Characters long !");
+		setLoginError(QString("The Username has to be between %1 and %2 Characters long !").arg(QString::number(USERNAME_MIN_LEN), QString::number(USERNAME_MAX_LEN)));
 		return;
 	}
 	else if (ui->login_PasswordEdit->text().length() < 8) {
-		setLoginError("The Pasword has to be at least 8 Characters long !");
+		setLoginError(QString("The Pasword has to be between %1 and %2 Characters long !").arg(QString::number(PASSWORD_MIN_LEN), QString::number(PASSWORD_MAX_LEN)));
 		return;
 	}
 
@@ -185,11 +185,11 @@ void MainWindow::registration_button_pressed()
 
 	//check if username and password were entered and are long enough
 	if (ui->registration_UsernameEdit->text().length() < 5) {
-		setRegistrationError("The Username has to be at least 5 Characters long !");
+		setLoginError(QString("The Username has to be between %1 and %2 Characters long !").arg(QString::number(USERNAME_MIN_LEN), QString::number(USERNAME_MAX_LEN)));
 		return;
 	}
 	else if (ui->registration_PasswordEdit->text().length() < 8) {
-		setRegistrationError("The Pasword has to be at least 8 Characters long !");
+		setLoginError(QString("The Pasword has to be between %1 and %2 Characters long !").arg(QString::number(PASSWORD_MIN_LEN), QString::number(PASSWORD_MAX_LEN)));
 		return;
 	}
 
