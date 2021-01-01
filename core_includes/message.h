@@ -38,15 +38,6 @@ public:
 	static QDataStream& writeToStream(QDataStream& stream, const Message& message);
 	static void sendThroughSocket(QTcpSocket* socket, const Message& message);
 
-	/*friend QDataStream& operator<<(QDataStream& stream, const Message& message) {
-		stream << message.messageType << message.dateTime << message.sender << message.receiver << message.messageContents;
-		return stream;
-	}
-	friend QDataStream& operator>>(QDataStream& stream, Message& message) {
-		stream >> message.messageType >> message.dateTime >> message.sender >> message.receiver >> message.messageContents;
-		return stream;
-	}*/
-
 	MessageType getMessageType()const { return messageType; }
 	QString getSender()const { return sender; }
 	QString getReceiver()const { return receiver; }
@@ -54,7 +45,7 @@ public:
 	QString getContent()const { return messageContents; }
 
 	void print()const {
-		qDebug() << messageType << dateTime << sender << receiver << messageContents;
+		qDebug() << messageType << dateTime << sender << messageContents << receiver;
 	}
 };
 
