@@ -2,15 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-
-#include <QTcpServer>
-#include <QTcpSocket>
-#include <QSslSocket>
-
-#include <QByteArray>
-#include <QDataStream>
-
-#include "../core_includes/message.h"
+#include <QMessageBox>
+#include "chatbox_server.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -23,12 +16,9 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow(QWidget* parent = nullptr);
 	~MainWindow();
-private slots:
-	void newConnection();
-	void readNewData();
+	bool initialize_server();
 private:
 	Ui::MainWindow* ui;
-	QTcpServer server;
-	//MySslServer server;
+	Chatbox_Server* server;
 };
 #endif // MAINWINDOW_H

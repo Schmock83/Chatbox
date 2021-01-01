@@ -11,6 +11,7 @@ CONFIG += c++11
 SOURCES += \
     ../core_includes/core.cpp \
     ../core_includes/message.cpp \
+    src/chatbox_server.cpp \
     src/databasehelper.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
 HEADERS += \
     ../core_includes/core.h \
     ../core_includes/message.h \
+    src/chatbox_server.h \
     src/databasehelper.h \
     src/mainwindow.h \
     src/user.h

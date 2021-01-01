@@ -7,32 +7,22 @@ MainWindow::MainWindow(QWidget* parent)
 {
 	ui->setupUi(this);
 
-	connect(&server, SIGNAL(newConnection()), this, SLOT(newConnection()));
+	server = new Chatbox_Server(this);
+}
 
-	if (!server.listen(QHostAddress::Any, 1338)) {
-		qDebug() << "!!!!Cant start listening: " << server.errorString();
+bool MainWindow::initialize_server()
+{
+	try {
+		server->startServer(QHostAddress::Any, 1338);
+		return true;
 	}
-	else {
-		qDebug() << "Listening on port 1338";
+	catch (Server_Error& server_error) {
+		QMessageBox::information(this, "Server Error", "Could not start Server: " + server_error.get_error_message());
+		return false;
 	}
 }
 
 MainWindow::~MainWindow()
 {
 	delete ui;
-}
-
-void MainWindow::newConnection()
-{
-	qDebug() << "newConnection";
-	QTcpSocket* clientConnection = server.nextPendingConnection();
-	connect(clientConnection, SIGNAL(readyRead()), this, SLOT(readNewData()));
-}
-
-void MainWindow::readNewData()
-{
-	qDebug() << "received new Data";
-	QTcpSocket* clientSocket = (QTcpSocket*)sender();
-	Message msg = Message::readFromSocket(clientSocket);
-	msg.print();
 }
