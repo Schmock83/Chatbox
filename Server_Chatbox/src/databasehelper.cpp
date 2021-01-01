@@ -55,6 +55,11 @@ bool DatabaseHelper::verify_user(const QString& user_name, const QString& unhash
 
 	if (!sql_query.exec())
 		throw data_base.lastError();
+
+	if (!sql_query.first())
+		return false;
+
+	QString stored_password = sql_query.value(0).toString();
 	locker.unlock();
-	return (sql_query.first() && CRYPTO::verifyPassword(sql_query.value(0).toString(), unhashed_password));
+	return CRYPTO::verifyPassword(stored_password, unhashed_password);
 }
