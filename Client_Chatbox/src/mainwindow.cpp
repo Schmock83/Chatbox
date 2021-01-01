@@ -160,7 +160,7 @@ void MainWindow::login_button_pressed()
 		return;
 	}
 	else if (ui->login_PasswordEdit->text().length() < 8) {
-		setLoginError(QString("The Pasword has to be between %1 and %2 Characters long !").arg(QString::number(PASSWORD_MIN_LEN), QString::number(PASSWORD_MAX_LEN)));
+		setLoginError(QString("The Pasword has to be at least %1 Characters long !").arg(QString::number(PASSWORD_MIN_LEN)));
 		return;
 	}
 
@@ -189,7 +189,7 @@ void MainWindow::registration_button_pressed()
 		return;
 	}
 	else if (ui->registration_PasswordEdit->text().length() < 8) {
-		setLoginError(QString("The Pasword has to be between %1 and %2 Characters long !").arg(QString::number(PASSWORD_MIN_LEN), QString::number(PASSWORD_MAX_LEN)));
+		setLoginError(QString("The Pasword has to be at least %1 Characters long !").arg(QString::number(PASSWORD_MIN_LEN)));
 		return;
 	}
 

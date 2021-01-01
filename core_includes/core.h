@@ -9,7 +9,6 @@
 #define USERNAME_MAX_LEN 25
 #define USERNAME_MIN_LEN 5
 #define PASSWORD_MAX_LEN 25
-#define PASSWORD_MIN_LEN 12
 
 #define DATABASENAME "qt_server_chatbox.db"
 #define USER_TABLE QString("registered_users")
