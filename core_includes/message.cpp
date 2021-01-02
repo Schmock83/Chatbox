@@ -4,18 +4,22 @@ Message Message::createLoginMessage(QDateTime dateTime, QString username, QStrin
 {
 	//hash
 	QString hashed_password = CRYPTO::hashPassword(unhashed_password);
-	return Message(MessageType::loginMessage, dateTime, username, hashed_password);
+	return Message(MessageType::client_loginMessage, dateTime, username, hashed_password);
 }
 Message Message::createRegistrationMessage(QDateTime dateTime, QString username, QString unhashed_password)
 {
 	//hash + encrypt
 	QString hashed_password = CRYPTO::hashPassword(unhashed_password);
 	QString encrypted_password = CRYPTO::encryptPassword(hashed_password);
-	return Message(MessageType::registrationMessage, dateTime, username, encrypted_password);
+	return Message(MessageType::client_registrationMessage, dateTime, username, encrypted_password);
+}
+Message Message::createServerMessage(MessageType messageType, QString content)
+{
+	return Message(messageType, QDateTime::currentDateTime(), "", content);
 }
 Message Message::createDefaultMessage(QDateTime dateTime, QString sender, QString receiver, QString content)
 {
-	return Message(MessageType::chatMessage, dateTime, sender, content, receiver);
+	return Message(MessageType::client_chatMessage, dateTime, sender, content, receiver);
 }
 
 Message Message::readFromStream(QDataStream& stream) {

@@ -10,9 +10,13 @@
 #include "core.h"
 
 enum MessageType {
-	chatMessage = 0,
-	loginMessage,
-	registrationMessage
+	client_chatMessage = 0,
+	client_loginMessage,
+	client_registrationMessage,
+	server_loginSucceeded,
+	server_loginFailed,
+	server_registrationSucceeded,
+	server_registrationFailed
 };
 
 class Message
@@ -32,6 +36,7 @@ public:
 	static Message createLoginMessage(QDateTime dateTime, QString username, QString unhashed_password);
 	static Message createRegistrationMessage(QDateTime dateTime, QString username, QString unhashed_password);
 	static Message createDefaultMessage(QDateTime dateTime, QString sender, QString receiver, QString content);
+	static Message createServerMessage(MessageType messageType, QString content);
 
 	static Message readFromStream(QDataStream& stream);
 	static Message readFromSocket(QTcpSocket* socket);
