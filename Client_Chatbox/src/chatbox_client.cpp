@@ -13,6 +13,13 @@ void Chatbox_Client::setUpSignalSlotConnections()
 	connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
 	connect(socket, SIGNAL(connected()), this, SLOT(connected()));
 	connect(socket, SIGNAL(errorOccurred(QAbstractSocket::SocketError)), this, SLOT(socketError()));
+	connect(socket, SIGNAL(readyRead()), this, SLOT(new_data_in_socket()));
+}
+
+void Chatbox_Client::new_data_in_socket()
+{
+	Message message = Message::readFromSocket(socket);
+	handleMessage(message);
 }
 
 void Chatbox_Client::socketError()
@@ -60,8 +67,48 @@ void Chatbox_Client::disconnected()
 	establishSocketConnection();
 }
 
+void Chatbox_Client::handleMessage(const Message& message)
+{
+	//login and registration - response from server
+	if (current_scene == UI::Scene::welcomeScene) {
+		switch (message.getMessageType()) {
+		case MessageType::server_loginFailed:
+			setLoginError(message.getContent());
+			emit stopWelcomePageAnimation();
+			emit clearLoginPasswordEdit();
+			emit enableButtons();
+			break;
+
+		case MessageType::server_loginSucceeded:
+			emit setScene(UI::Scene::mainScene);
+			emit stopWelcomePageAnimation();
+			emit enableButtons();
+			emit clearLoginPasswordEdit();
+			emit clearLoginStatusLabel();
+			break;
+
+		case MessageType::server_registrationFailed:
+			emit stopWelcomePageAnimation();
+			setRegistrationError(message.getContent());
+			emit clearRegistrationPasswordEdit();
+			emit enableButtons();
+			break;
+
+		case MessageType::server_registrationSucceeded:
+			emit stopWelcomePageAnimation();
+			setRegistrationStatus("Successfully registered!");
+			emit clearRegistrationPasswordEdit();
+			emit enableButtons();
+		}
+	}
+	else if (current_scene == UI::Scene::mainScene) {
+		qDebug() << "Main scene - message";
+	}
+}
+
 void Chatbox_Client::handleLogin(const QString& username, const QString& unhashed_password)
 {
+	emit clearRegistrationStatusLabel();
 	emit setLoginStatus("Encrypting your password ...");
 	try {
 		//hashes password -> might result in an Crypto_Error
@@ -82,14 +129,9 @@ void Chatbox_Client::handleLogin(const QString& username, const QString& unhashe
 		return;
 	}
 
-	emit enableButtons();
-
-	//clear password-field and statusLabels
 	emit clearLoginPasswordEdit();
-	emit clearLoginStatusLabel();
 
-	//hide loading animation
-	emit stopWelcomePageAnimation();
+	emit setLoginStatus("Waiting on server response ...");
 }
 
 void Chatbox_Client::attemptLogin(const QString& username, const QString& unhashed_password)
@@ -101,6 +143,7 @@ void Chatbox_Client::attemptLogin(const QString& username, const QString& unhash
 
 void Chatbox_Client::handleRegistration(const QString& username, const QString& unencrypted_password)
 {
+	emit clearLoginStatusLabel();
 	emit setRegistrationStatus("Encrypting your password ...");
 
 	try {
@@ -123,14 +166,9 @@ void Chatbox_Client::handleRegistration(const QString& username, const QString& 
 		return;
 	}
 
-	emit enableButtons();
-
-	//clear password-field and statusLabels
 	emit clearRegistrationPasswordEdit();
-	emit clearRegistrationStatusLabel();
 
-	//hide loading animation
-	emit stopWelcomePageAnimation();
+	emit setRegistrationStatus("Waiting on server response ...");
 }
 
 void Chatbox_Client::attemptRegistration(const QString& username, const QString& unencrypted_password)
@@ -154,7 +192,6 @@ void Chatbox_Client::deliver_queued_messages()
 	QList<Message>::iterator it = queued_messages.begin();
 	while (it != queued_messages.end()) {
 		Message::sendThroughSocket(socket, *it);
-		qDebug() << "delivering message...";
 		(*it).print();
 		it = queued_messages.erase(it);
 	}

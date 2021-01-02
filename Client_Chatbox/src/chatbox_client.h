@@ -20,6 +20,7 @@ private:
 
 	void handleLogin(const QString& username, const QString& unhashed_password);	//called by Mainwindow
 	void handleRegistration(const QString& username, const QString& unencrypted_password); //called by MainWindow
+	void handleMessage(const Message& message);
 	void queue_message(Message message);	//queue´s messages from threads, so that the main thread can safely send them through the socket
 public:
 	Chatbox_Client(QWidget* parent = nullptr);
@@ -35,6 +36,7 @@ private slots:
 	void disconnected();
 	void connected();
 	void socketError();
+	void new_data_in_socket();
 	void deliver_queued_messages();
 
 	void sceneChanged(UI::Scene scene);
