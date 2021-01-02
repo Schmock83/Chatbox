@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QTcpSocket>
 #include <QThread>
+#include <QMutex>
 
 #include "../core_includes/message.h"
 #include "../core_includes/core.h"
@@ -14,10 +15,12 @@ class Chatbox_Client : public QWidget
 private:
 	QTcpSocket* socket;
 	UI::Scene current_scene;
+	QList <Message> queued_messages;
+	mutable QMutex mutex;
 
 	void handleLogin(const QString& username, const QString& unhashed_password);	//called by Mainwindow
 	void handleRegistration(const QString& username, const QString& unencrypted_password); //called by MainWindow
-
+	void queue_message(Message message);	//queue´s messages from threads, so that the main thread can safely send them through the socket
 public:
 	Chatbox_Client(QWidget* parent = nullptr);
 	void setUpSignalSlotConnections();
@@ -32,6 +35,8 @@ private slots:
 	void disconnected();
 	void connected();
 	void socketError();
+	void deliver_queued_messages();
+
 	void sceneChanged(UI::Scene scene);
 
 signals:

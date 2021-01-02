@@ -66,8 +66,8 @@ void Chatbox_Client::handleLogin(const QString& username, const QString& unhashe
 	try {
 		//hashes password -> might result in an Crypto_Error
 		Message loginMessage = Message::createLoginMessage(QDateTime::currentDateTime(), username, unhashed_password);
-		//send message through socket
-		Message::sendThroughSocket(socket, loginMessage);
+		//queue message, so it gets send after thread execution
+		queue_message(loginMessage);
 	}
 	catch (CRYPTO::Crypto_Error& error) {
 #		//error occured in hash_function (e.g. not enough memory) -> print errorMessage in label
@@ -95,6 +95,7 @@ void Chatbox_Client::handleLogin(const QString& username, const QString& unhashe
 void Chatbox_Client::attemptLogin(const QString& username, const QString& unhashed_password)
 {
 	QThread* loginThread = QThread::create([&, username, unhashed_password] { handleLogin(username, unhashed_password); });
+	connect(loginThread, SIGNAL(finished()), this, SLOT(deliver_queued_messages()));
 	loginThread->start();
 }
 
@@ -106,7 +107,8 @@ void Chatbox_Client::handleRegistration(const QString& username, const QString& 
 		//hashes password -> might result in an Crypto_Error
 		Message registrationMessage = Message::createRegistrationMessage(QDateTime::currentDateTime(), username, unencrypted_password);
 		//send message through socket
-		Message::sendThroughSocket(socket, registrationMessage);
+		//queue message, so it gets send after thread execution
+		queue_message(registrationMessage);
 	}
 	catch (CRYPTO::Crypto_Error& error) {
 #		//error occured in hash_function (e.g. not enough memory) -> print errorMessage in label
@@ -134,5 +136,26 @@ void Chatbox_Client::handleRegistration(const QString& username, const QString& 
 void Chatbox_Client::attemptRegistration(const QString& username, const QString& unencrypted_password)
 {
 	QThread* registrationThread = QThread::create([&, username, unencrypted_password] { handleRegistration(username, unencrypted_password); });
+	connect(registrationThread, SIGNAL(finished()), this, SLOT(deliver_queued_messages()));
 	registrationThread->start();
+}
+
+//stores queued messages from different threads, so that mainThread can safely send them through the socket
+void Chatbox_Client::queue_message(Message message)
+{
+	QMutexLocker locker(&mutex);
+	queued_messages.append(message);
+}
+
+//send queued messages through socket
+void Chatbox_Client::deliver_queued_messages()
+{
+	QMutexLocker locker(&mutex);
+	QList<Message>::iterator it = queued_messages.begin();
+	while (it != queued_messages.end()) {
+		Message::sendThroughSocket(socket, *it);
+		qDebug() << "delivering message...";
+		(*it).print();
+		it = queued_messages.erase(it);
+	}
 }
