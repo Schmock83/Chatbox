@@ -33,12 +33,22 @@ private:
 	QTcpServer* tcp_server = nullptr;
 	DatabaseHelper* database = nullptr;
 	QList < QPair<Message, QTcpSocket* >> queued_messages;
-	mutable QMutex mutex;
-	//QHash<QString, User*> authenticated_online_users;
+	mutable QMutex socket_mutex;
+	mutable QMutex online_user_mutex;
+	QHash<QString, User*> authenticated_online_users;
 
 	void handleMessage(const Message& message, QTcpSocket* client_socket);
 	void handleRegistration(const Message& message, QTcpSocket* client_socket);
+	void handleLogin(const Message& message, QTcpSocket* client_socket);
+
+	bool userOnline(const QString& user_name);
+	bool socket_in_use(QTcpSocket* client_socket);
+
+	void user_connected(User* user);
+
 	void queue_message(Message message, QTcpSocket* client_socket);	//queue´s messages from threads, so that the main thread can safely send them through the socket
+
+	User* get_user_for_socket(QTcpSocket* client_socket);	//returns User pointer for the user associeted with the socket (or nullptr)
 public:
 	Chatbox_Server(QWidget* parent = nullptr)
 		:QWidget(parent)
@@ -49,6 +59,7 @@ public:
 private slots:
 	void new_data_in_socket();
 	void new_connection();
+	void user_disconnected();
 	void deliver_queued_messages();
 };
 

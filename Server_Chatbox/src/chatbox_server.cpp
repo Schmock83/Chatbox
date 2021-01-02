@@ -27,6 +27,45 @@ void Chatbox_Server::new_connection()
 	connect(new_connection_socket, SIGNAL(readyRead()), this, SLOT(new_data_in_socket()));
 }
 
+void Chatbox_Server::user_disconnected()
+{
+	QTcpSocket* clientSocket = (QTcpSocket*)sender();
+
+	//find user that just disconnected (later notify friends etc.)
+	User* user = get_user_for_socket(clientSocket);
+	//user found -> remove from authenticated_users
+	if (user != nullptr) {
+		QMutexLocker locker(&online_user_mutex);
+		authenticated_online_users.remove(user->get_user_name());
+		qDebug() << "User disconnected...: " << user->get_user_name();
+	}
+}
+
+void Chatbox_Server::user_connected(User* user)
+{
+	if (user == nullptr || user->get_tcp_socket() == nullptr)
+		return;
+
+	QMutexLocker locker(&online_user_mutex);
+	//if user disconnected, while calculating password -> disconnect
+	if (!user->connected()) {
+		emit user->get_tcp_socket()->disconnected();
+		return;
+	}
+
+	authenticated_online_users[user->get_user_name()] = user;
+
+	//connecting signal-slot, for when user disconnects
+	connect(user->get_tcp_socket(), SIGNAL(disconnected()), this, SLOT(user_disconnected()));
+
+	//TODO: send back successfull login
+	Message reply = Message::createServerMessage(MessageType::server_loginSucceeded, "");
+	queue_message(reply, user->get_tcp_socket());
+
+	//update last_login in db
+	user->update_last_login();
+}
+
 void Chatbox_Server::new_data_in_socket()
 {
 	QTcpSocket* clientSocket = (QTcpSocket*)sender();
@@ -44,12 +83,17 @@ void Chatbox_Server::handleMessage(const Message& message, QTcpSocket* client_so
 		handleRegistration(message, client_socket);
 		break;
 	case MessageType::client_loginMessage:
+		handleLogin(message, client_socket);
 		break;
 	}
 }
 
 void Chatbox_Server::handleRegistration(const Message& message, QTcpSocket* client_socket)
 {
+	//if socket is already in use by another client
+	if (socket_in_use(client_socket))
+		emit client_socket->disconnected();
+
 	try {
 		if (database->user_registered(message.getSender())) {
 			//failed - User already exiss :TODO send back message -> user with that name already exists....
@@ -69,16 +113,88 @@ void Chatbox_Server::handleRegistration(const Message& message, QTcpSocket* clie
 		queue_message(message, client_socket);
 	}
 }
+void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_socket)
+{
+	//user already online -> TODO: A User with that name is currently online...
+	if (userOnline(message.getSender())) {
+		Message reply = Message::createServerMessage(MessageType::server_loginFailed, "A User with that name is currently online");
+		queue_message(reply, client_socket);
+		return;
+	}
+
+	try {
+		if (database->verify_user(message.getSender(), message.getContent())) {
+			//user verified
+			try {
+				//check if user already online
+				//user already online -> TODO: A User with that name is currently online... ||-> need to check again, because of multi-threads
+				if (userOnline(message.getSender())) {
+					Message reply = Message::createServerMessage(MessageType::server_loginFailed, "A User with that name is currently online");
+					queue_message(reply, client_socket);
+					return;
+				}
+				//if socket is associated with another user -> disconnect that other user
+				else if (socket_in_use(client_socket)) {
+					emit client_socket->disconnected();
+				}
+
+				//build a user from db
+				User* user = new User(message.getSender(), database, client_socket);
+
+				user_connected(user);
+			}
+			catch (QSqlError error) {
+				qDebug() << "Error in handleLogin(update_last_login): " << error.text();
+			}
+		}
+		else {
+			//login failed -> TODO: Send back Password or Username wrong
+			Message reply = Message::createServerMessage(MessageType::server_loginFailed, "Wrong Username or Password!");
+			queue_message(reply, client_socket);
+			return;
+		}
+	}
+	catch (QSqlError error) {
+		qDebug() << "Error in handleLogin: " << error.text();
+		//error -> TODO: send back error on the server occured...
+		Message reply = Message::createServerMessage(MessageType::server_loginFailed, "An error occured on the server-side");
+		queue_message(reply, client_socket);
+	}
+}
+bool Chatbox_Server::userOnline(const QString& user_name)
+{
+	QMutexLocker locker(&online_user_mutex);
+	for (const User* authenticated_online_user : authenticated_online_users)
+	{
+		if (authenticated_online_user->get_user_name() == user_name)
+			return true;
+	}
+	return false;
+}
+
+bool Chatbox_Server::socket_in_use(QTcpSocket* client_socket)
+{
+	if (client_socket == nullptr)
+		return false;
+
+	QMutexLocker locker(&online_user_mutex);
+	for (const User* authenticated_online_user : authenticated_online_users)
+	{
+		if (authenticated_online_user->get_tcp_socket() == client_socket)
+			return true;
+	}
+	return false;
+}
 //stores queued messages from different threads, so that mainThread can safely send them through the socket
 void Chatbox_Server::queue_message(Message message, QTcpSocket* client_socket)
 {
-	QMutexLocker locker(&mutex);
+	QMutexLocker locker(&socket_mutex);
 	queued_messages.append(QPair<Message, QTcpSocket*>(message, client_socket));
 }
 //send queued messages through socket
 void Chatbox_Server::deliver_queued_messages()
 {
-	QMutexLocker locker(&mutex);
+	QMutexLocker locker(&socket_mutex);
 	QList<QPair<Message, QTcpSocket*>>::iterator it = queued_messages.begin();
 	while (it != queued_messages.end()) {
 		if (it->second->isValid()) {
@@ -88,4 +204,17 @@ void Chatbox_Server::deliver_queued_messages()
 		}
 		it = queued_messages.erase(it);
 	}
+}
+
+User* Chatbox_Server::get_user_for_socket(QTcpSocket* client_socket)
+{
+	QMutexLocker locker(&online_user_mutex);
+	for (User* user : authenticated_online_users)
+	{
+		if (user->get_tcp_socket() == client_socket)
+			return user;
+	}
+
+	//no user with that socket found
+	return nullptr;
 }
