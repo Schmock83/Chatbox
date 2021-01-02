@@ -24,6 +24,26 @@ void DatabaseHelper::setupTable(const QString& table_scheme)
 		throw data_base.lastError();
 }
 
+bool DatabaseHelper::construct_user(const QString& user_name, int& user_id, QDateTime& registry_date, QDateTime& last_login)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("SELECT user_id, registry_date, last_login FROM %1 WHERE user_name = :user_name").arg(USER_TABLE));
+	sql_query.bindValue(":user_name", user_name);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	//no user found
+	if (!sql_query.first())
+		return false;
+
+	user_id = sql_query.value(0).toInt();
+	registry_date = sql_query.value(1).toDateTime();
+	last_login = sql_query.value(2).toDateTime();
+
+	return true;
+}
+
 void DatabaseHelper::register_user(const QString& user_name, const QString& encrypted_password)
 {
 	QMutexLocker locker(&mutex);
@@ -50,8 +70,8 @@ bool DatabaseHelper::user_registered(const QString& user_name)
 bool DatabaseHelper::verify_user(const QString& user_name, const QString& unhashed_password)
 {
 	QMutexLocker locker(&mutex);
-	sql_query.prepare(QString("SELECT user_password FROM %1 WHERE user_name = :usr_name").arg(USER_TABLE));
-	sql_query.bindValue(":usr_name", user_name);
+	sql_query.prepare(QString("SELECT user_password FROM %1 WHERE user_name = :user_name").arg(USER_TABLE));
+	sql_query.bindValue(":user_name", user_name);
 
 	if (!sql_query.exec())
 		throw data_base.lastError();
@@ -62,4 +82,15 @@ bool DatabaseHelper::verify_user(const QString& user_name, const QString& unhash
 	QString stored_password = sql_query.value(0).toString();
 	locker.unlock();
 	return CRYPTO::verifyPassword(stored_password, unhashed_password);
+}
+
+void DatabaseHelper::update_last_login(const QString& user_name, const QDateTime& loginDateTime)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("UPDATE %1 SET last_login = :date_time WHERE user_name=:user_name").arg(USER_TABLE));
+	sql_query.bindValue(":date_time", loginDateTime);
+	sql_query.bindValue(":user_name", user_name);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
 }
