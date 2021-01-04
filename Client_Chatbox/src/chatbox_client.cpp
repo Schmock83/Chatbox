@@ -191,8 +191,7 @@ void Chatbox_Client::deliver_queued_messages()
 	QMutexLocker locker(&mutex);
 	QList<Message>::iterator it = queued_messages.begin();
 	while (it != queued_messages.end()) {
-		Message::sendThroughSocket(socket, *it);
-		(*it).print();
+        Message::sendThroughSocket(socket, *it);
 		it = queued_messages.erase(it);
 	}
 }
