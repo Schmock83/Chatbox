@@ -76,7 +76,7 @@
     <item row="1" column="0">
      <widget class="QStackedWidget" name="sceneWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="loadingPage">
        <layout class="QGridLayout" name="gridLayout_2">
@@ -483,16 +483,6 @@
                   </property>
                  </widget>
                 </item>
-                <item row="0" column="0">
-                 <widget class="QPushButton" name="pushButton_2">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                  <property name="text">
-                   <string>Online/Offline/DND</string>
-                  </property>
-                 </widget>
-                </item>
                 <item row="2" column="0">
                  <layout class="QHBoxLayout" name="horizontalLayout_2">
                   <property name="spacing">
@@ -500,6 +490,9 @@
                   </property>
                   <item>
                    <widget class="QPushButton" name="chat_button">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="text">
                      <string>Chats</string>
                     </property>
@@ -517,6 +510,16 @@
                   </item>
                  </layout>
                 </item>
+                <item row="0" column="0">
+                 <widget class="QPushButton" name="pushButton_2">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="text">
+                   <string>Online/Offline/DND</string>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </widget>
              </item>
@@ -528,7 +531,7 @@
                <item row="0" column="0">
                 <widget class="QStackedWidget" name="chat_contacts_stackedWidget">
                  <property name="currentIndex">
-                  <number>0</number>
+                  <number>1</number>
                  </property>
                  <widget class="QWidget" name="chats_page">
                   <layout class="QGridLayout" name="gridLayout_10">
@@ -560,8 +563,8 @@
                        <rect>
                         <x>0</x>
                         <y>0</y>
-                        <width>19</width>
-                        <height>16</height>
+                        <width>98</width>
+                        <height>28</height>
                        </rect>
                       </property>
                       <layout class="QGridLayout" name="gridLayout_12">
@@ -626,9 +629,17 @@
                        <rect>
                         <x>0</x>
                         <y>0</y>
-                        <width>98</width>
-                        <height>28</height>
+                        <width>187</width>
+                        <height>394</height>
                        </rect>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QLabel {
+	qproperty-alignment: AlignCenter;
+	font-family: &quot;Century Gothic&quot;;
+	font-size: 15px;
+	font: bold;
+}</string>
                       </property>
                       <layout class="QGridLayout" name="gridLayout_14">
                        <property name="leftMargin">
@@ -647,7 +658,7 @@
                         <number>0</number>
                        </property>
                        <item row="0" column="0">
-                        <layout class="QGridLayout" name="contacts_grid_layout">
+                        <layout class="QVBoxLayout" name="contacts_layout">
                          <property name="spacing">
                           <number>0</number>
                          </property>
@@ -667,7 +678,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QStackedWidget" name="stackedWidget_2">
+           <widget class="QStackedWidget" name="stacked_chat_browsers">
             <property name="minimumSize">
              <size>
               <width>250</width>
@@ -677,6 +688,62 @@
             <property name="frameShape">
              <enum>QFrame::Panel</enum>
             </property>
+            <widget class="QWidget" name="page_2">
+             <layout class="QGridLayout" name="gridLayout_15">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <item row="0" column="0">
+               <layout class="QGridLayout" name="gridLayout_13">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item row="0" column="0">
+                 <widget class="QTextBrowser" name="textBrowser">
+                  <property name="html">
+                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;CHAT 1&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="page">
+             <layout class="QGridLayout" name="gridLayout_17">
+              <item row="0" column="0">
+               <layout class="QGridLayout" name="gridLayout_16">
+                <item row="0" column="0">
+                 <widget class="QTextBrowser" name="textBrowser_2">
+                  <property name="html">
+                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;CHAT 2&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
            </widget>
           </item>
          </layout>
