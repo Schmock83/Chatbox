@@ -13,13 +13,15 @@ SOURCES += \
     ../core_includes/message.cpp \
     src/chatbox_client.cpp \
     src/main.cpp \
-    src/mainwindow.cpp
+    src/mainwindow.cpp \
+    src/widgets/chatbrowser.cpp
 
 HEADERS += \
     ../core_includes/core.h \
     ../core_includes/message.h \
     src/chatbox_client.h \
-    src/mainwindow.h
+    src/mainwindow.h \
+    src/widgets/chatbrowser.h
 
 FORMS += \
     forms/mainwindow.ui
