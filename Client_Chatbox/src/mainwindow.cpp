@@ -56,7 +56,7 @@ void MainWindow::setUpSignalSlotConnections()
 void MainWindow::setUpUi()
 {
 	ui->chats_grid_layout->setAlignment(Qt::AlignTop);
-	ui->contacts_grid_layout->setAlignment(Qt::AlignTop);
+	ui->contacts_layout->setAlignment(Qt::AlignTop);
 
 	//initiate loading animation
 	loadingAnimation = new QMovie(":/loadingGifs/imgs/loading3.gif");
@@ -70,7 +70,7 @@ void MainWindow::setUpUi()
 
 	UI::setUpDarkTheme();
 
-	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::chatPage);
+	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::contactPage);
 
 	setScene(UI::Scene::loadingScene);
 }
@@ -113,14 +113,49 @@ void MainWindow::addTopChatButton(QPushButton* newTopButton)
 void MainWindow::updateChatList()
 {
 	//delete all buttons from layout
-	QLayoutItem* wItem;
-	while ((wItem = ui->chats_grid_layout->layout()->takeAt(0)) != NULL)
-		delete wItem;
+	deleteWidgetsFromLayout(ui->chats_grid_layout->layout());
 
 	//re-add them
 	for (const auto& button : chatButtons)
 		ui->chats_grid_layout->addWidget(button);
 }
+
+void MainWindow::addContact(QString contact)
+{
+	QPushButton* contactButton = new QPushButton(contact);
+	contacts[contact[0]].insert(contact, contactButton);
+
+	updateContactList();
+}
+
+void MainWindow::updateContactList()
+{
+	//clear all widgets in the contact-list
+	deleteWidgetsFromLayout(ui->contacts_layout->layout());
+
+	//re-add all contacts + headerLabels, indicating start character
+	QMapIterator<QChar, QMap<QString, QPushButton*>> it(contacts);
+	while (it.hasNext()) {
+		it.next();
+		QLabel* headerLabel = new QLabel(it.key());
+		headerLabel->setAlignment(Qt::AlignCenter);
+		ui->contacts_layout->addWidget(headerLabel);
+		for (auto contact_str : it.value().keys())
+		{
+			ui->contacts_layout->addWidget(new QPushButton(contact_str));
+		}
+	}
+}
+
+void MainWindow::deleteWidgetsFromLayout(QLayout* layout)
+{
+	QLayoutItem* wItem;
+	while ((wItem = layout->takeAt(0)) != NULL) {
+		wItem->widget()->setParent(layout->widget());
+		delete wItem;
+	}
+}
+
 void MainWindow::disableButtons() {
 	ui->login_Button->setDisabled(true);
 	ui->registration_Button->setDisabled(true);

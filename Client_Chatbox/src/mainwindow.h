@@ -6,6 +6,9 @@
 #include <QMovie>
 #include <QTimer>
 #include <QThread>
+#include <QMap>
+#include <QHash>
+#include <QList>
 
 #include "../core_includes/core.h"
 #include "chatbox_client.h"
@@ -22,6 +25,7 @@ private:
 	Chatbox_Client* client;
 	QMovie* loadingAnimation;
 	std::list<QPushButton*> chatButtons;
+	QMap<QChar, QMap<QString, QPushButton*>> contacts;
 
 	//for timer in loadingScene
 	const int cooldown_secs = 6;
@@ -31,6 +35,8 @@ private:
 	void setUpSignalSlotConnections();
 	void addTopChatButton(QPushButton*);
 	void updateChatList();
+	void updateContactList();
+	void deleteWidgetsFromLayout(QLayout*);
 
 public:
 	MainWindow(QWidget* parent = nullptr);
@@ -41,6 +47,7 @@ signals:
 	void sceneChanged(UI::Scene);
 
 private slots:
+	void addContact(QString contact);
 	void setScene(UI::Scene scene);
 	void setLoadingStatus(QString new_status);
 	void setLoadingError(QString new_error);
