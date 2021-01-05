@@ -25,7 +25,10 @@ private:
 	Chatbox_Client* client;
 	QMovie* loadingAnimation;
 	std::list<QPushButton*> chatButtons;
-	QMap<QChar, QMap<QString, QPushButton*>> contacts;
+	QMap<QChar, QMap<QString, QPushButton*>> contacts; //useless qpushbutton ref ??
+
+	//for keeping track of wich left-side page was selected before clicking on lineedit
+	UI::ChatContactPage previous_left_page = UI::ChatContactPage::contactPage;
 
 	//for timer in loadingScene
 	const int cooldown_secs = 6;
@@ -45,6 +48,7 @@ public:
 signals:
 	void establishSocketConnection_signal();
 	void sceneChanged(UI::Scene);
+	void searchUser(const QString&);
 
 private slots:
 	void addContact(QString contact);
@@ -68,6 +72,11 @@ private slots:
 	void clearRegistrationPasswordEdit();
 	void startLoadingTimer();
 	void updateLoadingScreenLabel();
+	void search_line_edit_focussed();
+	void search_line_edit_unfocussed();
+	void search_line_edit_returnPressed();
+
+	void addSearchedUsers(QList<QString>);
 
 	void login_button_pressed();
 	void registration_button_pressed();

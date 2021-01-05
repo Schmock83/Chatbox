@@ -31,6 +31,8 @@ public:
 public slots:
 	//socket-handling
 	void establishSocketConnection();
+
+	void searchUser(const QString&);
 private slots:
 	//socket-handling
 	void disconnected();
@@ -61,6 +63,7 @@ signals:
 	void setLoginStatus(QString new_status);
 	void setLoginError(QString new_error);
 	void startLoadingTimer();
+	void searchedUsers(QList<QString>);
 };
 
 #endif // CHATBOX_CLIENT_H

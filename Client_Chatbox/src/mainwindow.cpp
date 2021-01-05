@@ -14,16 +14,28 @@ MainWindow::MainWindow(QWidget* parent)
 
 	//do this or with signal (emit establishSocketConnection())?
 	//client->establishSocketConnection();
-	emit establishSocketConnection_signal();
+	//emit establishSocketConnection_signal();
+
+	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::contactPage);
+	setScene(UI::Scene::mainScene);
+
+	emit addContact("Miriam");
+	emit addContact("Alex");
+	emit addContact("Dieter");
 }
 
 MainWindow::~MainWindow()
 {
 	delete ui;
 }
-
 void MainWindow::setUpSignalSlotConnections()
 {
+	//LineEdit (for searching users)
+	connect(ui->search_line_edit, SIGNAL(focussed()), this, SLOT(search_line_edit_focussed()));
+	connect(ui->search_line_edit, SIGNAL(clearButtonPressed()), this, SLOT(search_line_edit_unfocussed()));
+	connect(ui->search_line_edit, SIGNAL(escPressed()), this, SLOT(search_line_edit_unfocussed()));
+	connect(ui->search_line_edit, SIGNAL(returnPressed()), this, SLOT(search_line_edit_returnPressed()));
+
 	//buttons
 	connect(ui->login_Button, SIGNAL(clicked()), this, SLOT(login_button_pressed()));
 	connect(ui->registration_Button, SIGNAL(clicked()), this, SLOT(registration_button_pressed()));
@@ -51,6 +63,8 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(setLoginStatus(QString)), this, SLOT(setLoginStatus(QString)));
 	connect(client, SIGNAL(setLoginError(QString)), this, SLOT(setLoginError(QString)));
 	connect(client, SIGNAL(setRegistrationError(QString)), this, SLOT(setRegistrationError(QString)));
+	connect(this, SIGNAL(searchUser(const QString&)), client, SLOT(searchUser(const QString&)));
+	connect(client, SIGNAL(searchedUsers(QList<QString>)), this, SLOT(addSearchedUsers(QList<QString>)));
 }
 
 void MainWindow::setUpUi()
@@ -73,6 +87,46 @@ void MainWindow::setUpUi()
 	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::contactPage);
 
 	setScene(UI::Scene::loadingScene);
+}
+
+void MainWindow::search_line_edit_focussed()
+{
+	if (ui->chat_contacts_stackedWidget->currentIndex() != UI::ChatContactPage::user_search_page)
+		previous_left_page = (UI::ChatContactPage)ui->chat_contacts_stackedWidget->currentIndex();
+	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::user_search_page);
+}
+void MainWindow::search_line_edit_unfocussed()
+{
+	ui->chat_contacts_stackedWidget->setCurrentIndex(previous_left_page);
+}
+void MainWindow::search_line_edit_returnPressed()
+{
+	ui->search_line_edit->clearFocus();
+
+	//delete old results
+	deleteWidgetsFromLayout(ui->user_search_layout->layout());
+
+	//show loading animation
+	QLabel* loadingLabel = new QLabel("Hello");
+	loadingLabel->setAlignment(Qt::AlignCenter);
+	loadingLabel->setMovie(loadingAnimation);
+	loadingAnimation->start();
+	ui->user_search_layout->addWidget(loadingLabel);
+
+	emit searchUser(ui->search_line_edit->text());
+}
+
+void MainWindow::addSearchedUsers(QList<QString> searchedUsers)
+{
+	//delete everything from the searchUser-layout - including the loading label
+	deleteWidgetsFromLayout(ui->user_search_layout->layout());
+
+	ui->user_search_layout->setAlignment(Qt::Alignment(Qt::AlignTop));
+
+	for (auto searchedUser : searchedUsers)
+	{
+		ui->user_search_layout->addWidget(new QPushButton(searchedUser));
+	}
 }
 
 void MainWindow::startLoadingTimer()
@@ -142,7 +196,7 @@ void MainWindow::updateContactList()
 		ui->contacts_layout->addWidget(headerLabel);
 		for (auto contact_str : it.value().keys())
 		{
-			ui->contacts_layout->addWidget(new QPushButton(contact_str));
+			ui->contacts_layout->addWidget(new QPushButton(contact_str)); //try to add old qpushbutton*
 		}
 	}
 }
@@ -150,9 +204,11 @@ void MainWindow::updateContactList()
 void MainWindow::deleteWidgetsFromLayout(QLayout* layout)
 {
 	QLayoutItem* wItem;
+	QWidget* widget;
 	while ((wItem = layout->takeAt(0)) != NULL) {
-		wItem->widget()->setParent(layout->widget());
-		delete wItem;
+		widget = wItem->widget();
+		layout->removeWidget(widget);
+		widget->deleteLater();
 	}
 }
 
