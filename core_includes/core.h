@@ -30,7 +30,8 @@ namespace UI {
 	//left side (show contacts or chats)
 	enum ChatContactPage {
 		chatPage = 0,
-		contactPage
+		contactPage,
+		user_search_page
 	};
 	bool setUpDarkTheme();
 }
