@@ -16,17 +16,20 @@ void LineEdit::focusInEvent(QFocusEvent* e)
 void LineEdit::focusOutEvent(QFocusEvent* e)
 {
 	QLineEdit::focusOutEvent(e);
+	this->clear();
 	emit unfocussed();
 }
 
 void LineEdit::textChanged_slot(const QString& newText)
 {
 	if (newText.isEmpty())
+	{
+		this->clearFocus();
 		emit clearButtonPressed();
+	}
 }
 bool LineEdit::event(QEvent* e)
 {
-	QLineEdit::event(e);
 	if (e->type() == QEvent::KeyPress)
 	{
 		QKeyEvent* key_event = static_cast<QKeyEvent*>(e);
@@ -36,4 +39,5 @@ bool LineEdit::event(QEvent* e)
 			emit escPressed();
 		}
 	}
+	return QLineEdit::event(e);
 }
