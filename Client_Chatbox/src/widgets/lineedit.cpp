@@ -16,7 +16,6 @@ void LineEdit::focusInEvent(QFocusEvent* e)
 void LineEdit::focusOutEvent(QFocusEvent* e)
 {
 	QLineEdit::focusOutEvent(e);
-	this->clear();
 	emit unfocussed();
 }
 
@@ -35,6 +34,7 @@ bool LineEdit::event(QEvent* e)
 		QKeyEvent* key_event = static_cast<QKeyEvent*>(e);
 		if (key_event->key() == Qt::Key_Escape)
 		{
+			this->clear();
 			this->clearFocus();
 			emit escPressed();
 		}
