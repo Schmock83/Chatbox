@@ -177,6 +177,7 @@ void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_sock
 			//login failed -> Send back Password or Username wrong
 			Message reply = Message::createServerMessage(MessageType::server_loginFailed, "Wrong Username or Password!");
 			queue_message(reply, client_socket);
+            QThread::currentThread()->sleep(2);
 			return;
 		}
 	}
