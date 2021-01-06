@@ -15,7 +15,8 @@ SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
     src/widgets/chatbrowser.cpp \
-    src/widgets/lineedit.cpp
+    src/widgets/lineedit.cpp \
+    src/widgets/userbutton.cpp
 
 HEADERS += \
     ../core_includes/core.h \
@@ -23,7 +24,8 @@ HEADERS += \
     src/chatbox_client.h \
     src/mainwindow.h \
     src/widgets/chatbrowser.h \
-    src/widgets/lineedit.h
+    src/widgets/lineedit.h \
+    src/widgets/userbutton.h
 
 FORMS += \
     forms/mainwindow.ui
