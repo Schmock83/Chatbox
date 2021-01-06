@@ -10,6 +10,7 @@
 #include <QSqlError>
 #include <QMutex>
 #include <QDateTime>
+#include <QList>
 
 class DatabaseHelper
 {
@@ -31,6 +32,7 @@ public:
 	void register_user(const QString& user_name, const QString& encrypted_password);
 	bool verify_user(const QString& user_name, const QString& unhashed_password);
 	void update_last_login(const QString& user_name, const QDateTime& loginDateTime);
+	QList<QString> get_users_like(const QString& user_name);
 };
 
 #endif // DATABASEHELPER_H

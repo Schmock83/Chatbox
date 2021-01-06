@@ -58,8 +58,8 @@ void Chatbox_Server::user_connected(User* user)
 	//connecting signal-slot, for when user disconnects
 	connect(user->get_tcp_socket(), SIGNAL(disconnected()), this, SLOT(user_disconnected()));
 
-	//TODO: send back successfull login
-	Message reply = Message::createServerMessage(MessageType::server_loginSucceeded, "");
+	//send back successfull login
+	Message reply = Message::createServerMessage(MessageType::server_loginSucceeded, user->get_user_name());
 	queue_message(reply, user->get_tcp_socket());
 
 	//update last_login in db
@@ -78,6 +78,7 @@ void Chatbox_Server::new_data_in_socket()
 
 void Chatbox_Server::handleMessage(const Message& message, QTcpSocket* client_socket)
 {
+	//TODO check if user under authenticated_users -> send back error if not / disconnect
 	switch (message.getMessageType()) {
 	case MessageType::client_registrationMessage:
 		handleRegistration(message, client_socket);
@@ -85,7 +86,26 @@ void Chatbox_Server::handleMessage(const Message& message, QTcpSocket* client_so
 	case MessageType::client_loginMessage:
 		handleLogin(message, client_socket);
 		break;
+	case MessageType::client_searchUserRequest:
+		handleSearchUserRequest(message, client_socket);
+		break;
 	}
+}
+
+void Chatbox_Server::handleSearchUserRequest(const Message& message, QTcpSocket* client_socket)
+{
+	try {
+		QList<QString> found_users = database->get_users_like(message.getContent());
+		Message reply = Message::createServerMessage(MessageType::server_searchUserResult, found_users);
+		queue_message(reply, client_socket);
+	}
+	catch (QSqlError error) {
+		qDebug() << "Error in handleRegistration: " << error.text();
+		//error -> send back empty list...
+		Message error_reply = Message::createServerMessage(MessageType::server_searchUserResult, QList<QString>());
+		queue_message(error_reply, client_socket);
+	}
+	QThread::currentThread()->sleep(1);
 }
 
 void Chatbox_Server::handleRegistration(const Message& message, QTcpSocket* client_socket)
@@ -96,26 +116,26 @@ void Chatbox_Server::handleRegistration(const Message& message, QTcpSocket* clie
 
 	try {
 		if (database->user_registered(message.getSender())) {
-			//failed - User already exiss :TODO send back message -> user with that name already exists....
+			//failed - User already exists :send back message -> user with that name already exists....
 			Message message = Message::createServerMessage(MessageType::server_registrationFailed, "A User with that name already exists!");
 			queue_message(message, client_socket);
 			return;
 		}
 		database->register_user(message.getSender(), message.getContent());
-		//success -> TODO: send back successfully registered ...
+		//success -> send back successfully registered ...
 		Message message = Message::createServerMessage(MessageType::server_registrationSucceeded, "");
 		queue_message(message, client_socket);
 	}
 	catch (QSqlError error) {
 		qDebug() << "Error in handleRegistration: " << error.text();
-		//error -> TODO: send back error on the server occured...
+		//error -> send back error on the server occured...
 		Message message = Message::createServerMessage(MessageType::server_registrationFailed, "An error occured on the server-side");
 		queue_message(message, client_socket);
 	}
 }
 void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_socket)
 {
-	//user already online -> TODO: A User with that name is currently online...
+	//user already online -> A User with that name is currently online...
 	if (userOnline(message.getSender())) {
 		Message reply = Message::createServerMessage(MessageType::server_loginFailed, "A User with that name is currently online");
 		queue_message(reply, client_socket);
@@ -127,7 +147,7 @@ void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_sock
 			//user verified
 			try {
 				//check if user already online
-				//user already online -> TODO: A User with that name is currently online... ||-> need to check again, because of multi-threads
+				//user already online -> A User with that name is currently online... ||-> need to check again, because of multi-threads
 				if (userOnline(message.getSender())) {
 					Message reply = Message::createServerMessage(MessageType::server_loginFailed, "A User with that name is currently online");
 					queue_message(reply, client_socket);
@@ -148,7 +168,7 @@ void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_sock
 			}
 		}
 		else {
-			//login failed -> TODO: Send back Password or Username wrong
+			//login failed -> Send back Password or Username wrong
 			Message reply = Message::createServerMessage(MessageType::server_loginFailed, "Wrong Username or Password!");
 			queue_message(reply, client_socket);
 			return;
@@ -156,7 +176,7 @@ void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_sock
 	}
 	catch (QSqlError error) {
 		qDebug() << "Error in handleLogin: " << error.text();
-		//error -> TODO: send back error on the server occured...
+		//error -> send back error on the server occured...
 		Message reply = Message::createServerMessage(MessageType::server_loginFailed, "An error occured on the server-side");
 		queue_message(reply, client_socket);
 	}

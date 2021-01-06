@@ -94,3 +94,21 @@ void DatabaseHelper::update_last_login(const QString& user_name, const QDateTime
 	if (!sql_query.exec())
 		throw data_base.lastError();
 }
+QList<QString> DatabaseHelper::get_users_like(const QString& user_name)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("SELECT user_name FROM %1 WHERE user_name LIKE :user_name").arg(USER_TABLE));
+	sql_query.bindValue(":user_name", ("%" + user_name + "%"));
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	QList<QString> found_users;
+
+	while (sql_query.next())
+	{
+		found_users.append(sql_query.value(0).toString());
+	}
+
+	return found_users;
+}
