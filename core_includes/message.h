@@ -14,7 +14,8 @@ enum MessageType {
 	client_chatMessage = 0,
 	client_loginMessage,
 	client_registrationMessage,
-	client_searchUserRequest,
+	client_requestMessage,
+	//client_searchUserRequest,
 	server_loginSucceeded,
 	server_loginFailed,
 	server_registrationSucceeded,
@@ -22,10 +23,15 @@ enum MessageType {
 	server_searchUserResult
 };
 
+enum RequestType {
+	searchUserRequest = 0
+};
+
 class Message
 {
 private:
 	MessageType messageType;
+	RequestType requestType;
 	QDateTime dateTime;
 	QString messageContents;
 	QString sender;
@@ -38,6 +44,9 @@ private:
 	Message(MessageType messageType, QDateTime dateTime, QString sender, QList<QString> str_list, QString content = "", QString receiver = "")
 		:messageType(messageType), dateTime(dateTime), messageContents(content), sender(sender), receiver(receiver), str_list(str_list)
 	{}
+	Message(MessageType messageType, RequestType requestType, QString content = "")
+		:messageType(messageType), requestType(requestType), messageContents(content)
+	{}
 
 public:
 	static Message createLoginMessage(QDateTime dateTime, QString username, QString unhashed_password);
@@ -45,7 +54,7 @@ public:
 	static Message createDefaultMessage(QDateTime dateTime, QString sender, QString receiver, QString content);
 	static Message createServerMessage(MessageType messageType, QString content);
 	static Message createServerMessage(MessageType messageType, QList<QString> str_list);
-	static Message createClientRequstMessage(MessageType messageType, QString content);
+	static Message createClientRequstMessage(RequestType requestType, QString content); //for server-requests (e.g. addContact, searchUser, changeProfile...)
 
 	static Message readFromStream(QDataStream& stream);
 	static Message readFromSocket(QTcpSocket* socket);
@@ -53,6 +62,7 @@ public:
 	static void sendThroughSocket(QTcpSocket* socket, const Message& message);
 
 	MessageType getMessageType()const { return messageType; }
+	RequestType getRequestType()const { return requestType; }
 	QString getSender()const { return sender; }
 	QString getReceiver()const { return receiver; }
 	QDateTime getDateTime()const { return dateTime; }

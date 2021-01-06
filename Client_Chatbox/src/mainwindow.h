@@ -51,7 +51,7 @@ signals:
 	void searchUser(const QString&);
 
 private slots:
-	void addContact(QString contact);
+	void addContact(const QString& contact);
 	void setScene(UI::Scene scene);
 	void setLoadingStatus(QString new_status);
 	void setLoadingError(QString new_error);

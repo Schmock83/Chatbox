@@ -176,7 +176,7 @@ void MainWindow::updateChatList()
 		ui->chats_grid_layout->addWidget(button);
 }
 
-void MainWindow::addContact(QString contact)
+void MainWindow::addContact(const QString& contact)
 {
 	QPushButton* contactButton = new QPushButton(contact);
 	contacts[contact[0]].insert(contact, contactButton);

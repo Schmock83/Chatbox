@@ -25,14 +25,15 @@ Message Message::createDefaultMessage(QDateTime dateTime, QString sender, QStrin
 {
 	return Message(MessageType::client_chatMessage, dateTime, sender, content, receiver);
 }
-Message Message::createClientRequstMessage(MessageType messageType, QString content)
+Message Message::createClientRequstMessage(RequestType requestType, QString content)
 {
-	return Message(messageType, QDateTime::currentDateTime(), "", content);
+	return Message(MessageType::client_requestMessage, requestType, content);
 }
 
 Message Message::readFromStream(QDataStream& stream)
 {
 	MessageType messageType;
+	RequestType requestType;
 	QDateTime dateTime;
 	QString messageContents;
 	QString sender;
@@ -40,7 +41,12 @@ Message Message::readFromStream(QDataStream& stream)
 	QList<QString> str_list;
 
 	stream >> messageType >> dateTime >> sender;
-	if (messageType == MessageType::server_searchUserResult) {
+
+	if (messageType == MessageType::client_requestMessage) {
+		stream >> requestType >> messageContents;
+		return Message(messageType, requestType, messageContents);
+	}
+	else if (messageType == MessageType::server_searchUserResult) {
 		stream >> str_list;
 		return Message(messageType, dateTime, sender, str_list);
 	}
@@ -52,7 +58,11 @@ Message Message::readFromStream(QDataStream& stream)
 QDataStream& Message::writeToStream(QDataStream& stream, const Message& message)
 {
 	stream << message.messageType << message.dateTime << message.sender;
-	if (message.messageType == MessageType::server_searchUserResult) {
+
+	if (message.messageType == MessageType::client_requestMessage) {
+		stream << message.getRequestType() << message.getContent();
+	}
+	else if (message.messageType == MessageType::server_searchUserResult) {
 		stream << message.str_list;
 	}
 	else {

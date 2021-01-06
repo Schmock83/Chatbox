@@ -40,6 +40,7 @@ private:
 	void handleMessage(const Message& message, QTcpSocket* client_socket);
 	void handleRegistration(const Message& message, QTcpSocket* client_socket);
 	void handleLogin(const Message& message, QTcpSocket* client_socket);
+	void handleUserRequest(const Message& message, QTcpSocket* client_socket);
 	void handleSearchUserRequest(const Message& message, QTcpSocket* client_socket);
 
 	bool userOnline(const QString& user_name);

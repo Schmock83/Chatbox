@@ -58,7 +58,7 @@ void Chatbox_Client::searchUser(const QString& searchUser)
 {
 	qDebug() << "asking server for users like \'" << searchUser << "\'.";
 
-	Message request = Message::createClientRequstMessage(MessageType::client_searchUserRequest, searchUser);
+	Message request = Message::createClientRequstMessage(RequestType::searchUserRequest, searchUser);
 	Message::sendThroughSocket(socket, request);
 }
 

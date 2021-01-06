@@ -85,7 +85,24 @@ void Chatbox_Server::handleMessage(const Message& message, QTcpSocket* client_so
 	case MessageType::client_loginMessage:
 		handleLogin(message, client_socket);
 		break;
-	case MessageType::client_searchUserRequest:
+	case MessageType::client_requestMessage:
+		handleUserRequest(message, client_socket);
+		break;
+	}
+}
+
+void Chatbox_Server::handleUserRequest(const Message& message, QTcpSocket* client_socket)
+{
+	//check if message came from authenticated user
+	if (get_user_for_socket(client_socket) == nullptr)
+	{
+		client_socket->abort();
+		return;
+	}
+
+	switch (message.getRequestType())
+	{
+	case RequestType::searchUserRequest:
 		handleSearchUserRequest(message, client_socket);
 		break;
 	}
@@ -93,13 +110,6 @@ void Chatbox_Server::handleMessage(const Message& message, QTcpSocket* client_so
 
 void Chatbox_Server::handleSearchUserRequest(const Message& message, QTcpSocket* client_socket)
 {
-	//check if message came from authenticated user
-	if (get_user_for_socket(client_socket) != nullptr)
-	{
-		client_socket->abort();
-		return;
-	}
-
 	try {
 		QList<QString> found_users = database->get_users_like(message.getContent());
 		Message reply = Message::createServerMessage(MessageType::server_searchUserResult, found_users);
@@ -177,7 +187,7 @@ void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_sock
 			//login failed -> Send back Password or Username wrong
 			Message reply = Message::createServerMessage(MessageType::server_loginFailed, "Wrong Username or Password!");
 			queue_message(reply, client_socket);
-            QThread::currentThread()->sleep(2);
+			QThread::currentThread()->sleep(2);
 			return;
 		}
 	}
