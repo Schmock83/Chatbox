@@ -12,16 +12,14 @@ MainWindow::MainWindow(QWidget* parent)
 
 	setUpUi();
 
-	//do this or with signal (emit establishSocketConnection())?
-	//client->establishSocketConnection();
-	//emit establishSocketConnection_signal();
+	emit establishSocketConnection_signal();
 
-	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::contactPage);
+	/*ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::contactPage);
 	setScene(UI::Scene::mainScene);
 
 	emit addContact("Miriam");
 	emit addContact("Alex");
-	emit addContact("Dieter");
+	emit addContact("Dieter");*/
 }
 
 MainWindow::~MainWindow()
@@ -71,6 +69,7 @@ void MainWindow::setUpUi()
 {
 	ui->chats_grid_layout->setAlignment(Qt::AlignTop);
 	ui->contacts_layout->setAlignment(Qt::AlignTop);
+	ui->user_search_layout->setAlignment(Qt::AlignTop);
 
 	//initiate loading animation
 	loadingAnimation = new QMovie(":/loadingGifs/imgs/loading3.gif");
@@ -120,8 +119,6 @@ void MainWindow::addSearchedUsers(QList<QString> searchedUsers)
 {
 	//delete everything from the searchUser-layout - including the loading label
 	deleteWidgetsFromLayout(ui->user_search_layout->layout());
-
-	ui->user_search_layout->setAlignment(Qt::Alignment(Qt::AlignTop));
 
 	for (auto searchedUser : searchedUsers)
 	{

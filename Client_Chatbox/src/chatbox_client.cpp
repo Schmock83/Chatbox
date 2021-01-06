@@ -18,8 +18,10 @@ void Chatbox_Client::setUpSignalSlotConnections()
 
 void Chatbox_Client::new_data_in_socket()
 {
-	Message message = Message::readFromSocket(socket);
-	handleMessage(message);
+	do {
+		Message message = Message::readFromSocket(socket);
+		handleMessage(message);
+	} while (!socket->atEnd());
 }
 
 void Chatbox_Client::socketError()
@@ -56,7 +58,8 @@ void Chatbox_Client::searchUser(const QString& searchUser)
 {
 	qDebug() << "asking server for users like \'" << searchUser << "\'.";
 
-	//TODO query server
+	Message request = Message::createClientRequstMessage(MessageType::client_searchUserRequest, searchUser);
+	Message::sendThroughSocket(socket, request);
 }
 
 void Chatbox_Client::sceneChanged(UI::Scene scene)
@@ -76,6 +79,8 @@ void Chatbox_Client::disconnected()
 
 void Chatbox_Client::handleMessage(const Message& message)
 {
+	qDebug() << "handleMessage called: ";
+	message.print();
 	//login and registration - response from server
 	if (current_scene == UI::Scene::welcomeScene) {
 		switch (message.getMessageType()) {
@@ -86,7 +91,7 @@ void Chatbox_Client::handleMessage(const Message& message)
 			emit enableButtons();
 			break;
 
-		case MessageType::server_loginSucceeded:
+		case MessageType::server_loginSucceeded:	//TODDO store username
 			emit setScene(UI::Scene::mainScene);
 			emit stopWelcomePageAnimation();
 			emit enableButtons();
@@ -109,7 +114,12 @@ void Chatbox_Client::handleMessage(const Message& message)
 		}
 	}
 	else if (current_scene == UI::Scene::mainScene) {
-		qDebug() << "Main scene - message";
+		switch (message.getMessageType())
+		{
+		case MessageType::server_searchUserResult:
+			emit searchedUsers(message.getStringList());
+			break;
+		}
 	}
 }
 
