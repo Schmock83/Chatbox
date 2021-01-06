@@ -78,7 +78,6 @@ void Chatbox_Server::new_data_in_socket()
 
 void Chatbox_Server::handleMessage(const Message& message, QTcpSocket* client_socket)
 {
-	//TODO check if user under authenticated_users -> send back error if not / disconnect
 	switch (message.getMessageType()) {
 	case MessageType::client_registrationMessage:
 		handleRegistration(message, client_socket);
@@ -94,6 +93,13 @@ void Chatbox_Server::handleMessage(const Message& message, QTcpSocket* client_so
 
 void Chatbox_Server::handleSearchUserRequest(const Message& message, QTcpSocket* client_socket)
 {
+	//check if message came from authenticated user
+	if (get_user_for_socket(client_socket) != nullptr)
+	{
+		client_socket->abort();
+		return;
+	}
+
 	try {
 		QList<QString> found_users = database->get_users_like(message.getContent());
 		Message reply = Message::createServerMessage(MessageType::server_searchUserResult, found_users);
@@ -111,7 +117,7 @@ void Chatbox_Server::handleSearchUserRequest(const Message& message, QTcpSocket*
 void Chatbox_Server::handleRegistration(const Message& message, QTcpSocket* client_socket)
 {
 	//if socket is already in use by another client
-	if (socket_in_use(client_socket))
+	if (authenticated_socket(client_socket))
 		emit client_socket->disconnected();
 
 	try {
@@ -154,7 +160,7 @@ void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_sock
 					return;
 				}
 				//if socket is associated with another user -> disconnect that other user
-				else if (socket_in_use(client_socket)) {
+				else if (authenticated_socket(client_socket)) {
 					emit client_socket->disconnected();
 				}
 
@@ -191,20 +197,6 @@ bool Chatbox_Server::userOnline(const QString& user_name)
 	}
 	return false;
 }
-
-bool Chatbox_Server::socket_in_use(QTcpSocket* client_socket)
-{
-	if (client_socket == nullptr)
-		return false;
-
-	QMutexLocker locker(&online_user_mutex);
-	for (const User* authenticated_online_user : authenticated_online_users)
-	{
-		if (authenticated_online_user->get_tcp_socket() == client_socket)
-			return true;
-	}
-	return false;
-}
 //stores queued messages from different threads, so that mainThread can safely send them through the socket
 void Chatbox_Server::queue_message(Message message, QTcpSocket* client_socket)
 {
@@ -228,6 +220,9 @@ void Chatbox_Server::deliver_queued_messages()
 
 User* Chatbox_Server::get_user_for_socket(QTcpSocket* client_socket)
 {
+	if (client_socket == nullptr)
+		return nullptr;
+
 	QMutexLocker locker(&online_user_mutex);
 	for (User* user : authenticated_online_users)
 	{
