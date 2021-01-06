@@ -36,7 +36,12 @@ void MainWindow::setUpSignalSlotConnections()
 
 	//buttons
 	connect(ui->login_Button, SIGNAL(clicked()), this, SLOT(login_button_pressed()));
+	connect(ui->login_UsernameEdit, SIGNAL(returnPressed()), this, SLOT(login_button_pressed()));
+	connect(ui->login_PasswordEdit, SIGNAL(returnPressed()), this, SLOT(login_button_pressed()));
+
 	connect(ui->registration_Button, SIGNAL(clicked()), this, SLOT(registration_button_pressed()));
+	connect(ui->registration_UsernameEdit, SIGNAL(returnPressed()), this, SLOT(registration_button_pressed()));
+	connect(ui->registration_PasswordEdit, SIGNAL(returnPressed()), this, SLOT(registration_button_pressed()));
 
 	connect(this, SIGNAL(establishSocketConnection_signal()), client, SLOT(establishSocketConnection()));
 
