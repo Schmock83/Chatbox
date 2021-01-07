@@ -36,6 +36,10 @@ public:
 	QList<QString> get_users_like(const QString& user_name);
 	QList<QString> get_user_contacts(const int user_id);
 	QList<QString> get_user_contacts(const QString& user_name);
+	QList<QString> get_user_outgoing_friend_requests(const int user_id);
+	QList<QString> get_user_outgoing_friend_requests(const QString& user_name);
+	QList<QString> get_user_incoming_friend_requests(const int user_id);
+	QList<QString> get_user_incoming_friend_requests(const QString& user_name);
 };
 
 #endif // DATABASEHELPER_H

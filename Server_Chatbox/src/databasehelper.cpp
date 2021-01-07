@@ -64,8 +64,7 @@ bool DatabaseHelper::construct_user(const QString& user_name, int& user_id, QDat
 QList<QString> DatabaseHelper::get_user_contacts(const int user_id)
 {
 	QMutexLocker locker(&mutex);
-	sql_query.prepare(
-		QString("SELECT r.user_name FROM %1 c1 JOIN %2 r ON (r.user_id == c1.user_id2) WHERE c1.user_id1 = :user_id AND c1.user_id2 IN (SELECT user_id1 FROM %1 WHERE user_id2 = :user_id);").arg(CONTACTS_TABLE, USER_TABLE));
+	sql_query.prepare(QString("SELECT r.user_name FROM %1 c1 JOIN %2 r ON (r.user_id == c1.user_id2) WHERE c1.user_id1 = :user_id AND c1.user_id2 IN (SELECT user_id1 FROM %1 WHERE user_id2 = :user_id);").arg(CONTACTS_TABLE, USER_TABLE));
 	sql_query.bindValue(":user_id", user_id);
 
 	if (!sql_query.exec())
@@ -85,6 +84,56 @@ QList<QString> DatabaseHelper::get_user_contacts(const QString& user_name)
 	int user_id = get_user_id(user_name);
 
 	return get_user_contacts(user_id);
+}
+QList<QString> DatabaseHelper::get_user_outgoing_friend_requests(const int user_id)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(
+		QString("SELECT r.user_name FROM %1 c1 JOIN %2 r ON(r.user_id == c1.user_id2) WHERE c1.user_id1 = :user_id AND c1.user_id2 NOT IN(SELECT user_id1 FROM %1 WHERE user_id2 = :user_id);").arg(CONTACTS_TABLE, USER_TABLE));
+	sql_query.bindValue(":user_id", user_id);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	QList<QString>outgoing_friend_requests;
+
+	while (sql_query.next())
+	{
+		outgoing_friend_requests.append(sql_query.value(0).toString());
+	}
+
+	return outgoing_friend_requests;
+}
+QList<QString> DatabaseHelper::get_user_outgoing_friend_requests(const QString& user_name)
+{
+	int user_id = get_user_id(user_name);
+
+	return get_user_outgoing_friend_requests(user_id);
+}
+QList<QString> DatabaseHelper::get_user_incoming_friend_requests(const int user_id)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(
+		QString("SELECT r.user_name FROM %1 c1 JOIN %2 r ON (r.user_id == c1.user_id1) WHERE c1.user_id2 = :user_id AND c1.user_id1 NOT IN (SELECT user_id2 FROM %1 WHERE user_id1 = :user_id);").arg(CONTACTS_TABLE, USER_TABLE));
+	sql_query.bindValue(":user_id", user_id);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	QList<QString>incomin_friend_requests;
+
+	while (sql_query.next())
+	{
+		incomin_friend_requests.append(sql_query.value(0).toString());
+	}
+
+	return incomin_friend_requests;
+}
+QList<QString> DatabaseHelper::get_user_incoming_friend_requests(const QString& user_name)
+{
+	int user_id = get_user_id(user_name);
+
+	return get_user_incoming_friend_requests(user_id);
 }
 
 void DatabaseHelper::register_user(const QString& user_name, const QString& encrypted_password)
