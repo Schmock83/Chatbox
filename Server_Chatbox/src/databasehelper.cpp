@@ -85,7 +85,7 @@ QList<QString> DatabaseHelper::get_user_contacts(const QString& user_name)
 
 	return get_user_contacts(user_id);
 }
-QList<QString> DatabaseHelper::get_user_outgoing_friend_requests(const int user_id)
+QList<QString> DatabaseHelper::get_user_outgoing_contact_requests(const int user_id)
 {
 	QMutexLocker locker(&mutex);
 	sql_query.prepare(
@@ -95,22 +95,22 @@ QList<QString> DatabaseHelper::get_user_outgoing_friend_requests(const int user_
 	if (!sql_query.exec())
 		throw data_base.lastError();
 
-	QList<QString>outgoing_friend_requests;
+	QList<QString>outgoing_contact_requests;
 
 	while (sql_query.next())
 	{
-		outgoing_friend_requests.append(sql_query.value(0).toString());
+		outgoing_contact_requests.append(sql_query.value(0).toString());
 	}
 
-	return outgoing_friend_requests;
+	return outgoing_contact_requests;
 }
-QList<QString> DatabaseHelper::get_user_outgoing_friend_requests(const QString& user_name)
+QList<QString> DatabaseHelper::get_user_outgoing_contact_requests(const QString& user_name)
 {
 	int user_id = get_user_id(user_name);
 
-	return get_user_outgoing_friend_requests(user_id);
+	return get_user_outgoing_contact_requests(user_id);
 }
-QList<QString> DatabaseHelper::get_user_incoming_friend_requests(const int user_id)
+QList<QString> DatabaseHelper::get_user_incoming_contact_requests(const int user_id)
 {
 	QMutexLocker locker(&mutex);
 	sql_query.prepare(
@@ -129,11 +129,11 @@ QList<QString> DatabaseHelper::get_user_incoming_friend_requests(const int user_
 
 	return incomin_friend_requests;
 }
-QList<QString> DatabaseHelper::get_user_incoming_friend_requests(const QString& user_name)
+QList<QString> DatabaseHelper::get_user_incoming_contact_requests(const QString& user_name)
 {
 	int user_id = get_user_id(user_name);
 
-	return get_user_incoming_friend_requests(user_id);
+	return get_user_incoming_contact_requests(user_id);
 }
 
 void DatabaseHelper::register_user(const QString& user_name, const QString& encrypted_password)
