@@ -13,7 +13,8 @@ void DatabaseHelper::initiate_sqlite_database()
 
 void DatabaseHelper::setupTables()
 {
-	return (setupTable(USER_TABLE_SCHEME));
+	setupTable(USER_TABLE_SCHEME);
+	setupTable(CONTACTS_TABLE_SCHEME);
 }
 
 void DatabaseHelper::setupTable(const QString& table_scheme)
@@ -22,6 +23,22 @@ void DatabaseHelper::setupTable(const QString& table_scheme)
 	sql_query.prepare(table_scheme);
 	if (!sql_query.exec())
 		throw data_base.lastError();
+}
+
+int DatabaseHelper::get_user_id(const QString& user_name)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("SELECT user_id FROM %1 WHERE user_name = :user_name").arg(USER_TABLE));
+	sql_query.bindValue(":user_name", user_name);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	//no user found
+	if (!sql_query.first())
+		return -1;
+
+	return sql_query.value(0).toInt();
 }
 
 bool DatabaseHelper::construct_user(const QString& user_name, int& user_id, QDateTime& registry_date, QDateTime& last_login)
@@ -42,6 +59,32 @@ bool DatabaseHelper::construct_user(const QString& user_name, int& user_id, QDat
 	last_login = sql_query.value(2).toDateTime();
 
 	return true;
+}
+
+QList<QString> DatabaseHelper::get_user_contacts(const int user_id)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(
+		QString("SELECT r.user_name FROM %1 c1 JOIN %2 r ON (r.user_id == c1.user_id2) WHERE c1.user_id1 = :user_id AND c1.user_id2 IN (SELECT user_id1 FROM %1 WHERE user_id2 = :user_id);").arg(CONTACTS_TABLE, USER_TABLE));
+	sql_query.bindValue(":user_id", user_id);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	QList<QString>constacts;
+
+	while (sql_query.next())
+	{
+		constacts.append(sql_query.value(0).toString());
+	}
+
+	return constacts;
+}
+QList<QString> DatabaseHelper::get_user_contacts(const QString& user_name)
+{
+	int user_id = get_user_id(user_name);
+
+	return get_user_contacts(user_id);
 }
 
 void DatabaseHelper::register_user(const QString& user_name, const QString& encrypted_password)

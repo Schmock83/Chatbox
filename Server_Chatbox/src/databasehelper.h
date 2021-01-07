@@ -32,7 +32,10 @@ public:
 	void register_user(const QString& user_name, const QString& encrypted_password);
 	bool verify_user(const QString& user_name, const QString& unhashed_password);
 	void update_last_login(const QString& user_name, const QDateTime& loginDateTime);
+	int get_user_id(const QString& user_name);
 	QList<QString> get_users_like(const QString& user_name);
+	QList<QString> get_user_contacts(const int user_id);
+	QList<QString> get_user_contacts(const QString& user_name);
 };
 
 #endif // DATABASEHELPER_H
