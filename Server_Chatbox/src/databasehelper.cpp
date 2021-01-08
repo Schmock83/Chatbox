@@ -204,3 +204,44 @@ QList<QString> DatabaseHelper::get_users_like(const QString& user_name)
 
 	return found_users;
 }
+
+void DatabaseHelper::add_user_contact(const int user_id, const int user_id_to_add)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("INSERT INTO %1 (user_id1, user_id2) VALUES (:user_id1, :user_id2);").arg(CONTACTS_TABLE));
+	sql_query.bindValue(":user_id1", user_id);
+	sql_query.bindValue(":user_id2", user_id_to_add);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+}
+
+void DatabaseHelper::add_user_contact(const QString& user_name, const QString& user_name_to_add)
+{
+	const int user_id = get_user_id(user_name);
+	const int user_id_to_add = get_user_id(user_name_to_add);
+
+	add_user_contact(user_id, user_id_to_add);
+}
+
+void DatabaseHelper::delete_user_contact(const int user_id, const int user_id_to_del)
+{
+	//case 1 : decline incoming friend request -> remove pair (user_id_to_del, user_id) from contacts
+	//case 2 : actually remove a contact -> remove 2 pairs (user_id_to_del, user_id) and (user_id, user_id_to_del) from contacts
+
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("DELETE FROM %1 WHERE (user_id1 == :user_id AND user_id2 == :user_id_to_del) OR (user_id1 == :user_id_to_del AND user_id2 == :user_id);").arg(CONTACTS_TABLE));
+	sql_query.bindValue(":user_id", user_id);
+	sql_query.bindValue(":user_id_to_del", user_id_to_del);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+}
+
+void DatabaseHelper::delete_user_contact(const QString& user_name, const QString& user_name_to_del)
+{
+	const int user_id = get_user_id(user_name);
+	const int user_id_to_del = get_user_id(user_name_to_del);
+
+	delete_user_contact(user_id, user_id_to_del);
+}

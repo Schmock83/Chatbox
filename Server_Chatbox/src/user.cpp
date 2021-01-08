@@ -37,3 +37,25 @@ QList<QString> User::get_incoming_contact_requests() const
 
 	return database->get_user_incoming_contact_requests(user_id);
 }
+
+void User::add_user_contact(const int user_id_to_add)
+{
+	if (valid_database())
+		database->add_user_contact(user_id, user_id_to_add);
+}
+void User::add_user_contact(const QString& user_name)
+{
+	if (valid_database())
+		database->add_user_contact(user_name, user_name);
+}
+
+void User::delete_user_contact(const int user_id_to_del)
+{
+	if (valid_database())
+		database->delete_user_contact(user_id, user_id_to_del);
+}
+void User::delete_user_contact(const QString& user_name_to_add)
+{
+	if (valid_database())
+		database->delete_user_contact(user_name, user_name_to_add);
+}

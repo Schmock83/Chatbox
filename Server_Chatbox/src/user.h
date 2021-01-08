@@ -57,6 +57,10 @@ public:
 	QList<QString> get_contacts()const;
 	QList<QString> get_outgoing_contact_requests()const;
 	QList<QString> get_incoming_contact_requests()const;
+	void add_user_contact(const int user_id_to_add);
+	void add_user_contact(const QString& user_name_to_add);
+	void delete_user_contact(const int user_id_to_del);
+	void delete_user_contact(const QString& user_name_to_add);
 
 	void print()const { qDebug() << user_id << " - " << user_name << " - " << registry_date.toString() << " - " << last_login.toString(); }
 };

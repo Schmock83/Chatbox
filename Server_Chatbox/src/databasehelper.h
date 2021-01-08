@@ -40,6 +40,10 @@ public:
 	QList<QString> get_user_outgoing_contact_requests(const QString& user_name);
 	QList<QString> get_user_incoming_contact_requests(const int user_id);
 	QList<QString> get_user_incoming_contact_requests(const QString& user_name);
+	void add_user_contact(const int user_id, const int user_id_to_add); //for sending friend request + accepting incoming friend request
+	void add_user_contact(const QString& user_name, const QString& user_name_to_add);
+	void delete_user_contact(const int user_id, const int user_id_to_del); //for declining friend request + removing user
+	void delete_user_contact(const QString& user_name, const QString& user_name_to_del);
 };
 
 #endif // DATABASEHELPER_H
