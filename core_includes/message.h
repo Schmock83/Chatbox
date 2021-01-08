@@ -15,7 +15,6 @@ enum MessageType {
 	client_loginMessage,
 	client_registrationMessage,
 	client_requestMessage,
-	//client_searchUserRequest,
 	server_loginSucceeded,
 	server_loginFailed,
 	server_registrationSucceeded,
@@ -24,7 +23,9 @@ enum MessageType {
 };
 
 enum RequestType {
-	searchUserRequest = 0
+	searchUserRequest = 0,
+	addUserRequest,
+	delUserRequest
 };
 
 class Message
