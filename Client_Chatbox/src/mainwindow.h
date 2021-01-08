@@ -25,7 +25,8 @@ private:
 	Chatbox_Client* client;
 	QMovie* loadingAnimation;
 	std::list<QPushButton*> chatButtons;
-	QMap<QChar, QMap<QString, QPushButton*>> contacts; //useless qpushbutton ref ??
+	QMap<QChar, QMap<QString, QPushButton*>> contacts;
+	QMap<QChar, QMap<QString, QPushButton*>> contact_requests; //to store incoming contact requests from other users
 
 	//for keeping track of wich left-side page was selected before clicking on lineedit
 	UI::ChatContactPage previous_left_page = UI::ChatContactPage::contactPage;
@@ -39,7 +40,7 @@ private:
 	void addTopChatButton(QPushButton*);
 	void updateChatList();
 	void updateContactList();
-	void deleteWidgetsFromLayout(QLayout*);
+	void deleteWidgetsFromLayout(QLayout*, bool = true);
 
 public:
 	MainWindow(QWidget* parent = nullptr);
@@ -52,6 +53,9 @@ signals:
 
 private slots:
 	void addContact(const QString& contact);
+	void removeContact(const QString& contact);
+	void addContactRequest(const QString& contact);
+	void removeContactRequest(const QString& contact);
 	void setScene(UI::Scene scene);
 	void setLoadingStatus(QString new_status);
 	void setLoadingError(QString new_error);

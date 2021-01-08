@@ -17,9 +17,16 @@ MainWindow::MainWindow(QWidget* parent)
 	/*ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::contactPage);
 	setScene(UI::Scene::mainScene);
 
-	emit addContact("Miriam");
-	emit addContact("Alex");
-	emit addContact("Dieter");*/
+	addContactRequest("Friedrich");
+	addContact("Miriam");
+	addContact("Albert");
+	addContactRequest("Elfonso");
+	addContact("Dieter");
+	addContact("Alex");
+
+	addContactRequest("Hubert");
+	removeContactRequest("Halfo");
+	removeContactRequest("Elfonso");*/
 }
 
 MainWindow::~MainWindow()
@@ -169,7 +176,7 @@ void MainWindow::addTopChatButton(QPushButton* newTopButton)
 void MainWindow::updateChatList()
 {
 	//delete all buttons from layout
-	deleteWidgetsFromLayout(ui->chats_grid_layout->layout());
+	deleteWidgetsFromLayout(ui->chats_grid_layout->layout(), false);
 
 	//re-add them
 	for (const auto& button : chatButtons)
@@ -178,8 +185,34 @@ void MainWindow::updateChatList()
 
 void MainWindow::addContact(const QString& contact)
 {
+	qDebug() << "addContact in mainwindow: " << contact;
 	QPushButton* contactButton = new QPushButton(contact);
 	contacts[contact[0]].insert(contact, contactButton);
+
+	updateContactList();
+}
+
+void MainWindow::removeContact(const QString& contact)
+{
+	qDebug() << "removeContact in mainwindow: " << contact;
+	contacts[contact[0]].remove(contact);
+
+	updateContactList();
+}
+
+void MainWindow::addContactRequest(const QString& contact)
+{
+	qDebug() << "addContactRequest in mainwindow: " << contact;
+	QPushButton* contact_request_button = new QPushButton(contact);
+	contact_requests[contact[0]].insert(contact, contact_request_button);
+
+	updateContactList();
+}
+
+void MainWindow::removeContactRequest(const QString& contact)
+{
+	qDebug() << "removeContactRequest in mainwindow: " << contact;
+	contact_requests[contact[0]].remove(contact);
 
 	updateContactList();
 }
@@ -187,30 +220,51 @@ void MainWindow::addContact(const QString& contact)
 void MainWindow::updateContactList()
 {
 	//clear all widgets in the contact-list
-	deleteWidgetsFromLayout(ui->contacts_layout->layout());
+	deleteWidgetsFromLayout(ui->contacts_layout->layout(), false);
+
+	//re-add all contact-requests
+	if (!contact_requests.isEmpty())
+	{
+		QLabel* headerLabel = new QLabel("Contact requests");
+		headerLabel->setAlignment(Qt::AlignCenter);
+		ui->contacts_layout->addWidget(headerLabel);
+
+		for (auto it : contact_requests)
+		{
+			for (auto it2 : it)
+			{
+				ui->contacts_layout->addWidget(it2);
+			}
+		}
+	}
 
 	//re-add all contacts + headerLabels, indicating start character
 	QMapIterator<QChar, QMap<QString, QPushButton*>> it(contacts);
 	while (it.hasNext()) {
 		it.next();
+		if (it.value().isEmpty())
+			continue;
 		QLabel* headerLabel = new QLabel(it.key());
 		headerLabel->setAlignment(Qt::AlignCenter);
 		ui->contacts_layout->addWidget(headerLabel);
-		for (auto contact_str : it.value().keys())
+		for (auto it2 : it.value())
 		{
-			ui->contacts_layout->addWidget(new QPushButton(contact_str)); //try to add old qpushbutton*
+			ui->contacts_layout->addWidget(it2);
 		}
 	}
 }
 
-void MainWindow::deleteWidgetsFromLayout(QLayout* layout)
+void MainWindow::deleteWidgetsFromLayout(QLayout* layout, bool delete_widget)
 {
 	QLayoutItem* wItem;
 	QWidget* widget;
 	while ((wItem = layout->takeAt(0)) != NULL) {
 		widget = wItem->widget();
+		if (!delete_widget)
+			widget->setParent(layout->widget());
 		layout->removeWidget(widget);
-		widget->deleteLater();
+		if (delete_widget)
+			widget->deleteLater();
 	}
 }
 
