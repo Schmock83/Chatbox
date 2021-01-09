@@ -107,7 +107,7 @@ void Chatbox_Server::handleUserRequest(const Message& message, QTcpSocket* clien
 	switch (message.getClientRequestType())
 	{
 	case ClientRequestType::searchUserRequest:
-		handleSearchUserRequest(message, client_socket);
+		handleSearchUserRequest(message, user);
 		break;
 	case ClientRequestType::addUserRequest:
 		handleAddContactRequest(message, user);
@@ -125,18 +125,20 @@ void Chatbox_Server::handleRemoveContactRequest(const Message& message, User* us
 	;
 }
 
-void Chatbox_Server::handleSearchUserRequest(const Message& message, QTcpSocket* client_socket)
+void Chatbox_Server::handleSearchUserRequest(const Message& message, User* user)
 {
 	try {
 		QList<QString> found_users = database->get_users_like(message.getContent());
+		//remove the user itself
+		found_users.removeAll(user->get_user_name());
 		Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_searchUserResult, found_users);
-		queue_message(reply, client_socket);
+		queue_message(reply, user);
 	}
 	catch (QSqlError error) {
 		qDebug() << "Error in handleRegistration: " << error.text();
 		//error -> send back empty list...
 		Message error_reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_searchUserResult, QList<QString>());
-		queue_message(error_reply, client_socket);
+		queue_message(error_reply, user);
 	}
 	QThread::currentThread()->sleep(1);
 }
@@ -238,6 +240,11 @@ void Chatbox_Server::queue_message(Message message, QTcpSocket* client_socket)
 {
 	QMutexLocker locker(&socket_mutex);
 	queued_messages.append(QPair<Message, QTcpSocket*>(message, client_socket));
+}
+void Chatbox_Server::queue_message(Message message, User* user)
+{
+	QMutexLocker locker(&socket_mutex);
+	queued_messages.append(QPair<Message, QTcpSocket*>(message, user->get_tcp_socket()));
 }
 //send queued messages through socket
 void Chatbox_Server::deliver_queued_messages()

@@ -41,13 +41,16 @@ private:
 	void handleRegistration(const Message& message, QTcpSocket* client_socket);
 	void handleLogin(const Message& message, QTcpSocket* client_socket);
 	void handleUserRequest(const Message& message, QTcpSocket* client_socket);
-	void handleSearchUserRequest(const Message& message, QTcpSocket* client_socket);
+	void handleSearchUserRequest(const Message& message, User* user);
+	void handleAddContactRequest(const Message& message, User* user);
+	void handleRemoveContactRequest(const Message& message, User* user);
 
 	bool userOnline(const QString& user_name);
 
 	void user_connected(User* user);
 
 	void queue_message(Message message, QTcpSocket* client_socket);	//queue´s messages from threads, so that the main thread can safely send them through the socket
+	void queue_message(Message message, User* user); //overload
 
 	User* get_user_for_socket(QTcpSocket* client_socket);	//returns User pointer for the user associeted with the socket (or nullptr)
 	bool authenticated_socket(QTcpSocket* client_socket) { return get_user_for_socket(client_socket) != nullptr; }

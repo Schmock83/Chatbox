@@ -92,7 +92,7 @@ void Chatbox_Client::handleMessage(const Message& message)
 				emit enableButtons();
 				break;
 
-			case ServerMessageType::server_loginSucceeded:	//TODDO store username
+			case ServerMessageType::server_loginSucceeded:
 				emit setScene(UI::Scene::mainScene);
 				emit stopWelcomePageAnimation();
 				emit enableButtons();
