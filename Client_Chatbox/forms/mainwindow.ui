@@ -487,7 +487,7 @@
                   <item>
                    <widget class="QPushButton" name="chat_button">
                     <property name="enabled">
-                     <bool>false</bool>
+                     <bool>true</bool>
                     </property>
                     <property name="text">
                      <string>Chats</string>
@@ -497,7 +497,7 @@
                   <item>
                    <widget class="QPushButton" name="contacts_button">
                     <property name="enabled">
-                     <bool>false</bool>
+                     <bool>true</bool>
                     </property>
                     <property name="text">
                      <string>Contacts</string>
@@ -671,8 +671,8 @@
                        <rect>
                         <x>0</x>
                         <y>0</y>
-                        <width>187</width>
-                        <height>408</height>
+                        <width>98</width>
+                        <height>28</height>
                        </rect>
                       </property>
                       <property name="styleSheet">
