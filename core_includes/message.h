@@ -23,7 +23,9 @@ enum ServerMessageType {
 	server_loginFailed,
 	server_registrationSucceeded,
 	server_registrationFailed,
-	server_searchUserResult
+	server_searchUserResult,
+	server_addContact,
+	server_addContactRequest
 };
 
 enum ClientRequestType {
