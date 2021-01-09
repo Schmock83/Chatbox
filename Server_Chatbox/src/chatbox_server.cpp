@@ -59,7 +59,7 @@ void Chatbox_Server::user_connected(User* user)
 	connect(user->get_tcp_socket(), SIGNAL(disconnected()), this, SLOT(user_disconnected()));
 
 	//send back successfull login
-	Message reply = Message::createServerMessage(MessageType::server_loginSucceeded, user->get_user_name());
+	Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_loginSucceeded, user->get_user_name());
 	queue_message(reply, user->get_tcp_socket());
 
 	//update last_login in db
@@ -78,47 +78,64 @@ void Chatbox_Server::new_data_in_socket()
 
 void Chatbox_Server::handleMessage(const Message& message, QTcpSocket* client_socket)
 {
-	switch (message.getMessageType()) {
-	case MessageType::client_registrationMessage:
-		handleRegistration(message, client_socket);
-		break;
-	case MessageType::client_loginMessage:
-		handleLogin(message, client_socket);
-		break;
-	case MessageType::client_requestMessage:
-		handleUserRequest(message, client_socket);
-		break;
+	message.print();
+	if (message.getMessageType() == MessageType::client_requestMessage) {
+		switch (message.getClientRequestType()) {
+		case ClientRequestType::client_registrationMessage:
+			handleRegistration(message, client_socket);
+			break;
+		case ClientRequestType::client_loginMessage:
+			handleLogin(message, client_socket);
+			break;
+		default:
+			handleUserRequest(message, client_socket);
+			break;
+		}
 	}
 }
 
 void Chatbox_Server::handleUserRequest(const Message& message, QTcpSocket* client_socket)
 {
 	//check if message came from authenticated user
-	if (get_user_for_socket(client_socket) == nullptr)
+	User* user = get_user_for_socket(client_socket);
+	if (user == nullptr)
 	{
 		client_socket->abort();
 		return;
 	}
 
-	switch (message.getRequestType())
+	switch (message.getClientRequestType())
 	{
-	case RequestType::searchUserRequest:
+	case ClientRequestType::searchUserRequest:
 		handleSearchUserRequest(message, client_socket);
 		break;
+	case ClientRequestType::addUserRequest:
+		handleAddContactRequest(message, user);
+		break;
 	}
+}
+//TODO
+void Chatbox_Server::handleAddContactRequest(const Message& message, User* user)
+{
+	;
+}
+//TODO
+void Chatbox_Server::handleRemoveContactRequest(const Message& message, User* user)
+{
+	;
 }
 
 void Chatbox_Server::handleSearchUserRequest(const Message& message, QTcpSocket* client_socket)
 {
 	try {
 		QList<QString> found_users = database->get_users_like(message.getContent());
-		Message reply = Message::createServerMessage(MessageType::server_searchUserResult, found_users);
+		Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_searchUserResult, found_users);
 		queue_message(reply, client_socket);
 	}
 	catch (QSqlError error) {
 		qDebug() << "Error in handleRegistration: " << error.text();
 		//error -> send back empty list...
-		Message error_reply = Message::createServerMessage(MessageType::server_searchUserResult, QList<QString>());
+		Message error_reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_searchUserResult, QList<QString>());
 		queue_message(error_reply, client_socket);
 	}
 	QThread::currentThread()->sleep(1);
@@ -130,22 +147,30 @@ void Chatbox_Server::handleRegistration(const Message& message, QTcpSocket* clie
 	if (authenticated_socket(client_socket))
 		emit client_socket->disconnected();
 
+	//check if username long enough
+	if (message.getSender().length() < USERNAME_MIN_LEN || message.getSender().length() > USERNAME_MAX_LEN)
+	{
+		Message message = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_registrationFailed, QString("The Username has to be between %1 and %2 Characters long !").arg(QString::number(USERNAME_MIN_LEN), QString::number(USERNAME_MAX_LEN)));
+		queue_message(message, client_socket);
+		return;
+	}
+
 	try {
 		if (database->user_registered(message.getSender())) {
 			//failed - User already exists :send back message -> user with that name already exists....
-			Message message = Message::createServerMessage(MessageType::server_registrationFailed, "A User with that name already exists!");
+			Message message = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_registrationFailed, "A User with that name already exists!");
 			queue_message(message, client_socket);
 			return;
 		}
 		database->register_user(message.getSender(), message.getContent());
 		//success -> send back successfully registered ...
-		Message message = Message::createServerMessage(MessageType::server_registrationSucceeded, "");
+		Message message = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_registrationSucceeded, "");
 		queue_message(message, client_socket);
 	}
 	catch (QSqlError error) {
 		qDebug() << "Error in handleRegistration: " << error.text();
 		//error -> send back error on the server occured...
-		Message message = Message::createServerMessage(MessageType::server_registrationFailed, "An error occured on the server-side");
+		Message message = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_registrationFailed, "An error occured on the server-side");
 		queue_message(message, client_socket);
 	}
 }
@@ -153,7 +178,7 @@ void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_sock
 {
 	//user already online -> A User with that name is currently online...
 	if (userOnline(message.getSender())) {
-		Message reply = Message::createServerMessage(MessageType::server_loginFailed, "A User with that name is currently online");
+		Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_loginFailed, "A User with that name is currently online");
 		queue_message(reply, client_socket);
 		return;
 	}
@@ -165,7 +190,7 @@ void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_sock
 				//check if user already online
 				//user already online -> A User with that name is currently online... ||-> need to check again, because of multi-threads
 				if (userOnline(message.getSender())) {
-					Message reply = Message::createServerMessage(MessageType::server_loginFailed, "A User with that name is currently online");
+					Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_loginFailed, "A User with that name is currently online");
 					queue_message(reply, client_socket);
 					return;
 				}
@@ -185,7 +210,7 @@ void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_sock
 		}
 		else {
 			//login failed -> Send back Password or Username wrong
-			Message reply = Message::createServerMessage(MessageType::server_loginFailed, "Wrong Username or Password!");
+			Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_loginFailed, "Wrong Username or Password!");
 			queue_message(reply, client_socket);
 			QThread::currentThread()->sleep(2);
 			return;
@@ -194,7 +219,7 @@ void Chatbox_Server::handleLogin(const Message& message, QTcpSocket* client_sock
 	catch (QSqlError error) {
 		qDebug() << "Error in handleLogin: " << error.text();
 		//error -> send back error on the server occured...
-		Message reply = Message::createServerMessage(MessageType::server_loginFailed, "An error occured on the server-side");
+		Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_loginFailed, "An error occured on the server-side");
 		queue_message(reply, client_socket);
 	}
 }

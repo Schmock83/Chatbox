@@ -58,7 +58,7 @@ void Chatbox_Client::searchUser(const QString& searchUser)
 {
 	qDebug() << "asking server for users like \'" << searchUser << "\'.";
 
-	Message request = Message::createClientRequstMessage(RequestType::searchUserRequest, searchUser);
+	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::searchUserRequest, searchUser);
 	Message::sendThroughSocket(socket, request);
 }
 
@@ -83,42 +83,47 @@ void Chatbox_Client::handleMessage(const Message& message)
 	message.print();
 	//login and registration - response from server
 	if (current_scene == UI::Scene::welcomeScene) {
-		switch (message.getMessageType()) {
-		case MessageType::server_loginFailed:
-			setLoginError(message.getContent());
-			emit stopWelcomePageAnimation();
-			emit clearLoginPasswordEdit();
-			emit enableButtons();
-			break;
+		if (message.getMessageType() == MessageType::server_message) {
+			switch (message.getServerMessageType()) {
+			case ServerMessageType::server_loginFailed:
+				setLoginError(message.getContent());
+				emit stopWelcomePageAnimation();
+				emit clearLoginPasswordEdit();
+				emit enableButtons();
+				break;
 
-		case MessageType::server_loginSucceeded:	//TODDO store username
-			emit setScene(UI::Scene::mainScene);
-			emit stopWelcomePageAnimation();
-			emit enableButtons();
-			emit clearLoginPasswordEdit();
-			emit clearLoginStatusLabel();
-			break;
+			case ServerMessageType::server_loginSucceeded:	//TODDO store username
+				emit setScene(UI::Scene::mainScene);
+				emit stopWelcomePageAnimation();
+				emit enableButtons();
+				emit clearLoginPasswordEdit();
+				emit clearLoginStatusLabel();
+				break;
 
-		case MessageType::server_registrationFailed:
-			emit stopWelcomePageAnimation();
-			setRegistrationError(message.getContent());
-			emit clearRegistrationPasswordEdit();
-			emit enableButtons();
-			break;
+			case ServerMessageType::server_registrationFailed:
+				emit stopWelcomePageAnimation();
+				setRegistrationError(message.getContent());
+				emit clearRegistrationPasswordEdit();
+				emit enableButtons();
+				break;
 
-		case MessageType::server_registrationSucceeded:
-			emit stopWelcomePageAnimation();
-			setRegistrationStatus("Successfully registered!");
-			emit clearRegistrationPasswordEdit();
-			emit enableButtons();
+			case ServerMessageType::server_registrationSucceeded:
+				emit stopWelcomePageAnimation();
+				setRegistrationStatus("Successfully registered!");
+				emit clearRegistrationPasswordEdit();
+				emit enableButtons();
+				break;
+			}
 		}
 	}
 	else if (current_scene == UI::Scene::mainScene) {
-		switch (message.getMessageType())
-		{
-		case MessageType::server_searchUserResult:
-			emit searchedUsers(message.getStringList());
-			break;
+		if (message.getMessageType() == MessageType::server_message) {
+			switch (message.getServerMessageType())
+			{
+			case ServerMessageType::server_searchUserResult:
+				emit searchedUsers(message.getStringList());
+				break;
+			}
 		}
 	}
 }
