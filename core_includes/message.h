@@ -6,8 +6,6 @@
 #include <QDateTime>
 #include <QList>
 
-#include <QDebug>
-
 #include "core.h"
 
 enum MessageType {
@@ -25,7 +23,11 @@ enum ServerMessageType {
 	server_registrationFailed,
 	server_searchUserResult,
 	server_addContact,
-	server_addContactRequest
+	server_removeContact,
+	server_addIncomingContactRequest,
+	server_removeIncomingContactRequest,
+	server_addOutgoingContactRequest,
+	server_removeOutgoingContactRequest,
 };
 
 enum ClientRequestType {
@@ -33,8 +35,8 @@ enum ClientRequestType {
 	client_loginMessage = 0,
 	client_registrationMessage,
 	searchUserRequest,
-	addUserRequest,
-	delUserRequest
+	addContact,
+	removeContact
 };
 
 class Message

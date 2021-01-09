@@ -43,7 +43,11 @@ QDataStream& Message::writeToStream(QDataStream& stream, const Message& message)
 		case ServerMessageType::server_registrationFailed:
 		case ServerMessageType::server_registrationSucceeded:
 		case ServerMessageType::server_addContact:
-		case ServerMessageType::server_addContactRequest:
+		case ServerMessageType::server_removeContact:
+		case ServerMessageType::server_addIncomingContactRequest:
+		case ServerMessageType::server_removeIncomingContactRequest:
+		case ServerMessageType::server_addOutgoingContactRequest:
+		case ServerMessageType::server_removeOutgoingContactRequest:
 			stream << message.messageContents;
 			break;
 		case ServerMessageType::server_searchUserResult:
@@ -84,7 +88,10 @@ Message Message::readFromStream(QDataStream& stream)
 		case ServerMessageType::server_registrationFailed:
 		case ServerMessageType::server_registrationSucceeded:
 		case ServerMessageType::server_addContact:
-		case ServerMessageType::server_addContactRequest:
+		case ServerMessageType::server_addIncomingContactRequest:
+		case ServerMessageType::server_removeIncomingContactRequest:
+		case ServerMessageType::server_addOutgoingContactRequest:
+		case ServerMessageType::server_removeOutgoingContactRequest:
 			stream >> messageContents;
 			return Message(messageType, serverMessageType, dateTime, messageContents);
 			break;
