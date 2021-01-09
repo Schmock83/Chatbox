@@ -26,7 +26,7 @@ private:
 	QMovie* loadingAnimation;
 	std::list<UserButton*> chatButtons;
 	QMap<QChar, QMap<QString, UserButton*>> contacts;
-	QMap<QString, UserButton*> contact_requests; //to store incoming contact requests from other users
+	QMap<QString, UserButton*> contact_requests; //to store open (incoming or outgoing) contact-requests from other users
 
 	//for keeping track of wich left-side page was selected before clicking on lineedit
 	UI::ChatContactPage previous_left_page = UI::ChatContactPage::contactPage;
@@ -40,9 +40,13 @@ private:
 	void addTopChatButton(UserButton*);
 	void updateChatList();
 	void updateContactList();
-	void updateSearchedUser(const QString&, bool);
+	void updateSearchedUser(const QString&, bool = false, bool = false, bool = false);
+	void updateSearchedUser(const QString&, ServerMessageType);
 	void deleteWidgetsFromLayout(QLayout*, bool = true);
 	bool isContact(const QString&);
+	bool hasIncomingContactRequest(const QString&);
+	bool hasOutgoingContactRequest(const QString&);
+	UserButton* getContactRequestButton(const QString&);
 
 public:
 	MainWindow(QWidget* parent = nullptr);
@@ -51,7 +55,7 @@ public:
 signals:
 	void establishSocketConnection_signal();
 	void sceneChanged(UI::Scene);
-	void searchUser(const QString&);
+	void searchUserSignal(const QString&);
 	void addContactSignal(const QString&);
 
 private slots:
@@ -59,7 +63,7 @@ private slots:
 	void on_contacts_button_clicked();
 	void addContact(const QString& contact);
 	void removeContact(const QString& contact);
-	void addContactRequest(const QString& contact);
+	void addContactRequest(const QString& contact, ServerMessageType serverMessageType);
 	void removeContactRequest(const QString& contact);
 	void setScene(UI::Scene scene);
 	void setLoadingStatus(QString new_status);

@@ -66,14 +66,15 @@ void Chatbox_Client::addContact(const QString& contact)
 {
 	qDebug() << "asking server - addContact: " << contact;
 
-	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::addUserRequest, contact);
+	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::addContact, contact);
 	Message::sendThroughSocket(socket, request);
 }
 
 void Chatbox_Client::removeContact(const QString& contact)
 {
-	//TODO
-	qDebug() << "RemoveContact: " << contact << " (Not yet implemented)";
+	qDebug() << "asking server - removeContact: " << contact;
+	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::removeContact, contact);
+	Message::sendThroughSocket(socket, request);
 }
 
 void Chatbox_Client::sceneChanged(UI::Scene scene)
@@ -135,13 +136,21 @@ void Chatbox_Client::handleMessage(const Message& message)
 			switch (message.getServerMessageType())
 			{
 			case ServerMessageType::server_searchUserResult:
-				emit searchedUsers(message.getStringList());
+				emit searchUsersSignal(message.getStringList());
 				break;
 			case ServerMessageType::server_addContact:
 				emit addContactSignal(message.getContent());
 				break;
-			case ServerMessageType::server_addContactRequest:
-				emit addContactRequestSignal(message.getContent());
+			case ServerMessageType::server_removeContact:
+				emit removeContactSignal(message.getContent());
+				break;
+			case ServerMessageType::server_addIncomingContactRequest:
+			case ServerMessageType::server_addOutgoingContactRequest:
+				emit addContactRequestSignal(message.getContent(), message.getServerMessageType());
+				break;
+			case ServerMessageType::server_removeIncomingContactRequest:
+			case ServerMessageType::server_removeOutgoingContactRequest:
+				emit removeContactRequestSignal(message.getContent());
 				break;
 			}
 		}

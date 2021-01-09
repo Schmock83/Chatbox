@@ -65,9 +65,11 @@ signals:
 	void setLoginStatus(QString new_status);
 	void setLoginError(QString new_error);
 	void startLoadingTimer();
-	void searchedUsers(QList<QString>);
+	void searchUsersSignal(QList<QString>);
 	void addContactSignal(const QString&);
-	void addContactRequestSignal(const QString&);
+	void removeContactSignal(const QString&);
+	void addContactRequestSignal(const QString&, ServerMessageType);
+	void removeContactRequestSignal(const QString&);
 };
 
 #endif // CHATBOX_CLIENT_H
