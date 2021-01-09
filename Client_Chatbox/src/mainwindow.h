@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QPushButton>
 #include <QMovie>
 #include <QTimer>
 #include <QThread>
@@ -12,6 +11,7 @@
 
 #include "../core_includes/core.h"
 #include "chatbox_client.h"
+#include "widgets/userbutton.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,9 +24,9 @@ private:
 	Ui::MainWindow* ui;
 	Chatbox_Client* client;
 	QMovie* loadingAnimation;
-	std::list<QPushButton*> chatButtons;
-	QMap<QChar, QMap<QString, QPushButton*>> contacts;
-	QMap<QChar, QMap<QString, QPushButton*>> contact_requests; //to store incoming contact requests from other users
+	std::list<UserButton*> chatButtons;
+	QMap<QChar, QMap<QString, UserButton*>> contacts;
+	QMap<QString, UserButton*> contact_requests; //to store incoming contact requests from other users
 
 	//for keeping track of wich left-side page was selected before clicking on lineedit
 	UI::ChatContactPage previous_left_page = UI::ChatContactPage::contactPage;
@@ -37,10 +37,12 @@ private:
 
 	void setUpUi();
 	void setUpSignalSlotConnections();
-	void addTopChatButton(QPushButton*);
+	void addTopChatButton(UserButton*);
 	void updateChatList();
 	void updateContactList();
+	void updateSearchedUser(const QString&, bool);
 	void deleteWidgetsFromLayout(QLayout*, bool = true);
+	bool isContact(const QString&);
 
 public:
 	MainWindow(QWidget* parent = nullptr);
@@ -50,8 +52,11 @@ signals:
 	void establishSocketConnection_signal();
 	void sceneChanged(UI::Scene);
 	void searchUser(const QString&);
+	void addContactSignal(const QString&);
 
 private slots:
+	void on_chat_button_clicked();
+	void on_contacts_button_clicked();
 	void addContact(const QString& contact);
 	void removeContact(const QString& contact);
 	void addContactRequest(const QString& contact);

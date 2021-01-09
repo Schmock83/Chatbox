@@ -13,26 +13,13 @@ MainWindow::MainWindow(QWidget* parent)
 	setUpUi();
 
 	emit establishSocketConnection_signal();
-
-	/*ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::contactPage);
-	setScene(UI::Scene::mainScene);
-
-	addContactRequest("Friedrich");
-	addContact("Miriam");
-	addContact("Albert");
-	addContactRequest("Elfonso");
-	addContact("Dieter");
-	addContact("Alex");
-
-	addContactRequest("Hubert");
-	removeContactRequest("Halfo");
-	removeContactRequest("Elfonso");*/
 }
 
 MainWindow::~MainWindow()
 {
 	delete ui;
 }
+
 void MainWindow::setUpSignalSlotConnections()
 {
 	//LineEdit (for searching users)
@@ -75,6 +62,9 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(setRegistrationError(QString)), this, SLOT(setRegistrationError(QString)));
 	connect(this, SIGNAL(searchUser(const QString&)), client, SLOT(searchUser(const QString&)));
 	connect(client, SIGNAL(searchedUsers(QList<QString>)), this, SLOT(addSearchedUsers(QList<QString>)));
+	connect(this, SIGNAL(addContactSignal(const QString&)), client, SLOT(addContact(const QString&)));
+	connect(client, SIGNAL(addContactSignal(const QString&)), this, SLOT(addContact(const QString&)));
+	connect(client, SIGNAL(addContactRequestSignal(const QString&)), this, SLOT(addContactRequest(const QString&)));
 }
 
 void MainWindow::setUpUi()
@@ -95,9 +85,19 @@ void MainWindow::setUpUi()
 
 	UI::setUpDarkTheme();
 
-	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::contactPage);
+	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::chatPage);
 
 	setScene(UI::Scene::loadingScene);
+}
+
+void MainWindow::on_chat_button_clicked()
+{
+	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::chatPage);
+}
+
+void MainWindow::on_contacts_button_clicked()
+{
+	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::contactPage);
 }
 
 void MainWindow::search_line_edit_focussed()
@@ -132,9 +132,13 @@ void MainWindow::addSearchedUsers(QList<QString> searchedUsers)
 	//delete everything from the searchUser-layout - including the loading label
 	deleteWidgetsFromLayout(ui->user_search_layout->layout());
 
+	UserButton* user_btn;
 	for (auto searchedUser : searchedUsers)
 	{
-		ui->user_search_layout->addWidget(new QPushButton(searchedUser));
+		user_btn = new UserButton(searchedUser, isContact(searchedUser));
+		connect(user_btn, SIGNAL(addContact(const QString&)), client, SLOT(addContact(const QString&)));
+		connect(user_btn, SIGNAL(removeContact(const QString&)), client, SLOT(removeContact(const QString&)));
+		ui->user_search_layout->addWidget(user_btn);
 	}
 }
 
@@ -164,13 +168,18 @@ void MainWindow::setScene(UI::Scene scene)
 }
 
 //puts newTopButton to the front of chatButtons-list (adds or re-adds if already in list)
-void MainWindow::addTopChatButton(QPushButton* newTopButton)
+void MainWindow::addTopChatButton(UserButton* newTopButton)
 {
 	//remove if exists
 	chatButtons.remove(newTopButton);
 
 	//re-add to front
 	chatButtons.push_front(newTopButton);
+}
+
+bool MainWindow::isContact(const QString& user_name)
+{
+	return contacts[user_name[0]].contains(user_name);
 }
 
 void MainWindow::updateChatList()
@@ -186,7 +195,15 @@ void MainWindow::updateChatList()
 void MainWindow::addContact(const QString& contact)
 {
 	qDebug() << "addContact in mainwindow: " << contact;
-	QPushButton* contactButton = new QPushButton(contact);
+
+	//remove contact from friend-request
+	contact_requests.remove(contact);
+
+	updateSearchedUser(contact, true);
+
+	UserButton* contactButton = new UserButton(contact, true);
+	connect(contactButton, SIGNAL(addContact(const QString&)), client, SLOT(addContact(const QString&)));
+	connect(contactButton, SIGNAL(removeContact(const QString&)), client, SLOT(removeContact(const QString&)));
 	contacts[contact[0]].insert(contact, contactButton);
 
 	updateContactList();
@@ -197,14 +214,20 @@ void MainWindow::removeContact(const QString& contact)
 	qDebug() << "removeContact in mainwindow: " << contact;
 	contacts[contact[0]].remove(contact);
 
+	updateSearchedUser(contact, false);
+
 	updateContactList();
 }
 
 void MainWindow::addContactRequest(const QString& contact)
 {
 	qDebug() << "addContactRequest in mainwindow: " << contact;
-	QPushButton* contact_request_button = new QPushButton(contact);
-	contact_requests[contact[0]].insert(contact, contact_request_button);
+	UserButton* contact_request_button = new UserButton(contact, true);
+	connect(contact_request_button, SIGNAL(addContact(const QString&)), client, SLOT(addContact(const QString&)));
+	connect(contact_request_button, SIGNAL(removeContact(const QString&)), client, SLOT(removeContact(const QString&)));
+	contact_requests.insert(contact, contact_request_button);
+
+	updateSearchedUser(contact, true);
 
 	updateContactList();
 }
@@ -212,9 +235,27 @@ void MainWindow::addContactRequest(const QString& contact)
 void MainWindow::removeContactRequest(const QString& contact)
 {
 	qDebug() << "removeContactRequest in mainwindow: " << contact;
-	contact_requests[contact[0]].remove(contact);
+	contact_requests.remove(contact);
+
+	updateSearchedUser(contact, false);
 
 	updateContactList();
+}
+
+//for updating a searchedUser that was added/removed from contacts (so that context-menu shows the right tooltip + signals match)
+void MainWindow::updateSearchedUser(const QString& user_name, bool is_contact)
+{
+	UserButton* user_btn;
+	for (int i = 0; i < ui->user_search_layout->count(); i++)
+	{
+		QWidget* widget = ui->user_search_layout->itemAt(i)->widget();
+		user_btn = dynamic_cast<UserButton*>(widget);
+		if (user_btn != nullptr && user_btn->text() == user_name)
+		{
+			user_btn->is_contact = is_contact;
+			return;
+		}
+	}
 }
 
 void MainWindow::updateContactList()
@@ -231,15 +272,16 @@ void MainWindow::updateContactList()
 
 		for (auto it : contact_requests)
 		{
-			for (auto it2 : it)
-			{
-				ui->contacts_layout->addWidget(it2);
-			}
+			ui->contacts_layout->addWidget(it);
 		}
 	}
 
+	QLabel* headerLabel = new QLabel("Contacts");
+	headerLabel->setAlignment(Qt::AlignCenter);
+	ui->contacts_layout->addWidget(headerLabel);
+
 	//re-add all contacts + headerLabels, indicating start character
-	QMapIterator<QChar, QMap<QString, QPushButton*>> it(contacts);
+	QMapIterator<QChar, QMap<QString, UserButton*>> it(contacts);
 	while (it.hasNext()) {
 		it.next();
 		if (it.value().isEmpty())

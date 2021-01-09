@@ -62,6 +62,20 @@ void Chatbox_Client::searchUser(const QString& searchUser)
 	Message::sendThroughSocket(socket, request);
 }
 
+void Chatbox_Client::addContact(const QString& contact)
+{
+	qDebug() << "asking server - addContact: " << contact;
+
+	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::addUserRequest, contact);
+	Message::sendThroughSocket(socket, request);
+}
+
+void Chatbox_Client::removeContact(const QString& contact)
+{
+	//TODO
+	qDebug() << "RemoveContact: " << contact << " (Not yet implemented)";
+}
+
 void Chatbox_Client::sceneChanged(UI::Scene scene)
 {
 	current_scene = scene;
@@ -122,6 +136,12 @@ void Chatbox_Client::handleMessage(const Message& message)
 			{
 			case ServerMessageType::server_searchUserResult:
 				emit searchedUsers(message.getStringList());
+				break;
+			case ServerMessageType::server_addContact:
+				emit addContactSignal(message.getContent());
+				break;
+			case ServerMessageType::server_addContactRequest:
+				emit addContactRequestSignal(message.getContent());
 				break;
 			}
 		}
