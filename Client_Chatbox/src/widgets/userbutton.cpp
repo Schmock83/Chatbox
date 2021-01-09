@@ -12,10 +12,10 @@ void UserButton::mousePressEvent(QMouseEvent* e)
 		if (is_contact)
 		{
 			QMenu contextMenu_contact(this);
-			QAction action1("Delete contact", this);
+			QAction action1("Remove contact", this);
 			QAction cancel_action("Cancel", this);
 
-			connect(&action1, SIGNAL(triggered()), this, SLOT(deleteContactClicked()));
+			connect(&action1, SIGNAL(triggered()), this, SLOT(removeContactClicked()));
 			connect(&cancel_action, SIGNAL(triggered()), &contextMenu_contact, SLOT(close()));
 
 			contextMenu_contact.addAction(&action1);
@@ -38,9 +38,9 @@ void UserButton::mousePressEvent(QMouseEvent* e)
 	}
 }
 
-void UserButton::deleteContactClicked()
+void UserButton::removeContactClicked()
 {
-	emit deleteContact(text());
+	emit removeContact(text());
 }
 void UserButton::addContactClicked()
 {

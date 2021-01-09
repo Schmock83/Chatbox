@@ -13,14 +13,14 @@ class UserButton : public QPushButton
 	Q_OBJECT
 public:
 	UserButton(const QString& text, bool is_contact = false, QWidget* parent = nullptr);
-private:
 	bool is_contact;
+private:
 	virtual void mousePressEvent(QMouseEvent* e);
 private slots:
-	void deleteContactClicked();
+	void removeContactClicked();
 	void addContactClicked();
 signals:
-	void deleteContact(const QString&);
+	void removeContact(const QString&);
 	void addContact(const QString&);
 };
 
