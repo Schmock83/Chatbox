@@ -1,7 +1,7 @@
 #include "userbutton.h"
 
-UserButton::UserButton(const QString& text, bool is_contact, QWidget* parent)
-	:QPushButton(text, parent), is_contact(is_contact)
+UserButton::UserButton(const QString& text, bool is_contact, bool incoming_contact_request, bool outgoing_contact_request, QWidget* parent)
+	:QPushButton(text, parent), is_contact(is_contact), incoming_contact_request(incoming_contact_request), outgoing_contact_request(outgoing_contact_request)
 {}
 
 void UserButton::mousePressEvent(QMouseEvent* e)
@@ -11,30 +11,78 @@ void UserButton::mousePressEvent(QMouseEvent* e)
 	{
 		if (is_contact)
 		{
-			QMenu contextMenu_contact(this);
-			QAction action1("Remove contact", this);
-			QAction cancel_action("Cancel", this);
+			QMenu contextMenu(this);
+			QAction action1("remove friend", this);
+			QAction cancel_action("cancel", this);
 
 			connect(&action1, SIGNAL(triggered()), this, SLOT(removeContactClicked()));
-			connect(&cancel_action, SIGNAL(triggered()), &contextMenu_contact, SLOT(close()));
+			connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
 
-			contextMenu_contact.addAction(&action1);
-			contextMenu_contact.addAction(&cancel_action);
-			contextMenu_contact.exec(e->globalPos());
+			contextMenu.addAction(&action1);
+			contextMenu.addAction(&cancel_action);
+			contextMenu.exec(e->globalPos());
 		}
-		else
+		else if (incoming_contact_request)
 		{
-			QMenu contextMenu_user(this);
-			QAction action1("Add contact", this);
+			QMenu contextMenu(this);
+			QAction action1("accept friend request", this);
+			QAction action2("decline friend request", this);
 			QAction cancel_action("Cancel", this);
 
 			connect(&action1, SIGNAL(triggered()), this, SLOT(addContactClicked()));
-			connect(&cancel_action, SIGNAL(triggered()), &contextMenu_user, SLOT(close()));
+			connect(&action2, SIGNAL(triggered()), this, SLOT(removeContactClicked()));
+			connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
 
-			contextMenu_user.addAction(&action1);
-			contextMenu_user.addAction(&cancel_action);
-			contextMenu_user.exec(e->globalPos());
+			contextMenu.addAction(&action1);
+			contextMenu.addAction(&action2);
+			contextMenu.addAction(&cancel_action);
+			contextMenu.exec(e->globalPos());
 		}
+		else if (outgoing_contact_request)
+		{
+			QMenu contextMenu(this);
+			QAction action1("cancel friend request", this);
+			QAction cancel_action("cancel", this);
+
+			connect(&action1, SIGNAL(triggered()), this, SLOT(removeContactClicked()));
+			connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
+
+			contextMenu.addAction(&action1);
+			contextMenu.addAction(&cancel_action);
+			contextMenu.exec(e->globalPos());
+		}
+		else
+		{
+			QMenu contextMenu(this);
+			QAction action1("send friend request", this);
+			QAction cancel_action("cancel", this);
+
+			connect(&action1, SIGNAL(triggered()), this, SLOT(addContactClicked()));
+			connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
+
+			contextMenu.addAction(&action1);
+			contextMenu.addAction(&cancel_action);
+			contextMenu.exec(e->globalPos());
+		}
+	}
+}
+
+void UserButton::setFlags(ServerMessageType serverMessageType)
+{
+	switch (serverMessageType)
+	{
+	case ServerMessageType::server_addContact:
+		is_contact = true;
+		outgoing_contact_request = incoming_contact_request = false;
+		break;
+	case ServerMessageType::server_addIncomingContactRequest:
+		incoming_contact_request = true;
+		outgoing_contact_request = is_contact = false;
+		break;
+	case ServerMessageType::server_addOutgoingContactRequest:
+		outgoing_contact_request = true;
+		incoming_contact_request = is_contact = false;
+		break;
 	}
 }
 
