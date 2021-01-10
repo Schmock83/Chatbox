@@ -59,6 +59,7 @@ signals:
 	void addContactSignal(const QString&);
 
 private slots:
+	void clearUI();
 	void on_chat_button_clicked();
 	void on_contacts_button_clicked();
 	void addContact(const QString& contact);
@@ -88,9 +89,7 @@ private slots:
 	void search_line_edit_focussed();
 	void search_line_edit_unfocussed();
 	void search_line_edit_returnPressed();
-
 	void addSearchedUsers(QList<QString>);
-
 	void login_button_pressed();
 	void registration_button_pressed();
 };

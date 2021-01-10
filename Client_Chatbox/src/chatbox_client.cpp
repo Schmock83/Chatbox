@@ -56,23 +56,18 @@ void Chatbox_Client::establishSocketConnection()
 
 void Chatbox_Client::searchUser(const QString& searchUser)
 {
-	qDebug() << "asking server for users like \'" << searchUser << "\'.";
-
 	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::searchUserRequest, searchUser);
 	Message::sendThroughSocket(socket, request);
 }
 
 void Chatbox_Client::addContact(const QString& contact)
 {
-	qDebug() << "asking server - addContact: " << contact;
-
 	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::addContact, contact);
 	Message::sendThroughSocket(socket, request);
 }
 
 void Chatbox_Client::removeContact(const QString& contact)
 {
-	qDebug() << "asking server - removeContact: " << contact;
 	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::removeContact, contact);
 	Message::sendThroughSocket(socket, request);
 }
@@ -108,6 +103,8 @@ void Chatbox_Client::handleMessage(const Message& message)
 				break;
 
 			case ServerMessageType::server_loginSucceeded:
+				//delete all old items (e.g. contacts, contact_requests, chats...)
+				emit clearUI();
 				emit setScene(UI::Scene::mainScene);
 				emit stopWelcomePageAnimation();
 				emit enableButtons();
@@ -135,6 +132,18 @@ void Chatbox_Client::handleMessage(const Message& message)
 		if (message.getMessageType() == MessageType::server_message) {
 			switch (message.getServerMessageType())
 			{
+			case ServerMessageType::server_storedContacts:
+				for (const auto& contact : message.getStringList())
+					emit addContactSignal(contact);
+				break;
+			case ServerMessageType::server_storedIncomingContactRequests:
+				for (const auto& contact_request : message.getStringList())
+					emit addContactRequestSignal(contact_request, ServerMessageType::server_addIncomingContactRequest);
+				break;
+			case ServerMessageType::server_storedOutgoingContactRequests:
+				for (const auto& contact_request : message.getStringList())
+					emit addContactRequestSignal(contact_request, ServerMessageType::server_addOutgoingContactRequest);
+				break;
 			case ServerMessageType::server_searchUserResult:
 				emit searchUsersSignal(message.getStringList());
 				break;

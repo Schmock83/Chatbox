@@ -70,6 +70,7 @@ signals:
 	void removeContactSignal(const QString&);
 	void addContactRequestSignal(const QString&, ServerMessageType);
 	void removeContactRequestSignal(const QString&);
+	void clearUI();
 };
 
 #endif // CHATBOX_CLIENT_H

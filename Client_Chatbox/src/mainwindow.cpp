@@ -67,6 +67,7 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(removeContactSignal(const QString&)), this, SLOT(removeContact(const QString&)));
 	connect(client, SIGNAL(addContactRequestSignal(const QString&, ServerMessageType)), this, SLOT(addContactRequest(const QString&, ServerMessageType)));
 	connect(client, SIGNAL(removeContactRequestSignal(const QString&)), this, SLOT(removeContactRequest(const QString&)));
+	connect(client, SIGNAL(clearUI()), this, SLOT(clearUI()));
 }
 
 void MainWindow::setUpUi()
@@ -92,6 +93,24 @@ void MainWindow::setUpUi()
 	setScene(UI::Scene::loadingScene);
 
 	updateContactList();
+}
+
+void MainWindow::clearUI()
+{
+	deleteWidgetsFromLayout(ui->user_search_layout, true);
+
+	//clear contacts
+	deleteWidgetsFromLayout(ui->contacts_layout, true);
+
+	contacts.clear();
+
+	//clear contact-requests
+	contact_requests.clear();
+
+	deleteWidgetsFromLayout(ui->chats_grid_layout, true);
+
+	//clear chat-buttons
+	chatButtons.clear();
 }
 
 void MainWindow::on_chat_button_clicked()
@@ -343,6 +362,13 @@ void MainWindow::deleteWidgetsFromLayout(QLayout* layout, bool delete_widget)
 	QWidget* widget;
 	while ((wItem = layout->takeAt(0)) != NULL) {
 		widget = wItem->widget();
+		//dont setParent for labels or it will create a new mainWindow
+		if (QLabel* label = qobject_cast<QLabel*>(widget))
+		{
+			layout->removeWidget(widget);
+			label->deleteLater();
+			continue;
+		}
 		if (!delete_widget)
 			widget->setParent(layout->widget());
 		layout->removeWidget(widget);
