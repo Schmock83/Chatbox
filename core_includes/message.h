@@ -29,6 +29,8 @@ enum ServerMessageType {
 	server_addOutgoingContactRequest,
 	server_removeOutgoingContactRequest,
 	server_storedContacts,
+	server_storedIncomingContactRequests,
+	server_storedOutgoingContactRequests
 };
 
 enum ClientRequestType {
