@@ -62,7 +62,7 @@ void Chatbox_Server::user_connected(User* user)
 	Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_loginSucceeded, user->get_user_name());
 	queue_message(reply, user->get_tcp_socket());
 
-	//send the user all stored Messages
+	//send the user all stored contacts + contact-requests
 	send_user_contacts(user);
 
 	//update last_login in db
@@ -76,6 +76,12 @@ void Chatbox_Server::send_user_contacts(User* user)
 		try {
 			Message storedContactMessage = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_storedContacts, user->get_contacts());
 			queue_message(storedContactMessage, user);
+
+			Message storedIncomingContactMessage = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_storedIncomingContactRequests, user->get_incoming_contact_requests());
+			queue_message(storedIncomingContactMessage, user);
+
+			Message storedOutgoingContactMessage = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_storedOutgoingContactRequests, user->get_outgoing_contact_requests());
+			queue_message(storedOutgoingContactMessage, user);
 		}
 		catch (QSqlError error)
 		{
