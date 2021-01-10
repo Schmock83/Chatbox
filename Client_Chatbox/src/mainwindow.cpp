@@ -90,6 +90,8 @@ void MainWindow::setUpUi()
 	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::chatPage);
 
 	setScene(UI::Scene::loadingScene);
+
+	updateContactList();
 }
 
 void MainWindow::on_chat_button_clicked()
@@ -132,10 +134,9 @@ void MainWindow::search_line_edit_returnPressed()
 void MainWindow::addSearchedUsers(QList<QString> searchedUsers)
 {
 	qDebug() << "addSearchedUsers in mainWindow";
-	qDebug() << contact_requests;
 	//delete everything from the searchUser-layout - including the loading label
 	deleteWidgetsFromLayout(ui->user_search_layout->layout());
-	qDebug() << "2:" << contact_requests;
+
 	UserButton* user_btn;
 	for (auto searchedUser : searchedUsers)
 	{
@@ -144,7 +145,6 @@ void MainWindow::addSearchedUsers(QList<QString> searchedUsers)
 		connect(user_btn, SIGNAL(removeContact(const QString&)), client, SLOT(removeContact(const QString&)));
 		ui->user_search_layout->addWidget(user_btn);
 	}
-	qDebug() << "3:" << contact_requests;
 }
 
 void MainWindow::startLoadingTimer()
@@ -220,19 +220,16 @@ void MainWindow::updateChatList()
 void MainWindow::addContact(const QString& contact)
 {
 	qDebug() << "addContact in mainwindow: " << contact;
-	qDebug() << contact_requests;
 
 	//remove contact from friend-request
 	contact_requests.remove(contact);
 
 	updateSearchedUser(contact, true);
-	qDebug() << "1";
 
 	UserButton* contactButton = new UserButton(contact, true);
 	connect(contactButton, SIGNAL(addContact(const QString&)), client, SLOT(addContact(const QString&)));
 	connect(contactButton, SIGNAL(removeContact(const QString&)), client, SLOT(removeContact(const QString&)));
 	contacts[contact[0]].insert(contact, contactButton);
-	qDebug() << "2";
 
 	updateContactList();
 }
@@ -306,8 +303,7 @@ void MainWindow::updateContactList()
 {
 	//clear all widgets in the contact-list
 	deleteWidgetsFromLayout(ui->contacts_layout->layout(), false);
-	qDebug() << "5";
-	qDebug() << contact_requests;
+
 	//re-add all contact-requests
 	if (!contact_requests.isEmpty())
 	{
@@ -320,8 +316,6 @@ void MainWindow::updateContactList()
 			ui->contacts_layout->addWidget(it);
 		}
 	}
-
-	qDebug() << "4";
 
 	QLabel* headerLabel = new QLabel("Contacts");
 	headerLabel->setAlignment(Qt::AlignCenter);
