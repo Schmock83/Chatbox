@@ -9,6 +9,8 @@
 
 #include "databasehelper.h"
 
+//TODO userState
+
 class NoUserInDatabase {
 public:
 	NoUserInDatabase() {}
@@ -61,6 +63,9 @@ public:
 	void add_user_contact(const QString& user_name_to_add);
 	void delete_user_contact(const int user_id_to_del);
 	void delete_user_contact(const QString& user_name_to_add);
+	bool has_contact(const QString& user_name);
+	bool has_incoming_contact_request(const QString& user_name);
+	bool has_outgoing_contact_request(const QString& user_name);
 
 	void print()const { qDebug() << user_id << " - " << user_name << " - " << registry_date.toString() << " - " << last_login.toString(); }
 };

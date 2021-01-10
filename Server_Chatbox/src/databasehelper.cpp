@@ -245,3 +245,66 @@ void DatabaseHelper::delete_user_contact(const QString& user_name, const QString
 
 	delete_user_contact(user_id, user_id_to_del);
 }
+
+bool DatabaseHelper::user_has_contact(const int user_id, const int contact_user_id)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("SELECT EXISTS( SELECT * FROM %1 WHERE user_id1 == :user_id AND user_id2 == :contact_user_id AND user_id1 IN (SELECT user_id2 FROM %1 WHERE user_id1 == :contact_user_id) );").arg(CONTACTS_TABLE));
+	sql_query.bindValue(":user_id", user_id);
+	sql_query.bindValue(":contact_user_id", contact_user_id);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	return sql_query.first() && sql_query.value(0).toBool();
+}
+
+bool DatabaseHelper::user_has_contact(const QString& user_name, const QString& contact)
+{
+	const int user_id = get_user_id(user_name);
+	const int contact_user_id = get_user_id(contact);
+
+	return  user_has_contact(user_id, contact_user_id);
+}
+
+bool DatabaseHelper::user_has_outgoing_contact_request(const int user_id, const int outgoing_user_id)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("SELECT EXISTS( SELECT * FROM %1 WHERE user_id1 == :user_id AND user_id2 == :outgoing_user_id AND user_id1 NOT IN (SELECT user_id2 FROM %1 WHERE user_id1 == :outgoing_user_id) );").arg(CONTACTS_TABLE));
+	sql_query.bindValue(":user_id", user_id);
+	sql_query.bindValue(":outgoing_user_id", outgoing_user_id);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	return sql_query.first() && sql_query.value(0).toBool();
+}
+
+bool DatabaseHelper::user_has_outgoing_contact_request(const QString& user_name, const QString& outgoing_user)
+{
+	const int user_id = get_user_id(user_name);
+	const int outgoing_user_id = get_user_id(outgoing_user);
+
+	return  user_has_outgoing_contact_request(user_id, outgoing_user_id);
+}
+
+bool DatabaseHelper::user_has_incoming_contact_request(const int user_id, const int incoming_user_id)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("SELECT EXISTS( SELECT * FROM %1 WHERE user_id1 == :outgoing_user_id AND user_id2 == :user_id AND user_id1 NOT IN (SELECT user_id2 FROM %1 WHERE user_id1 == :user_id) );").arg(CONTACTS_TABLE));
+	sql_query.bindValue(":user_id", user_id);
+	sql_query.bindValue(":outgoing_user_id", incoming_user_id);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	return sql_query.first() && sql_query.value(0).toBool();
+}
+
+bool DatabaseHelper::user_has_incoming_contact_request(const QString& user_name, const QString& incoming_user)
+{
+	const int user_id = get_user_id(user_name);
+	const int incoming_user_id = get_user_id(incoming_user);
+
+	return  user_has_incoming_contact_request(user_id, incoming_user_id);
+}

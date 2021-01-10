@@ -44,6 +44,12 @@ public:
 	void add_user_contact(const QString& user_name, const QString& user_name_to_add);
 	void delete_user_contact(const int user_id, const int user_id_to_del); //for declining friend request + removing user
 	void delete_user_contact(const QString& user_name, const QString& user_name_to_del);
+	bool user_has_contact(const int user_id, const int contact_user_id);
+	bool user_has_contact(const QString& user_name, const QString& contact);
+	bool user_has_outgoing_contact_request(const int user_id, const int outgoing_user_id);
+	bool user_has_outgoing_contact_request(const QString& user_name, const QString& outgoing_user);
+	bool user_has_incoming_contact_request(const int user_id, const int incoming_user_id);
+	bool user_has_incoming_contact_request(const QString& user_name, const QString& incoming_user);
 };
 
 #endif // DATABASEHELPER_H
