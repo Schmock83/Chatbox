@@ -62,8 +62,26 @@ void Chatbox_Server::user_connected(User* user)
 	Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_loginSucceeded, user->get_user_name());
 	queue_message(reply, user->get_tcp_socket());
 
+	//send the user all stored Messages
+	send_user_contacts(user);
+
 	//update last_login in db
 	user->update_last_login();
+}
+
+void Chatbox_Server::send_user_contacts(User* user)
+{
+	if (user != nullptr)
+	{
+		try {
+			Message storedContactMessage = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_storedContacts, user->get_contacts());
+			queue_message(storedContactMessage, user);
+		}
+		catch (QSqlError error)
+		{
+			qDebug() << "error in send_user_contacts: " << error.text();
+		}
+	}
 }
 
 void Chatbox_Server::new_data_in_socket()
@@ -109,20 +127,121 @@ void Chatbox_Server::handleUserRequest(const Message& message, QTcpSocket* clien
 	case ClientRequestType::searchUserRequest:
 		handleSearchUserRequest(message, user);
 		break;
-	case ClientRequestType::addUserRequest:
+	case ClientRequestType::addContact:
 		handleAddContactRequest(message, user);
+		break;
+	case ClientRequestType::removeContact:
+		handleRemoveContactRequest(message, user);
+		break;
+	case ClientRequestType::storedContacts:
+		send_user_contacts(user);
 		break;
 	}
 }
-//TODO
 void Chatbox_Server::handleAddContactRequest(const Message& message, User* user)
 {
-	;
+	//see if the contact is online
+	User* added_contact = get_user_for_user_name(message.getContent());
+
+	try {
+		//user accepted incoming contact-request
+		if (user->has_incoming_contact_request(message.getContent()))
+		{
+			//try to add contact in db
+			user->add_user_contact(message.getContent());
+
+			//send back addContact message
+			Message reply1 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_addContact, message.getContent());
+			queue_message(reply1, user);
+
+			//check if user online -> if so send him addContact message as well
+			if (added_contact != nullptr)
+			{
+				Message reply2 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_addContact, user->get_user_name());
+				queue_message(reply2, added_contact);
+			}
+		}
+		//user is sending an contact-request
+		else if (!user->has_outgoing_contact_request(message.getContent()) && !user->has_contact(message.getContent()))
+		{
+			//try to add contact in db
+			user->add_user_contact(message.getContent());
+
+			//send back addContactRequest message
+			Message reply1 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_addOutgoingContactRequest, message.getContent());
+			queue_message(reply1, user);
+
+			//check if user online -> if so send him addContactRequest message as well
+			if (added_contact != nullptr)
+			{
+				Message reply2 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_addIncomingContactRequest, user->get_user_name());
+				queue_message(reply2, added_contact);
+			}
+		}
+	}
+	catch (QSqlError error) {
+		qDebug() << "Error in handleAddContactRequest: " << error.text();
+	}
 }
-//TODO
+
 void Chatbox_Server::handleRemoveContactRequest(const Message& message, User* user)
 {
-	;
+	//get the other user -> nullptr if offline
+	User* remove_contact = get_user_for_user_name(message.getContent());
+
+	try {
+		//both users are contacts
+		if (user->has_contact(message.getContent()))
+		{
+			//try to remove contact in db
+			user->delete_user_contact(message.getContent());
+
+			//send back removeContact to both users
+			Message reply1 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_removeContact, message.getContent());
+			queue_message(reply1, user);
+
+			if (remove_contact != nullptr)
+			{
+				Message reply2 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_removeContact, user->get_user_name());
+				queue_message(reply2, remove_contact);
+			}
+		}
+		//user is denying incoming contact-request
+		else if (user->has_incoming_contact_request(message.getContent()))
+		{
+			//try to remove deny contact-request in db
+			user->delete_user_contact(message.getContent());
+
+			//send back reply to both users
+			Message reply1 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_removeIncomingContactRequest, message.getContent());
+			queue_message(reply1, user);
+
+			if (remove_contact != nullptr)
+			{
+				Message reply2 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_removeOutgoingContactRequest, user->get_user_name());
+				queue_message(reply2, remove_contact);
+			}
+		}
+		//user is cancelling an outgoing contact-request
+		else if (user->has_outgoing_contact_request(message.getContent()))
+		{
+			//try to cancel contact-request in db
+			user->delete_user_contact(message.getContent());
+
+			//send back reply to both users
+			Message reply1 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_removeOutgoingContactRequest, message.getContent());
+			queue_message(reply1, user);
+
+			if (remove_contact != nullptr)
+			{
+				Message reply2 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_removeIncomingContactRequest, user->get_user_name());
+				queue_message(reply2, remove_contact);
+			}
+		}
+	}
+	catch (QSqlError error) {
+		qDebug() << "Error in handleRemoveContactRequest: " << error.text();
+	}
 }
 
 void Chatbox_Server::handleSearchUserRequest(const Message& message, User* user)
@@ -135,7 +254,6 @@ void Chatbox_Server::handleSearchUserRequest(const Message& message, User* user)
 		queue_message(reply, user);
 	}
 	catch (QSqlError error) {
-		qDebug() << "Error in handleRegistration: " << error.text();
 		//error -> send back empty list...
 		Message error_reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_searchUserResult, QList<QString>());
 		queue_message(error_reply, user);
@@ -274,5 +392,17 @@ User* Chatbox_Server::get_user_for_socket(QTcpSocket* client_socket)
 	}
 
 	//no user with that socket found
+	return nullptr;
+}
+
+User* Chatbox_Server::get_user_for_user_name(const QString& user_name)
+{
+	QMutexLocker locker(&online_user_mutex);
+	for (User* user : authenticated_online_users)
+	{
+		if (user->get_user_name() == user_name)
+			return user;
+	}
+	//no user with that username found
 	return nullptr;
 }

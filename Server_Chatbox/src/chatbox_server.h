@@ -53,7 +53,9 @@ private:
 	void queue_message(Message message, User* user); //overload
 
 	User* get_user_for_socket(QTcpSocket* client_socket);	//returns User pointer for the user associeted with the socket (or nullptr)
+	User* get_user_for_user_name(const QString& user_name);
 	bool authenticated_socket(QTcpSocket* client_socket) { return get_user_for_socket(client_socket) != nullptr; }
+	void send_user_contacts(User* user);
 public:
 	Chatbox_Server(QWidget* parent = nullptr)
 		:QWidget(parent)
