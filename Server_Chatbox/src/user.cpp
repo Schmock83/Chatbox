@@ -61,7 +61,7 @@ void User::delete_user_contact(const QString& user_name_to_add)
 {
 	if (valid_database())
 	{
-		const int user_id_to_del = database->get_user_id(user_name);
+		const int user_id_to_del = database->get_user_id(user_name_to_add);
 		database->delete_user_contact(user_id, user_id_to_del);
 	}
 }
