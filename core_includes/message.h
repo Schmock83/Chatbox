@@ -28,6 +28,7 @@ enum ServerMessageType {
 	server_removeIncomingContactRequest,
 	server_addOutgoingContactRequest,
 	server_removeOutgoingContactRequest,
+	server_storedContacts,
 };
 
 enum ClientRequestType {
@@ -36,7 +37,8 @@ enum ClientRequestType {
 	client_registrationMessage,
 	searchUserRequest,
 	addContact,
-	removeContact
+	removeContact,
+	storedContacts,
 };
 
 class Message
