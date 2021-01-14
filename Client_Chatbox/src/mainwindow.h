@@ -92,5 +92,6 @@ private slots:
 	void addSearchedUsers(QList<QString>);
 	void login_button_pressed();
 	void registration_button_pressed();
+	void userStateChanged(QPair<QString, UserState>);
 };
 #endif // MAINWINDOW_H

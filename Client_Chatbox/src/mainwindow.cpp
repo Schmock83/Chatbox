@@ -68,6 +68,7 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(addContactRequestSignal(const QString&, ServerMessageType)), this, SLOT(addContactRequest(const QString&, ServerMessageType)));
 	connect(client, SIGNAL(removeContactRequestSignal(const QString&)), this, SLOT(removeContactRequest(const QString&)));
 	connect(client, SIGNAL(clearUI()), this, SLOT(clearUI()));
+	connect(client, SIGNAL(userStateChanged(QPair<QString, UserState>)), this, SLOT(userStateChanged(QPair<QString, UserState>)));
 }
 
 void MainWindow::setUpUi()
@@ -97,6 +98,7 @@ void MainWindow::setUpUi()
 
 void MainWindow::clearUI()
 {
+	qDebug() << "ClearUI called";
 	deleteWidgetsFromLayout(ui->user_search_layout, true);
 
 	//clear contacts
@@ -148,6 +150,16 @@ void MainWindow::search_line_edit_returnPressed()
 	ui->user_search_layout->addWidget(loadingLabel);
 
 	emit searchUserSignal(ui->search_line_edit->text());
+}
+
+void MainWindow::userStateChanged(QPair<QString, UserState> pair)
+{
+	//get userbutton associated with username
+	auto it = contacts[pair.first[0]].find(pair.first);
+	if (it != contacts[pair.first[0]].end())
+	{
+		(*it)->setState(pair.second);
+	}
 }
 
 void MainWindow::addSearchedUsers(QList<QString> searchedUsers)
@@ -246,6 +258,7 @@ void MainWindow::addContact(const QString& contact)
 	updateSearchedUser(contact, true);
 
 	UserButton* contactButton = new UserButton(contact, true);
+	contactButton->setState(UserState::offline);
 	connect(contactButton, SIGNAL(addContact(const QString&)), client, SLOT(addContact(const QString&)));
 	connect(contactButton, SIGNAL(removeContact(const QString&)), client, SLOT(removeContact(const QString&)));
 	contacts[contact[0]].insert(contact, contactButton);
