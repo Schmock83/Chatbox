@@ -17,6 +17,13 @@
 #define USER_TABLE_SCHEME QString("CREATE TABLE IF NOT EXISTS %1 (user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL DEFAULT(0), user_name VARCHAR(%2) UNIQUE NOT NULL, user_password VARCHAR(150) NOT NULL, registry_date DATETIME DEFAULT CURRENT_TIMESTAMP, last_login DATETIME DEFAULT NULL);").arg(USER_TABLE, QString::number(USERNAME_MAX_LEN))
 #define CONTACTS_TABLE_SCHEME QString("CREATE TABLE IF NOT EXISTS %1 (user_id1 INTEGER NOT NULL, user_id2 INTEGER NOT NULL CHECK(user_id1 != user_id2), FOREIGN KEY(user_id1) REFERENCES %2 (user_id) ON UPDATE CASCADE ON DELETE CASCADE, FOREIGN KEY(user_id2) REFERENCES %2 (user_id) ON UPDATE CASCADE ON DELETE CASCADE, PRIMARY KEY(user_id1, user_id2));").arg(CONTACTS_TABLE, USER_TABLE)
 
+enum UserState
+{
+	unknown = -1,
+	offline,
+	online
+};
+
 //UI-includes
 #include <QFile>
 #include <QTextStream>

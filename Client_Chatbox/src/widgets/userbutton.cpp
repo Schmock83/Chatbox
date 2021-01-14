@@ -3,6 +3,9 @@
 UserButton::UserButton(const QString& text, bool is_contact, bool incoming_contact_request, bool outgoing_contact_request, QWidget* parent)
 	:QPushButton(text, parent), is_contact(is_contact), incoming_contact_request(incoming_contact_request), outgoing_contact_request(outgoing_contact_request)
 {}
+UserButton::UserButton(const QIcon& icon, const QString& text, bool is_contact, bool incoming_contact_request, bool outgoing_contact_request, QWidget* parent)
+	: QPushButton(icon, text, parent), is_contact(is_contact), incoming_contact_request(incoming_contact_request), outgoing_contact_request(outgoing_contact_request)
+{}
 
 void UserButton::mousePressEvent(QMouseEvent* e)
 {
@@ -93,4 +96,21 @@ void UserButton::removeContactClicked()
 void UserButton::addContactClicked()
 {
 	emit addContact(text());
+}
+
+void UserButton::setState(UserState newState)
+{
+	userState = newState;
+
+	switch (userState)
+	{
+	case UserState::online:
+		this->setIcon(QIcon(":/userIcons/imgs/online.png"));
+		break;
+	case UserState::offline:
+		this->setIcon(QIcon(":/userIcons/imgs/offline.png"));
+		break;
+	case UserState::unknown:
+		this->setIcon(QIcon());
+	}
 }
