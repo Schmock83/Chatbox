@@ -9,7 +9,7 @@
 
 #include "databasehelper.h"
 
-//TODO userState
+#include "../core_includes/core.h"
 
 class NoUserInDatabase {
 public:
@@ -24,6 +24,7 @@ private:
 	QDateTime registry_date;
 	QDateTime last_login;
 	QTcpSocket* tcp_socket;
+	UserState userState = UserState::online;
 
 	DatabaseHelper* database = nullptr;
 public:
@@ -44,11 +45,14 @@ public:
 		database = database;
 	}
 
+	void set_user_state(UserState new_state) { userState = new_state; }
+
 	int get_user_id()const { return user_id; }
 	QString get_user_name()const { return user_name; }
 	QDateTime get_registry_date() const { return registry_date; }
 	QDateTime get_last_login()const { return last_login; }
 	QTcpSocket* get_tcp_socket()const { return tcp_socket; }
+	UserState get_user_state()const { return userState; }
 
 	bool user_never_logged_in()const { return !last_login.isValid(); }
 	bool connected()const { return (tcp_socket != nullptr && tcp_socket->isValid() && tcp_socket->state() == QTcpSocket::ConnectedState); }

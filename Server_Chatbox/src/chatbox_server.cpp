@@ -35,9 +35,28 @@ void Chatbox_Server::user_disconnected()
 	User* user = get_user_for_socket(clientSocket);
 	//user found -> remove from authenticated_users
 	if (user != nullptr) {
+		notify_contacts(user);
 		QMutexLocker locker(&online_user_mutex);
 		authenticated_online_users.remove(user->get_user_name());
 		qDebug() << "User disconnected...: " << user->get_user_name();
+	}
+}
+
+void Chatbox_Server::notify_contacts(User* user)
+{
+	if (user->get_user_state() != UserState::offline)
+	{
+		auto contacts = user->get_contacts();
+		for (auto contact : contacts)
+		{
+			User* online_contact = get_user_for_user_name(contact);
+			//if contact online
+			if (online_contact != nullptr)
+			{
+				Message contactStateChange = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_userStateChanged, QPair<QString, UserState>(user->get_user_name(), UserState::offline));
+				Message::sendThroughSocket(online_contact->get_tcp_socket(), contactStateChange);
+			}
+		}
 	}
 }
 
@@ -71,11 +90,31 @@ void Chatbox_Server::user_connected(User* user)
 
 void Chatbox_Server::send_user_contacts(User* user)
 {
+	qDebug() << "send_user_contacts called";
 	if (user != nullptr)
 	{
 		try {
-			Message storedContactMessage = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_storedContacts, user->get_contacts());
+			auto contacts = user->get_contacts();
+			Message storedContactMessage = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_storedContacts, contacts);
 			queue_message(storedContactMessage, user);
+
+			//go through contacts
+			for (auto contact : contacts)
+			{
+				//see if that contact is online
+				for (User* online_contact : authenticated_online_users)
+				{
+					if (online_contact->get_user_name() == contact && online_contact->get_user_state() != UserState::offline)
+					{
+						//notify the client for userStateChanged
+						Message contactStateChange1 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_userStateChanged, QPair<QString, UserState>(contact, online_contact->get_user_state()));
+						Message contactStateChange2 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_userStateChanged, QPair<QString, UserState>(user->get_user_name(), user->get_user_state()));
+						queue_message(contactStateChange1, user);
+						queue_message(contactStateChange2, online_contact);
+						break;
+					}
+				}
+			}
 
 			Message storedIncomingContactMessage = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_storedIncomingContactRequests, user->get_incoming_contact_requests());
 			queue_message(storedIncomingContactMessage, user);
@@ -165,6 +204,19 @@ void Chatbox_Server::handleAddContactRequest(const Message& message, User* user)
 			{
 				Message reply2 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_addContact, user->get_user_name());
 				queue_message(reply2, added_contact);
+
+				if (user->get_user_state() != UserState::offline)
+				{
+					Message userStateChange = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_userStateChanged, QPair<QString, UserState>(user->get_user_name(), user->get_user_state()));
+					queue_message(userStateChange, added_contact);
+				}
+
+				//if the contact is online -> send userStateChanged to user
+				if (added_contact->get_user_state() != UserState::offline)
+				{
+					Message userStateChange2 = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_userStateChanged, QPair<QString, UserState>(added_contact->get_user_name(), added_contact->get_user_state()));
+					queue_message(userStateChange2, user);
+				}
 			}
 		}
 		//user is sending an contact-request
