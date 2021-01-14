@@ -30,7 +30,8 @@ enum ServerMessageType {
 	server_removeOutgoingContactRequest,
 	server_storedContacts,
 	server_storedIncomingContactRequests,
-	server_storedOutgoingContactRequests
+	server_storedOutgoingContactRequests,
+	server_userStateChanged
 };
 
 enum ClientRequestType {
@@ -54,6 +55,7 @@ private:
 	QString sender;
 	QString receiver;
 	QList<QString> str_list;
+	QPair<QString, UserState> string_state_pair;
 
 	Message(MessageType messageType, QDateTime dateTime, QString sender, QString content = "", QString receiver = "")
 		:messageType(messageType), dateTime(dateTime), messageContents(content), sender(sender), receiver(receiver)
@@ -67,6 +69,9 @@ private:
 	Message(MessageType messageType, ServerMessageType serverMessageType, QDateTime dateTime, QString content = "")
 		:messageType(messageType), serverMessageType(serverMessageType), dateTime(dateTime), messageContents(content)
 	{}
+	Message(MessageType messageType, ServerMessageType serverMessageType, QDateTime dateTime, QPair<QString, UserState> string_state_pair)
+		:messageType(messageType), serverMessageType(serverMessageType), dateTime(dateTime), string_state_pair(string_state_pair)
+	{}
 	Message(MessageType messageType, ServerMessageType serverMessageType, QDateTime dateTime, QList<QString> str_list)
 		:messageType(messageType), serverMessageType(serverMessageType), dateTime(dateTime), str_list(str_list)
 	{}
@@ -75,6 +80,7 @@ public:
 	static Message createLoginMessage(QDateTime dateTime, QString username, QString unhashed_password);
 	static Message createRegistrationMessage(QDateTime dateTime, QString username, QString unhashed_password);
 	static Message createServerMessage(QDateTime dateTime, ServerMessageType serverMessageType, QString content);
+	static Message createServerMessage(QDateTime dateTime, ServerMessageType serverMessageType, QPair<QString, UserState> string_state_pair);
 	static Message createServerMessage(QDateTime dateTime, ServerMessageType serverMessageType, QList<QString> str_list);
 	static Message createClientRequstMessage(QDateTime dateTime, ClientRequestType requestType, QString content); //for server-requests (e.g. addContact, searchUser, changeProfile...)
 
@@ -90,6 +96,7 @@ public:
 	QString getReceiver()const { return receiver; }
 	QDateTime getDateTime()const { return dateTime; }
 	QString getContent()const { return messageContents; }
+	QPair<QString, UserState> getStringStateContent()const { return string_state_pair; }
 	QList<QString> getStringList()const { return str_list; }
 
 	void print()const {

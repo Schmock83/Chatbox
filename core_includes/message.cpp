@@ -17,6 +17,10 @@ Message Message::createServerMessage(QDateTime dateTime, ServerMessageType serve
 {
 	return Message(MessageType::server_message, serverMessageType, dateTime, content);
 }
+Message Message::createServerMessage(QDateTime dateTime, ServerMessageType serverMessageType, QPair<QString, UserState> string_state_pair)
+{
+	return Message(MessageType::server_message, serverMessageType, dateTime, string_state_pair);
+}
 Message Message::createServerMessage(QDateTime dateTime, ServerMessageType serverMessageType, QList<QString> str_list)
 {
 	return Message(MessageType::server_message, serverMessageType, dateTime, str_list);
@@ -56,6 +60,9 @@ QDataStream& Message::writeToStream(QDataStream& stream, const Message& message)
 		case ServerMessageType::server_storedOutgoingContactRequests:
 			stream << message.str_list;
 			break;
+		case ServerMessageType::server_userStateChanged:
+			stream << message.string_state_pair;
+			break;
 		}
 	}
 	else {
@@ -71,6 +78,7 @@ Message Message::readFromStream(QDataStream& stream)
 	ServerMessageType serverMessageType;
 	QDateTime dateTime;
 	QString messageContents;
+	QPair<QString, UserState> string_state_pair;
 	QString sender;
 	QString receiver;
 	QList<QString> str_list;
@@ -105,6 +113,10 @@ Message Message::readFromStream(QDataStream& stream)
 		case ServerMessageType::server_storedOutgoingContactRequests:
 			stream >> str_list;
 			return Message(messageType, serverMessageType, dateTime, str_list);
+			break;
+		case ServerMessageType::server_userStateChanged:
+			stream >> string_state_pair;
+			return Message(messageType, serverMessageType, dateTime, string_state_pair);
 			break;
 		}
 	}
