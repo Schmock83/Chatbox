@@ -71,6 +71,7 @@ signals:
 	void addContactRequestSignal(const QString&, ServerMessageType);
 	void removeContactRequestSignal(const QString&);
 	void clearUI();
+	void userStateChanged(QPair<QString, UserState>);
 };
 
 #endif // CHATBOX_CLIENT_H

@@ -84,6 +84,11 @@ void Chatbox_Client::connected()
 
 void Chatbox_Client::disconnected()
 {
+	emit clearLoginStatusLabel();
+	emit clearRegistrationStatusLabel();
+	emit stopWelcomePageAnimation();
+	emit enableButtons();
+
 	establishSocketConnection();
 }
 
@@ -160,6 +165,9 @@ void Chatbox_Client::handleMessage(const Message& message)
 			case ServerMessageType::server_removeIncomingContactRequest:
 			case ServerMessageType::server_removeOutgoingContactRequest:
 				emit removeContactRequestSignal(message.getContent());
+				break;
+			case ServerMessageType::server_userStateChanged:
+				emit userStateChanged(message.getStringStateContent());
 				break;
 			}
 		}
