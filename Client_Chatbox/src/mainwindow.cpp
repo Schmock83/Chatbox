@@ -89,7 +89,7 @@ void MainWindow::setUpUi()
 
 	UI::setUpDarkTheme();
 
-	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::chatPage);
+	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::contactPage);
 
 	setScene(UI::Scene::loadingScene);
 
