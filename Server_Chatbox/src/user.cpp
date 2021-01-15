@@ -18,23 +18,14 @@ void User::update_last_login()
 
 QList<QString> User::get_contacts() const
 {
-	if (!valid_database())
-		return QList<QString>();
-
 	return database->get_user_contacts(user_id);
 }
 QList<QString> User::get_outgoing_contact_requests() const
 {
-	if (!valid_database())
-		return QList<QString>();
-
 	return database->get_user_outgoing_contact_requests(user_id);
 }
 QList<QString> User::get_incoming_contact_requests() const
 {
-	if (!valid_database())
-		return QList<QString>();
-
 	return database->get_user_incoming_contact_requests(user_id);
 }
 
