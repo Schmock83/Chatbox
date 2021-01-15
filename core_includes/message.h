@@ -77,6 +77,7 @@ private:
 	{}
 
 public:
+	static Message createChatMessage(QString receiver, QDateTime dateTime, QString content, QString sender = "");
 	static Message createLoginMessage(QDateTime dateTime, QString username, QString unhashed_password);
 	static Message createRegistrationMessage(QDateTime dateTime, QString username, QString unhashed_password);
 	static Message createServerMessage(QDateTime dateTime, ServerMessageType serverMessageType, QString content);
@@ -98,6 +99,7 @@ public:
 	QString getContent()const { return messageContents; }
 	QPair<QString, UserState> getStringStateContent()const { return string_state_pair; }
 	QList<QString> getStringList()const { return str_list; }
+	void setSender(const QString sender) { this->sender = sender; }
 
 	void print()const {
 		qDebug() << messageType << clientRequestType << serverMessageType << dateTime << sender << messageContents << receiver << str_list;

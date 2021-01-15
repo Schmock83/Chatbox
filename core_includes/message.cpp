@@ -1,5 +1,8 @@
 #include "message.h"
-
+Message Message::createChatMessage(QString receiver, QDateTime dateTime, QString content, QString sender = "")
+{
+	return Message(MessageType::chatMessage, dateTime, sender, content, receiver);
+}
 Message Message::createLoginMessage(QDateTime dateTime, QString username, QString unhashed_password)
 {
 	//hash
@@ -33,7 +36,6 @@ Message Message::createClientRequstMessage(QDateTime dateTime, ClientRequestType
 QDataStream& Message::writeToStream(QDataStream& stream, const Message& message)
 {
 	stream << message.messageType << message.dateTime << message.sender;
-
 	if (message.messageType == MessageType::client_requestMessage) {
 		stream << message.getClientRequestType() << message.getContent();
 	}
