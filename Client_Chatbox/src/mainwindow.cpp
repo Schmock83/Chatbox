@@ -243,7 +243,7 @@ int MainWindow::buildChatWindow(const QString& user_name)
 	if (chatWindows.contains(user_name))
 		return -1;
 
-	//otherwise create widgets and add them to the
+	//otherwise create widgets and add them to the chatStackedWidget
 	QWidget* chatWindow = new QWidget;
 	QVBoxLayout* vboxLayout = new QVBoxLayout;
 	ChatBrowser* chat = new ChatBrowser;
