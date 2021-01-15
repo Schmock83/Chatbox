@@ -155,6 +155,45 @@ void Chatbox_Server::handleMessage(const Message& message, QTcpSocket* client_so
 			break;
 		}
 	}
+	else if (message.getMessageType() == MessageType::chatMessage)
+	{
+		//check if user is authenticated
+		User* user = get_user_for_socket(client_socket);
+		if (user == nullptr)
+		{
+			//if not -> close connection
+			client_socket->abort();
+		}
+		else //otherwise deliver chatMessage
+			handleChatMessage(message, user);
+	}
+}
+
+void Chatbox_Server::handleChatMessage(Message message, User* user)
+{
+	//add sender to message
+	message.setSender(user->get_user_name());
+
+	//store in db
+	try {
+		database->add_user_message(message);
+
+		//see if receiver is online
+		User* receiver = get_user_for_user_name(message.getReceiver());
+		//receiver online -> deliver message
+		if (receiver != nullptr)
+		{
+			queue_message(message, receiver);
+		}
+		//receiver NOT online -> store message
+		else
+		{
+			database->store_user_message(message);
+		}
+	}
+	catch (QSqlError error) {
+		qDebug() << "Error in handleChatMessage: " << error.text();
+	}
 }
 
 void Chatbox_Server::handleUserRequest(const Message& message, QTcpSocket* client_socket)

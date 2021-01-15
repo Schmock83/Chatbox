@@ -44,6 +44,7 @@ private:
 	void handleSearchUserRequest(const Message& message, User* user);
 	void handleAddContactRequest(const Message& message, User* user);
 	void handleRemoveContactRequest(const Message& message, User* user);
+	void handleChatMessage(Message message, User* user);
 
 	bool userOnline(const QString& user_name);
 
