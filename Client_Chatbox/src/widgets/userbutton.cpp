@@ -68,6 +68,10 @@ void UserButton::mousePressEvent(QMouseEvent* e)
 			contextMenu.exec(e->globalPos());
 		}
 	}
+	else if (e->button() == Qt::LeftButton)
+	{
+		emit userbutton_clicked(text());
+	}
 }
 
 void UserButton::setFlags(ServerMessageType serverMessageType)

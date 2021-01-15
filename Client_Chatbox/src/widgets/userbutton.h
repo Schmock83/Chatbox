@@ -31,6 +31,7 @@ private slots:
 signals:
 	void removeContact(const QString&);
 	void addContact(const QString&);
+	void userbutton_clicked(const QString&);
 };
 
 #endif // USERBUTTON_H
