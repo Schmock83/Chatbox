@@ -8,10 +8,12 @@
 #include <QMap>
 #include <QHash>
 #include <QList>
+#include <QVBoxLayout>
 
 #include "../core_includes/core.h"
 #include "chatbox_client.h"
 #include "widgets/userbutton.h"
+#include "widgets/chatbrowser.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,6 +26,7 @@ private:
 	Ui::MainWindow* ui;
 	Chatbox_Client* client;
 	QMovie* loadingAnimation;
+	QHash<QString, QWidget*> chatWindows;
 	std::list<UserButton*> chatButtons;
 	QMap<QChar, QMap<QString, UserButton*>> contacts;
 	QMap<QString, UserButton*> contact_requests; //to store open (incoming or outgoing) contact-requests from other users
@@ -47,6 +50,8 @@ private:
 	bool hasIncomingContactRequest(const QString&);
 	bool hasOutgoingContactRequest(const QString&);
 	UserButton* getContactRequestButton(const QString&);
+	int getChatWindowIndex(const QString&);
+	int buildChatWindow(const QString&);	//creates a chat(Browser)-window for a given username
 
 public:
 	MainWindow(QWidget* parent = nullptr);
@@ -59,6 +64,7 @@ signals:
 	void addContactSignal(const QString&);
 
 private slots:
+	void showChatWindow(const QString&);
 	void clearUI();
 	void on_chat_button_clicked();
 	void on_contacts_button_clicked();

@@ -174,6 +174,7 @@ void MainWindow::addSearchedUsers(QList<QString> searchedUsers)
 		user_btn = new UserButton(searchedUser, isContact(searchedUser), hasIncomingContactRequest(searchedUser), hasOutgoingContactRequest(searchedUser));
 		connect(user_btn, SIGNAL(addContact(const QString&)), client, SLOT(addContact(const QString&)));
 		connect(user_btn, SIGNAL(removeContact(const QString&)), client, SLOT(removeContact(const QString&)));
+		connect(user_btn, SIGNAL(userbutton_clicked(const QString&)), this, SLOT(showChatWindow(const QString&)));
 		ui->user_search_layout->addWidget(user_btn);
 	}
 }
@@ -211,6 +212,56 @@ void MainWindow::addTopChatButton(UserButton* newTopButton)
 
 	//re-add to front
 	chatButtons.push_front(newTopButton);
+}
+
+void MainWindow::showChatWindow(const QString& user_name)
+{
+	int index = getChatWindowIndex(user_name);
+
+	//no chatWindow for that user exists -> create one
+	if (index == -1)
+	{
+		index = buildChatWindow(user_name);
+	}
+
+	//actually show the chatWindow
+	ui->stacked_chat_browsers->setCurrentIndex(index);
+}
+
+int MainWindow::getChatWindowIndex(const QString& user_name)
+{
+	if (chatWindows.contains(user_name))
+		return ui->stacked_chat_browsers->indexOf(chatWindows[user_name]);
+
+	return -1;
+}
+
+int MainWindow::buildChatWindow(const QString& user_name)
+{
+	qDebug() << "buildChatWindow called:" << user_name;
+	//check if it already exists
+	if (chatWindows.contains(user_name))
+		return -1;
+
+	//otherwise create widgets and add them to the
+	QWidget* chatWindow = new QWidget;
+	QVBoxLayout* vboxLayout = new QVBoxLayout;
+	ChatBrowser* chat = new ChatBrowser;
+	QPushButton* sendButton = new QPushButton("Send");
+
+	vboxLayout->addWidget(new QLabel(tr("Chat with ").append(user_name)));
+	vboxLayout->addWidget(chat);
+	vboxLayout->addWidget(new QLineEdit);
+	vboxLayout->addWidget(sendButton);
+
+	chatWindow->setLayout(vboxLayout);
+
+	//add the widget to the stackedChatWidget
+	int index = ui->stacked_chat_browsers->addWidget(chatWindow);
+
+	chatWindows[user_name] = chatWindow;
+
+	return index;
 }
 
 bool MainWindow::isContact(const QString& user_name)
@@ -261,6 +312,7 @@ void MainWindow::addContact(const QString& contact)
 	contactButton->setState(UserState::offline);
 	connect(contactButton, SIGNAL(addContact(const QString&)), client, SLOT(addContact(const QString&)));
 	connect(contactButton, SIGNAL(removeContact(const QString&)), client, SLOT(removeContact(const QString&)));
+	connect(contactButton, SIGNAL(userbutton_clicked(const QString&)), this, SLOT(showChatWindow(const QString&)));
 	contacts[contact[0]].insert(contact, contactButton);
 
 	updateContactList();
@@ -283,6 +335,7 @@ void MainWindow::addContactRequest(const QString& contact, ServerMessageType ser
 	contact_request_button->setFlags(serverMessageType);
 	connect(contact_request_button, SIGNAL(addContact(const QString&)), client, SLOT(addContact(const QString&)));
 	connect(contact_request_button, SIGNAL(removeContact(const QString&)), client, SLOT(removeContact(const QString&)));
+	connect(contact_request_button, SIGNAL(userbutton_clicked(const QString&)), this, SLOT(showChatWindow(const QString&)));
 	contact_requests.insert(contact, contact_request_button);
 
 	updateSearchedUser(contact, serverMessageType);
