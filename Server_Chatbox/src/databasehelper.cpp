@@ -15,6 +15,8 @@ void DatabaseHelper::setupTables()
 {
 	setupTable(USER_TABLE_SCHEME);
 	setupTable(CONTACTS_TABLE_SCHEME);
+	setupTable(SEND_MESSAGES_TABLE_SCHEME);
+	setupTable(STORED_MESSAGES_TABLE_SCHEME);
 }
 
 void DatabaseHelper::setupTable(const QString& table_scheme)
@@ -136,6 +138,33 @@ QList<QString> DatabaseHelper::get_user_incoming_contact_requests(const QString&
 	return get_user_incoming_contact_requests(user_id);
 }
 
+QList<const Message&> DatabaseHelper::get_stored_user_messages(const QString& user_name)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("SELECT dateTime, message, sender_user_name FROM %1 WHERE receiver_user_name == :receiver_user_name;").arg(STORED_MESSAGES_TABLE));
+	sql_query.bindValue(":receiver_user_name", user_name);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	QList<const Message&> stored_messages;
+
+	while (sql_query.next())
+	{
+		Message m = Message::createChatMessage(user_name, sql_query.value(0).toDateTime(), sql_query.value(1).toString(), sql_query.value(2).toString());
+		stored_messages.append(m);
+	}
+
+	//delete the messages
+	sql_query.prepare(QString("DELETE FROM %1 WHERE receiver_user_name == :receiver_user_name;").arg(STORED_MESSAGES_TABLE));
+	sql_query.bindValue(":receiver_user_name", user_name);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	return stored_messages;
+}
+
 void DatabaseHelper::register_user(const QString& user_name, const QString& encrypted_password)
 {
 	QMutexLocker locker(&mutex);
@@ -222,6 +251,32 @@ void DatabaseHelper::add_user_contact(const QString& user_name, const QString& u
 	const int user_id_to_add = get_user_id(user_name_to_add);
 
 	add_user_contact(user_id, user_id_to_add);
+}
+
+void DatabaseHelper::add_user_message(const Message& message)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("INSERT INTO %1 (sender_user_name, receiver_user_name, dateTime, message) VALUES (:sender_user_name, :receiver_user_name, :dateTime, :message);").arg(SEND_MESSAGES_TABLE));
+	sql_query.bindValue(":sender_user_name", message.getSender());
+	sql_query.bindValue(":receiver_user_name", message.getReceiver());
+	sql_query.bindValue(":dateTime", message.getDateTime());
+	sql_query.bindValue(":message", message.getContent());
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+}
+
+void DatabaseHelper::store_user_message(const Message& message)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("INSERT INTO %1 (sender_user_name, receiver_user_name, dateTime, message) VALUES (:sender_user_name, :receiver_user_name, :dateTime, :message);").arg(STORED_MESSAGES_TABLE));
+	sql_query.bindValue(":sender_user_name", message.getSender());
+	sql_query.bindValue(":receiver_user_name", message.getReceiver());
+	sql_query.bindValue(":dateTime", message.getDateTime());
+	sql_query.bindValue(":message", message.getContent());
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
 }
 
 void DatabaseHelper::delete_user_contact(const int user_id, const int user_id_to_del)

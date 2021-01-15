@@ -3,6 +3,7 @@
 
 //include core for defines (database_name + table schema)
 #include "../core_includes/core.h"
+#include "../core_includes/message.h"
 
 #include <QString>
 #include <QSqlDatabase>
@@ -40,10 +41,13 @@ public:
 	QList<QString> get_user_outgoing_contact_requests(const QString& user_name);
 	QList<QString> get_user_incoming_contact_requests(const int user_id);
 	QList<QString> get_user_incoming_contact_requests(const QString& user_name);
+	QList<const Message&> get_stored_user_messages(const QString& user_name);
 	void add_user_contact(const int user_id, const int user_id_to_add); //for sending friend request + accepting incoming friend request
 	void add_user_contact(const QString& user_name, const QString& user_name_to_add);
 	void delete_user_contact(const int user_id, const int user_id_to_del); //for declining friend request + removing user
 	void delete_user_contact(const QString& user_name, const QString& user_name_to_del);
+	void add_user_message(const Message& message);
+	void store_user_message(const Message& message);
 	bool user_has_contact(const int user_id, const int contact_user_id);
 	bool user_has_contact(const QString& user_name, const QString& contact);
 	bool user_has_outgoing_contact_request(const int user_id, const int outgoing_user_id);

@@ -13,9 +13,13 @@
 #define DATABASENAME "qt_server_chatbox.db"
 #define USER_TABLE QString("registered_users")
 #define CONTACTS_TABLE QString("contacts")
+#define SEND_MESSAGES_TABLE QString("send_messages")
+#define STORED_MESSAGES_TABLE QString("stored_messages")
 
 #define USER_TABLE_SCHEME QString("CREATE TABLE IF NOT EXISTS %1 (user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL DEFAULT(0), user_name VARCHAR(%2) UNIQUE NOT NULL, user_password VARCHAR(150) NOT NULL, registry_date DATETIME DEFAULT CURRENT_TIMESTAMP, last_login DATETIME DEFAULT NULL);").arg(USER_TABLE, QString::number(USERNAME_MAX_LEN))
 #define CONTACTS_TABLE_SCHEME QString("CREATE TABLE IF NOT EXISTS %1 (user_id1 INTEGER NOT NULL, user_id2 INTEGER NOT NULL CHECK(user_id1 != user_id2), FOREIGN KEY(user_id1) REFERENCES %2 (user_id) ON UPDATE CASCADE ON DELETE CASCADE, FOREIGN KEY(user_id2) REFERENCES %2 (user_id) ON UPDATE CASCADE ON DELETE CASCADE, PRIMARY KEY(user_id1, user_id2));").arg(CONTACTS_TABLE, USER_TABLE)
+#define SEND_MESSAGES_TABLE_SCHEME QString("CREATE TABLE IF NOT EXISTS %1 (sender_user_name VARCHAR(%2) NOT NULL, receiver_user_name VARCHAR(%2) NOT NULL, dateTime DATETIME NOT NULL, message TEXT NOT NULL, FOREIGN KEY(sender_user_name) REFERENCES %3(user_name), FOREIGN KEY(receiver_user_name) REFERENCES %3 (user_name) ON DELETE CASCADE ON UPDATE CASCADE);").arg(SEND_MESSAGES_TABLE, QString::number(USERNAME_MAX_LEN), USER_TABLE)
+#define STORED_MESSAGES_TABLE_SCHEME QString("CREATE TABLE IF NOT EXISTS %1 (sender_user_name VARCHAR(%2) NOT NULL, receiver_user_name VARCHAR(%2) NOT NULL, dateTime DATETIME NOT NULL, message TEXT NOT NULL, FOREIGN KEY(sender_user_name) REFERENCES %3(user_name), FOREIGN KEY(receiver_user_name) REFERENCES %3 (user_name) ON DELETE CASCADE ON UPDATE CASCADE);").arg(STORED_MESSAGES_TABLE, QString::number(USERNAME_MAX_LEN), USER_TABLE)
 
 enum UserState
 {
