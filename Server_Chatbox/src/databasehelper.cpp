@@ -138,7 +138,7 @@ QList<QString> DatabaseHelper::get_user_incoming_contact_requests(const QString&
 	return get_user_incoming_contact_requests(user_id);
 }
 
-QList<const Message&> DatabaseHelper::get_stored_user_messages(const QString& user_name)
+QList<Message> DatabaseHelper::get_stored_user_messages(const QString& user_name)
 {
 	QMutexLocker locker(&mutex);
 	sql_query.prepare(QString("SELECT dateTime, message, sender_user_name FROM %1 WHERE receiver_user_name == :receiver_user_name;").arg(STORED_MESSAGES_TABLE));
@@ -147,7 +147,7 @@ QList<const Message&> DatabaseHelper::get_stored_user_messages(const QString& us
 	if (!sql_query.exec())
 		throw data_base.lastError();
 
-	QList<const Message&> stored_messages;
+    QList<Message> stored_messages;
 
 	while (sql_query.next())
 	{
