@@ -22,9 +22,13 @@ public:
 	void setFlags(ServerMessageType serverMessageType);
 	void setFlags(bool is_contact = false, bool incoming_contact_request = false, bool outgoing_contact_request = false) { this->is_contact = is_contact; this->incoming_contact_request = incoming_contact_request; this->outgoing_contact_request = outgoing_contact_request; }
 	void setState(UserState newState);
+	void messageReceived();
+	virtual QString text() { return original_text; }
 private:
 	virtual void mousePressEvent(QMouseEvent* e);
 	UserState userState = UserState::unknown;
+	QString original_text;
+	int unreadMessageCount = 0;
 private slots:
 	void removeContactClicked();
 	void addContactClicked();

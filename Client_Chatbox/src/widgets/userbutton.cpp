@@ -1,11 +1,17 @@
 #include "userbutton.h"
 
 UserButton::UserButton(const QString& text, bool is_contact, bool incoming_contact_request, bool outgoing_contact_request, QWidget* parent)
-	:QPushButton(text, parent), is_contact(is_contact), incoming_contact_request(incoming_contact_request), outgoing_contact_request(outgoing_contact_request)
+	:QPushButton(text, parent), original_text(text), is_contact(is_contact), incoming_contact_request(incoming_contact_request), outgoing_contact_request(outgoing_contact_request)
 {}
 UserButton::UserButton(const QIcon& icon, const QString& text, bool is_contact, bool incoming_contact_request, bool outgoing_contact_request, QWidget* parent)
-	: QPushButton(icon, text, parent), is_contact(is_contact), incoming_contact_request(incoming_contact_request), outgoing_contact_request(outgoing_contact_request)
+	: QPushButton(icon, text, parent), original_text(text), is_contact(is_contact), incoming_contact_request(incoming_contact_request), outgoing_contact_request(outgoing_contact_request)
 {}
+
+void UserButton::messageReceived()
+{
+	unreadMessageCount++;
+	setText(tr("%1 (%2)").arg(original_text, QString::number(unreadMessageCount)));
+}
 
 void UserButton::mousePressEvent(QMouseEvent* e)
 {
@@ -70,6 +76,10 @@ void UserButton::mousePressEvent(QMouseEvent* e)
 	}
 	else if (e->button() == Qt::LeftButton)
 	{
+		//reset unreadMessageCount and reset text
+		unreadMessageCount = 0;
+		setText(original_text);
+
 		emit userbutton_clicked(text());
 	}
 }

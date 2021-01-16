@@ -171,6 +171,10 @@ void Chatbox_Client::handleMessage(const Message& message)
 				break;
 			}
 		}
+		else if (message.getMessageType() == MessageType::chatMessage)
+		{
+			emit chatMessageReceived(message);
+		}
 	}
 }
 

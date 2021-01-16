@@ -21,13 +21,12 @@ private:
 	void handleLogin(const QString& username, const QString& unhashed_password);	//called by Mainwindow
 	void handleRegistration(const QString& username, const QString& unencrypted_password); //called by MainWindow
 	void handleMessage(const Message& message);
-	void queue_message(Message message);	//queue´s messages from threads, so that the main thread can safely send them through the socket
 public:
 	Chatbox_Client(QWidget* parent = nullptr);
 	void setUpSignalSlotConnections();
 	void attemptLogin(const QString& username, const QString& unhashed_password);
 	void attemptRegistration(const QString& username, const QString& unencrypted_password);
-
+	void queue_message(Message message);	//queue´s messages from threads, so that the main thread can safely send them through the socket
 public slots:
 	//socket-handling
 	void establishSocketConnection();
@@ -35,13 +34,13 @@ public slots:
 	void searchUser(const QString&);
 	void addContact(const QString&);
 	void removeContact(const QString&);
+	void deliver_queued_messages();
 private slots:
 	//socket-handling
 	void disconnected();
 	void connected();
 	void socketError();
 	void new_data_in_socket();
-	void deliver_queued_messages();
 
 	void sceneChanged(UI::Scene scene);
 
@@ -72,6 +71,7 @@ signals:
 	void removeContactRequestSignal(const QString&);
 	void clearUI();
 	void userStateChanged(QPair<QString, UserState>);
+	void chatMessageReceived(const Message&);
 };
 
 #endif // CHATBOX_CLIENT_H

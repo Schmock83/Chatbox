@@ -45,6 +45,8 @@ private:
 	void updateContactList();
 	void updateSearchedUser(const QString&, bool = false, bool = false, bool = false);
 	void updateSearchedUser(const QString&, ServerMessageType);
+	void updateChatButton(const QString&, bool = false, bool = false, bool = false);
+	void updateChatButton(const QString&, ServerMessageType);
 	void deleteWidgetsFromLayout(QLayout*, bool = true);
 	bool isContact(const QString&);
 	bool hasIncomingContactRequest(const QString&);
@@ -52,7 +54,9 @@ private:
 	UserButton* getContactRequestButton(const QString&);
 	int getChatWindowIndex(const QString&);
 	int buildChatWindow(const QString&);	//creates a chat(Browser)-window for a given username
-
+	ChatBrowser* getChatForIndex(int index);
+	UserButton* getChatButton(const QString&);
+	UserButton* addChatButton(const QString&);
 public:
 	MainWindow(QWidget* parent = nullptr);
 	~MainWindow();
@@ -64,6 +68,8 @@ signals:
 	void addContactSignal(const QString&);
 
 private slots:
+	void appendToChatHistory(QString chat_user_name, QDateTime dateTime, QString message);
+	void sendMessage();
 	void showChatWindow(const QString&);
 	void clearUI();
 	void on_chat_button_clicked();
@@ -99,5 +105,6 @@ private slots:
 	void login_button_pressed();
 	void registration_button_pressed();
 	void userStateChanged(QPair<QString, UserState>);
+	void chatMessageReceived(const Message&);
 };
 #endif // MAINWINDOW_H

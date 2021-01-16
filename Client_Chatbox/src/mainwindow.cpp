@@ -60,6 +60,7 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(setLoginStatus(QString)), this, SLOT(setLoginStatus(QString)));
 	connect(client, SIGNAL(setLoginError(QString)), this, SLOT(setLoginError(QString)));
 	connect(client, SIGNAL(setRegistrationError(QString)), this, SLOT(setRegistrationError(QString)));
+
 	connect(this, SIGNAL(searchUserSignal(const QString&)), client, SLOT(searchUser(const QString&)));
 	connect(client, SIGNAL(searchUsersSignal(QList<QString>)), this, SLOT(addSearchedUsers(QList<QString>)));
 	connect(this, SIGNAL(addContactSignal(const QString&)), client, SLOT(addContact(const QString&)));
@@ -69,6 +70,7 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(removeContactRequestSignal(const QString&)), this, SLOT(removeContactRequest(const QString&)));
 	connect(client, SIGNAL(clearUI()), this, SLOT(clearUI()));
 	connect(client, SIGNAL(userStateChanged(QPair<QString, UserState>)), this, SLOT(userStateChanged(QPair<QString, UserState>)));
+	connect(client, SIGNAL(chatMessageReceived(const Message&)), this, SLOT(chatMessageReceived(const Message&)));
 }
 
 void MainWindow::setUpUi()
@@ -98,7 +100,6 @@ void MainWindow::setUpUi()
 
 void MainWindow::clearUI()
 {
-	qDebug() << "ClearUI called";
 	deleteWidgetsFromLayout(ui->user_search_layout, true);
 
 	//clear contacts
@@ -164,7 +165,6 @@ void MainWindow::userStateChanged(QPair<QString, UserState> pair)
 
 void MainWindow::addSearchedUsers(QList<QString> searchedUsers)
 {
-	qDebug() << "addSearchedUsers in mainWindow";
 	//delete everything from the searchUser-layout - including the loading label
 	deleteWidgetsFromLayout(ui->user_search_layout->layout());
 
@@ -212,6 +212,8 @@ void MainWindow::addTopChatButton(UserButton* newTopButton)
 
 	//re-add to front
 	chatButtons.push_front(newTopButton);
+
+	updateChatList();
 }
 
 void MainWindow::showChatWindow(const QString& user_name)
@@ -226,6 +228,13 @@ void MainWindow::showChatWindow(const QString& user_name)
 
 	//actually show the chatWindow
 	ui->stacked_chat_browsers->setCurrentIndex(index);
+
+	UserButton* chat_btn = getChatButton(user_name);
+	if (chat_btn != nullptr)
+	{
+		//reset text
+		chat_btn->setText(chat_btn->text());
+	}
 }
 
 int MainWindow::getChatWindowIndex(const QString& user_name)
@@ -238,7 +247,6 @@ int MainWindow::getChatWindowIndex(const QString& user_name)
 
 int MainWindow::buildChatWindow(const QString& user_name)
 {
-	qDebug() << "buildChatWindow called:" << user_name;
 	//check if it already exists
 	if (chatWindows.contains(user_name))
 		return -1;
@@ -248,6 +256,8 @@ int MainWindow::buildChatWindow(const QString& user_name)
 	QVBoxLayout* vboxLayout = new QVBoxLayout;
 	ChatBrowser* chat = new ChatBrowser;
 	QPushButton* sendButton = new QPushButton("Send");
+
+	connect(sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
 
 	vboxLayout->addWidget(new QLabel(tr("Chat with ").append(user_name)));
 	vboxLayout->addWidget(chat);
@@ -261,7 +271,115 @@ int MainWindow::buildChatWindow(const QString& user_name)
 
 	chatWindows[user_name] = chatWindow;
 
+	//create chat-button
+	if (getChatButton(user_name) == nullptr)
+		addChatButton(user_name);
+
 	return index;
+}
+
+//when send button was clicked -> send message
+void MainWindow::sendMessage()
+{
+	//get the current line-edit field containing the message
+	QWidget* currentChatWindow = ui->stacked_chat_browsers->currentWidget();
+	QLineEdit* lineEdit = qobject_cast<QLineEdit*>(currentChatWindow->layout()->itemAt(2)->widget());
+
+	QString receiver = chatWindows.key(currentChatWindow);
+	QString message = lineEdit->text();
+
+	if (message.isEmpty())
+	{
+		//empty message
+		return;
+	}
+
+	//build message
+	Message msg = Message::createChatMessage(receiver, QDateTime::currentDateTime(), message);
+
+	//send message
+	client->queue_message(msg);
+	client->deliver_queued_messages();
+
+	//append to the chat
+	appendToChatHistory(receiver, msg.getDateTime(), tr(
+		"<p style=\"margin-bottom:0em; margin-top:0em; text-align:left; width: 50%; font-size: 14px;\">%1"
+		"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
+		"</p>"
+	).arg(msg.getDateTime().toString("hh:mm:ss"), message));
+
+	lineEdit->clear();
+}
+
+void MainWindow::chatMessageReceived(const Message& message)
+{
+	appendToChatHistory(message.getSender(), message.getDateTime(), tr(
+		"<p style=\"margin-bottom:0em; margin-top:0em; text-align:right; width: 50%; font-size: 14px;\">%1"
+		"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
+		"</p>").arg(message.getDateTime().toString("hh:mm:ss"), message.getContent()));
+}
+
+void MainWindow::appendToChatHistory(QString chat_user_name, QDateTime dateTime, QString message)
+{
+	int index = getChatWindowIndex(chat_user_name);
+
+	//no chatWindow for that user exists -> create one
+	if (index == -1)
+	{
+		index = buildChatWindow(chat_user_name);
+	}
+
+	//add chatButton to the top
+	//1.check if chatButton exists
+	UserButton* chatButton = getChatButton(chat_user_name);
+	if (chatButton == nullptr)
+	{
+		chatButton = addChatButton(chat_user_name);
+	}
+
+	addTopChatButton(chatButton);
+	ChatBrowser* chatBrowser = getChatForIndex(index);
+	if (chatBrowser != nullptr)
+	{
+		chatBrowser->appendToChatHistory(dateTime, message);
+
+		//if chat is not currently shown -> show '+1 message' on chatButton
+		if (ui->stacked_chat_browsers->currentIndex() != index)
+		{
+			chatButton->messageReceived();
+		}
+	}
+}
+
+UserButton* MainWindow::addChatButton(const QString& chat_user_name)
+{
+	if (getChatButton(chat_user_name) == nullptr)
+	{
+		UserButton* chat_btn = new UserButton(chat_user_name, isContact(chat_user_name), hasIncomingContactRequest(chat_user_name), hasOutgoingContactRequest(chat_user_name));
+		connect(chat_btn, SIGNAL(addContact(const QString&)), client, SLOT(addContact(const QString&)));
+		connect(chat_btn, SIGNAL(removeContact(const QString&)), client, SLOT(removeContact(const QString&)));
+		connect(chat_btn, SIGNAL(userbutton_clicked(const QString&)), this, SLOT(showChatWindow(const QString&)));
+
+		addTopChatButton(chat_btn);
+
+		return chat_btn;
+	}
+
+	return nullptr;
+}
+
+UserButton* MainWindow::getChatButton(const QString& chat_name)
+{
+	for (auto chatButton : chatButtons)
+		if (chatButton->text() == chat_name)
+			return chatButton;
+
+	return nullptr;
+}
+
+ChatBrowser* MainWindow::getChatForIndex(int index)
+{
+	return qobject_cast<ChatBrowser*>(ui->stacked_chat_browsers->widget(index)->layout()->itemAt(1)->widget());
 }
 
 bool MainWindow::isContact(const QString& user_name)
@@ -301,12 +419,11 @@ void MainWindow::updateChatList()
 
 void MainWindow::addContact(const QString& contact)
 {
-	qDebug() << "addContact in mainwindow: " << contact;
-
 	//remove contact from friend-request
 	contact_requests.remove(contact);
 
 	updateSearchedUser(contact, true);
+	updateChatButton(contact, true);
 
 	UserButton* contactButton = new UserButton(contact, true);
 	contactButton->setState(UserState::offline);
@@ -320,17 +437,16 @@ void MainWindow::addContact(const QString& contact)
 
 void MainWindow::removeContact(const QString& contact)
 {
-	qDebug() << "removeContact in mainwindow: " << contact;
 	contacts[contact[0]].remove(contact);
 
 	updateSearchedUser(contact, false);
+	updateChatButton(contact, false);
 
 	updateContactList();
 }
 
 void MainWindow::addContactRequest(const QString& contact, ServerMessageType serverMessageType)
 {
-	qDebug() << "addContactRequest in mainwindow: " << contact;
 	UserButton* contact_request_button = new UserButton(contact);
 	contact_request_button->setFlags(serverMessageType);
 	connect(contact_request_button, SIGNAL(addContact(const QString&)), client, SLOT(addContact(const QString&)));
@@ -345,10 +461,10 @@ void MainWindow::addContactRequest(const QString& contact, ServerMessageType ser
 
 void MainWindow::removeContactRequest(const QString& contact)
 {
-	qDebug() << "removeContactRequest in mainwindow: " << contact;
 	contact_requests.remove(contact);
 
 	updateSearchedUser(contact, false);
+	updateChatButton(contact, false);
 
 	updateContactList();
 }
@@ -382,6 +498,21 @@ void MainWindow::updateSearchedUser(const QString& user_name, ServerMessageType 
 	UserButton* user_btn = getContactRequestButton(user_name);
 	if (user_btn != nullptr)
 		user_btn->setFlags(serverMessageType);
+}
+
+//for updating a searchedUser that was added/removed from contacts (so that context-menu shows the right tooltip + signals match)
+void MainWindow::updateChatButton(const QString& user_name, bool is_contact, bool incoming_contact_request, bool outgoing_contact_request)
+{
+	UserButton* chat_btn = getChatButton(user_name);
+	if (chat_btn != nullptr)
+		chat_btn->setFlags(is_contact, incoming_contact_request, outgoing_contact_request);
+}
+
+void MainWindow::updateChatButton(const QString& user_name, ServerMessageType serverMessageType)
+{
+	UserButton* chat_btn = getChatButton(user_name);
+	if (chat_btn != nullptr)
+		chat_btn->setFlags(serverMessageType);
 }
 
 void MainWindow::updateContactList()
