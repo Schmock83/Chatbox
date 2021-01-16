@@ -1,5 +1,5 @@
 #include "message.h"
-Message Message::createChatMessage(QString receiver, QDateTime dateTime, QString content, QString sender = "")
+Message Message::createChatMessage(QString receiver, QDateTime dateTime, QString content, QString sender)
 {
 	return Message(MessageType::chatMessage, dateTime, sender, content, receiver);
 }
