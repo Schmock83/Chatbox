@@ -71,6 +71,7 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(clearUI()), this, SLOT(clearUI()));
 	connect(client, SIGNAL(userStateChanged(QPair<QString, UserState>)), this, SLOT(userStateChanged(QPair<QString, UserState>)));
 	connect(client, SIGNAL(chatMessageReceived(const Message&)), this, SLOT(chatMessageReceived(const Message&)));
+	connect(client, SIGNAL(oldChatMessageReceived(const Message&, bool)), this, SLOT(oldChatMessageReceived(const Message&, bool)));
 }
 
 void MainWindow::setUpUi()
@@ -317,6 +318,21 @@ void MainWindow::chatMessageReceived(const Message& message)
 		"<p style=\"margin-bottom:0em; margin-top:0em; text-align:right; width: 50%; font-size: 14px;\">%1"
 		"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
 		"</p>").arg(message.getDateTime().toString("hh:mm:ss"), message.getContent()), message.getMessageType());
+}
+
+void MainWindow::oldChatMessageReceived(const Message& message, bool receiver)
+{
+	if (receiver)
+	{
+		chatMessageReceived(message);
+	}
+	else
+	{
+		appendToChatHistory(message.getReceiver(), message.getDateTime(), tr(
+			"<p style=\"margin-bottom:0em; margin-top:0em; text-align:left; width: 50%; font-size: 14px;\">%1"
+			"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
+			"</p>").arg(message.getDateTime().toString("hh:mm:ss"), message.getContent()), message.getMessageType());
+	}
 }
 
 void MainWindow::appendToChatHistory(QString chat_user_name, QDateTime dateTime, QString message, MessageType messageType)

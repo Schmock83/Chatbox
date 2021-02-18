@@ -106,5 +106,6 @@ private slots:
 	void registration_button_pressed();
 	void userStateChanged(QPair<QString, UserState>);
 	void chatMessageReceived(const Message&);
+	void oldChatMessageReceived(const Message&, bool);
 };
 #endif // MAINWINDOW_H

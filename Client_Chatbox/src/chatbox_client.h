@@ -17,6 +17,7 @@ private:
 	UI::Scene current_scene;
 	QList <Message> queued_messages;
 	mutable QMutex mutex;
+	QString current_user_name;
 
 	void handleLogin(const QString& username, const QString& unhashed_password);	//called by Mainwindow
 	void handleRegistration(const QString& username, const QString& unencrypted_password); //called by MainWindow
@@ -72,6 +73,7 @@ signals:
 	void clearUI();
 	void userStateChanged(QPair<QString, UserState>);
 	void chatMessageReceived(const Message&);
+	void oldChatMessageReceived(const Message&, bool);
 };
 
 #endif // CHATBOX_CLIENT_H

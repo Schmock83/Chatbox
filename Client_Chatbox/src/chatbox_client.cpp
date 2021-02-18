@@ -94,8 +94,6 @@ void Chatbox_Client::disconnected()
 
 void Chatbox_Client::handleMessage(const Message& message)
 {
-	qDebug() << "handleMessage called: ";
-	message.print();
 	//login and registration - response from server
 	if (current_scene == UI::Scene::welcomeScene) {
 		if (message.getMessageType() == MessageType::server_message) {
@@ -115,6 +113,7 @@ void Chatbox_Client::handleMessage(const Message& message)
 				emit enableButtons();
 				emit clearLoginPasswordEdit();
 				emit clearLoginStatusLabel();
+				current_user_name = message.getContent();
 				break;
 
 			case ServerMessageType::server_registrationFailed:
@@ -171,9 +170,13 @@ void Chatbox_Client::handleMessage(const Message& message)
 				break;
 			}
 		}
-		else if (message.getMessageType() == MessageType::chatMessage || message.getMessageType() == MessageType::old_message)
+		else if (message.getMessageType() == MessageType::chatMessage)
 		{
 			emit chatMessageReceived(message);
+		}
+		else if (message.getMessageType() == MessageType::old_message)
+		{
+			emit oldChatMessageReceived(message, (message.getReceiver() == current_user_name) ? true : false);
 		}
 	}
 }
