@@ -3,6 +3,10 @@ Message Message::createChatMessage(QString receiver, QDateTime dateTime, QString
 {
 	return Message(MessageType::chatMessage, dateTime, sender, content, receiver);
 }
+Message Message::createOldChatMessage(QString receiver, QDateTime dateTime, QString content, QString sender)
+{
+	return Message(MessageType::old_message, dateTime, sender, content, receiver);
+}
 Message Message::createLoginMessage(QDateTime dateTime, QString username, QString unhashed_password)
 {
 	//hash

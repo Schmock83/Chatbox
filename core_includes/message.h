@@ -79,6 +79,7 @@ private:
 
 public:
 	static Message createChatMessage(QString receiver, QDateTime dateTime, QString content, QString sender = "");
+	static Message createOldChatMessage(QString receiver, QDateTime dateTime, QString content, QString sender = "");
 	static Message createLoginMessage(QDateTime dateTime, QString username, QString unhashed_password);
 	static Message createRegistrationMessage(QDateTime dateTime, QString username, QString unhashed_password);
 	static Message createServerMessage(QDateTime dateTime, ServerMessageType serverMessageType, QString content);
