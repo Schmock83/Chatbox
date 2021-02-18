@@ -88,6 +88,11 @@ void Chatbox_Server::user_connected(User* user)
 	for (auto stored_message : database->get_stored_user_messages(user->get_user_name()))
 		queue_message(stored_message, user->get_tcp_socket());
 
+	//send old messages from last conversation
+	for (auto chat_user_name : user->get_chats())
+		for (auto old_message : database->get_last_conversation(user->get_user_name(), chat_user_name))
+			queue_message(old_message, user->get_tcp_socket());
+
 	//update last_login in db
 	user->update_last_login();
 }
