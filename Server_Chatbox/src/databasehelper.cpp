@@ -24,7 +24,7 @@ void DatabaseHelper::setupTable(const QString& table_scheme)
 	QMutexLocker locker(&mutex);
 	sql_query.prepare(table_scheme);
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 }
 
 int DatabaseHelper::get_user_id(const QString& user_name)
@@ -34,7 +34,7 @@ int DatabaseHelper::get_user_id(const QString& user_name)
 	sql_query.bindValue(":user_name", user_name);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	//no user found
 	if (!sql_query.first())
@@ -50,7 +50,7 @@ bool DatabaseHelper::construct_user(const QString& user_name, int& user_id, QDat
 	sql_query.bindValue(":user_name", user_name);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	//no user found
 	if (!sql_query.first())
@@ -70,7 +70,7 @@ QList<QString> DatabaseHelper::get_user_contacts(const int user_id)
 	sql_query.bindValue(":user_id", user_id);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	QList<QString>constacts;
 
@@ -94,7 +94,7 @@ QList<QString> DatabaseHelper::get_user_chats(const QString& user_name)
 	sql_query.bindValue(":user", user_name);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	QList<QString> chats;
 
@@ -113,7 +113,7 @@ QList<QString> DatabaseHelper::get_user_outgoing_contact_requests(const int user
 	sql_query.bindValue(":user_id", user_id);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	QList<QString>outgoing_contact_requests;
 
@@ -138,7 +138,7 @@ QList<QString> DatabaseHelper::get_user_incoming_contact_requests(const int user
 	sql_query.bindValue(":user_id", user_id);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	QList<QString>incomin_friend_requests;
 
@@ -163,7 +163,7 @@ QList<Message> DatabaseHelper::get_stored_user_messages(const QString& user_name
 	sql_query.bindValue(":receiver_user_name", user_name);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	QList<Message> stored_messages;
 
@@ -213,7 +213,7 @@ void DatabaseHelper::register_user(const QString& user_name, const QString& encr
 	sql_query.bindValue(":user_password", encrypted_password);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 }
 
 bool DatabaseHelper::user_registered(const QString& user_name)
@@ -223,7 +223,7 @@ bool DatabaseHelper::user_registered(const QString& user_name)
 	sql_query.bindValue(":user_name", user_name);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 	else
 		return (sql_query.first() && sql_query.value(0).toBool());
 }
@@ -235,7 +235,7 @@ bool DatabaseHelper::verify_user(const QString& user_name, const QString& unhash
 	sql_query.bindValue(":user_name", user_name);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	if (!sql_query.first())
 		return false;
@@ -253,7 +253,7 @@ void DatabaseHelper::update_last_login(const QString& user_name, const QDateTime
 	sql_query.bindValue(":user_name", user_name);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 }
 QList<QString> DatabaseHelper::get_users_like(const QString& user_name)
 {
@@ -262,7 +262,7 @@ QList<QString> DatabaseHelper::get_users_like(const QString& user_name)
 	sql_query.bindValue(":user_name", ("%" + user_name + "%"));
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	QList<QString> found_users;
 
@@ -282,7 +282,7 @@ void DatabaseHelper::add_user_contact(const int user_id, const int user_id_to_ad
 	sql_query.bindValue(":user_id2", user_id_to_add);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 }
 
 void DatabaseHelper::add_user_contact(const QString& user_name, const QString& user_name_to_add)
@@ -303,7 +303,7 @@ void DatabaseHelper::add_user_message(const Message& message)
 	sql_query.bindValue(":message", message.getContent());
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 }
 
 void DatabaseHelper::store_user_message(const Message& message)
@@ -316,7 +316,7 @@ void DatabaseHelper::store_user_message(const Message& message)
 	sql_query.bindValue(":message", message.getContent());
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 }
 
 void DatabaseHelper::delete_user_contact(const int user_id, const int user_id_to_del)
@@ -330,7 +330,7 @@ void DatabaseHelper::delete_user_contact(const int user_id, const int user_id_to
 	sql_query.bindValue(":user_id_to_del", user_id_to_del);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 }
 
 void DatabaseHelper::delete_user_contact(const QString& user_name, const QString& user_name_to_del)
@@ -349,7 +349,7 @@ bool DatabaseHelper::user_has_contact(const int user_id, const int contact_user_
 	sql_query.bindValue(":contact_user_id", contact_user_id);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	return sql_query.first() && sql_query.value(0).toBool();
 }
@@ -370,7 +370,7 @@ bool DatabaseHelper::user_has_outgoing_contact_request(const int user_id, const 
 	sql_query.bindValue(":outgoing_user_id", outgoing_user_id);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	return sql_query.first() && sql_query.value(0).toBool();
 }
@@ -391,7 +391,7 @@ bool DatabaseHelper::user_has_incoming_contact_request(const int user_id, const 
 	sql_query.bindValue(":outgoing_user_id", incoming_user_id);
 
 	if (!sql_query.exec())
-		throw data_base.lastError();
+		throw sql_query.lastError();
 
 	return sql_query.first() && sql_query.value(0).toBool();
 }
