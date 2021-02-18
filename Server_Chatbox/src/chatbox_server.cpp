@@ -84,6 +84,10 @@ void Chatbox_Server::user_connected(User* user)
 	//send the user all stored contacts + contact-requests
 	send_user_contacts(user);
 
+	//send stored messages
+	for (auto stored_message : database->get_stored_user_messages(user->get_user_name()))
+		queue_message(stored_message, user->get_tcp_socket());
+
 	//update last_login in db
 	user->update_last_login();
 }
