@@ -20,6 +20,10 @@ QList<QString> User::get_contacts() const
 {
 	return database->get_user_contacts(user_id);
 }
+QList<QString> User::get_chats() const
+{
+	return database->get_user_chats(user_name);
+}
 QList<QString> User::get_outgoing_contact_requests() const
 {
 	return database->get_user_outgoing_contact_requests(user_id);

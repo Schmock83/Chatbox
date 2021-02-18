@@ -87,6 +87,24 @@ QList<QString> DatabaseHelper::get_user_contacts(const QString& user_name)
 
 	return get_user_contacts(user_id);
 }
+QList<QString> DatabaseHelper::get_user_chats(const QString& user_name)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("SELECT DISTINCT sender_user_name FROM %1 WHERE receiver_user_name = :user UNION SELECT DISTINCT receiver_user_name FROM %1 WHERE sender_user_name = :user; ").arg(SEND_MESSAGES_TABLE));
+	sql_query.bindValue(":user", user_name);
+
+	if (!sql_query.exec())
+		throw data_base.lastError();
+
+	QList<QString> chats;
+
+	while (sql_query.next())
+	{
+		chats.append(sql_query.value(0).toString());
+	}
+
+	return chats;
+}
 QList<QString> DatabaseHelper::get_user_outgoing_contact_requests(const int user_id)
 {
 	QMutexLocker locker(&mutex);

@@ -37,6 +37,7 @@ public:
 	QList<QString> get_users_like(const QString& user_name);
 	QList<QString> get_user_contacts(const int user_id);
 	QList<QString> get_user_contacts(const QString& user_name);
+	QList<QString> get_user_chats(const QString& user_name); //get all user-names that user_name has chatted with (contacts included)
 	QList<QString> get_user_outgoing_contact_requests(const int user_id);
 	QList<QString> get_user_outgoing_contact_requests(const QString& user_name);
 	QList<QString> get_user_incoming_contact_requests(const int user_id);

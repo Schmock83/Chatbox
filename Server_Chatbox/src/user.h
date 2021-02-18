@@ -61,6 +61,7 @@ public:
 
 	void update_last_login();
 	QList<QString> get_contacts()const;
+	QList<QString> get_chats()const;
 	QList<QString> get_outgoing_contact_requests()const;
 	QList<QString> get_incoming_contact_requests()const;
 	void add_user_contact(const int user_id_to_add);
