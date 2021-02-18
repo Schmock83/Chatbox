@@ -68,7 +68,7 @@ signals:
 	void addContactSignal(const QString&);
 
 private slots:
-	void appendToChatHistory(QString chat_user_name, QDateTime dateTime, QString message);
+	void appendToChatHistory(QString chat_user_name, QDateTime dateTime, QString message, MessageType messageType = chatMessage);
 	void sendMessage();
 	void showChatWindow(const QString&);
 	void clearUI();

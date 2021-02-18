@@ -316,10 +316,10 @@ void MainWindow::chatMessageReceived(const Message& message)
 	appendToChatHistory(message.getSender(), message.getDateTime(), tr(
 		"<p style=\"margin-bottom:0em; margin-top:0em; text-align:right; width: 50%; font-size: 14px;\">%1"
 		"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
-		"</p>").arg(message.getDateTime().toString("hh:mm:ss"), message.getContent()));
+		"</p>").arg(message.getDateTime().toString("hh:mm:ss"), message.getContent()), message.getMessageType());
 }
 
-void MainWindow::appendToChatHistory(QString chat_user_name, QDateTime dateTime, QString message)
+void MainWindow::appendToChatHistory(QString chat_user_name, QDateTime dateTime, QString message, MessageType messageType)
 {
 	int index = getChatWindowIndex(chat_user_name);
 
@@ -343,8 +343,8 @@ void MainWindow::appendToChatHistory(QString chat_user_name, QDateTime dateTime,
 	{
 		chatBrowser->appendToChatHistory(dateTime, message);
 
-		//if chat is not currently shown -> show '+1 message' on chatButton
-		if (ui->stacked_chat_browsers->currentIndex() != index)
+		//if chat is not currently shown and its a 'new' chatMessage -> show '+1 message' on chatButton
+		if (messageType == MessageType::chatMessage && ui->stacked_chat_browsers->currentIndex() != index)
 		{
 			chatButton->messageReceived();
 		}
