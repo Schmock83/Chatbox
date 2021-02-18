@@ -180,7 +180,7 @@ QList<Message> DatabaseHelper::get_last_conversation(const QString& user_name1, 
 
 	while (sql_query.next())
 	{
-		Message m = Message::createChatMessage(sql_query.value(0).toString(), sql_query.value(1).toDateTime(), sql_query.value(2).toString(), sql_query.value(3).toString());
+		Message m = Message::createOldChatMessage(sql_query.value(0).toString(), sql_query.value(1).toDateTime(), sql_query.value(2).toString(), sql_query.value(3).toString());
 		conversation_messages.append(m);
 	}
 
