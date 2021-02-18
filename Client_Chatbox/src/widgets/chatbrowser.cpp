@@ -4,7 +4,7 @@ ChatBrowser::ChatBrowser()
 {
 	//show a 'No recorded Messages found' on an empty chat -> will be overwritten when first insertion happens
 	setHtml(tr("<p style=\"text-align:center; font-size: 14px;\">"
-		"<span style=\"background-color:powderblue; padding: 10px; border-radius: 10px;\">"
+		"<span style=\"padding: 10px; border-radius: 10px;\">"
 		"This chat is empty ..."
 		"</span></p>"));
 
@@ -78,7 +78,7 @@ void ChatBrowser::insertDateLabel(const QDateTime& datetime)
 
 	//insert dateLabel into chatBrowser, so user knows that all messages below are from that date
 	QString msg = tr("<p style=\"text-align:center; font-size: 14px;\">"
-		"<span style=\"background-color:powderblue; padding: 10px; border-radius: 10px;\">"
+		"<span style=\"padding: 10px; border-radius: 10px;\">"
 		"%1"
 		"</span></p>").arg(datetime.date().toString("dd.MM.yyyy"));
 	QPair<QDateTime, QString> datePair = QPair<QDateTime, QString>(dateTimeLabel, msg);
