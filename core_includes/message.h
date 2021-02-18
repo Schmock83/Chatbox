@@ -32,7 +32,8 @@ enum ServerMessageType {
 	server_storedContacts,
 	server_storedIncomingContactRequests,
 	server_storedOutgoingContactRequests,
-	server_userStateChanged
+	server_userStateChanged,
+	server_initializationDone
 };
 
 enum ClientRequestType {
