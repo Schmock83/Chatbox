@@ -147,7 +147,7 @@ QList<Message> DatabaseHelper::get_stored_user_messages(const QString& user_name
 	if (!sql_query.exec())
 		throw data_base.lastError();
 
-    QList<Message> stored_messages;
+	QList<Message> stored_messages;
 
 	while (sql_query.next())
 	{
@@ -163,6 +163,28 @@ QList<Message> DatabaseHelper::get_stored_user_messages(const QString& user_name
 		throw data_base.lastError();
 
 	return stored_messages;
+}
+
+QList<Message> DatabaseHelper::get_last_conversation(const QString& user_name1, const QString& user_name2, const QDate& conversation_date)
+{
+	QMutexLocker locker(&mutex);
+	sql_query.prepare(QString("SELECT receiver_user_name, dateTime, message, sender_user_name from %1 WHERE((sender_user_name = :user_1 AND receiver_user_name = :user_2) OR(sender_user_name = :user_2 AND receiver_user_name = :user_1)) AND DATE(dateTime) = (SELECT DATE(dateTime) FROM send_messages WHERE DATE(dateTime) <= :dateTime ORDER BY dateTime DESC LIMIT 1)").arg(SEND_MESSAGES_TABLE));
+	sql_query.bindValue(":user_1", user_name1);
+	sql_query.bindValue(":user_2", user_name2);
+	sql_query.bindValue(":dateTime", conversation_date);
+
+	if (!sql_query.exec())
+		throw sql_query.lastError();
+
+	QList<Message> conversation_messages;
+
+	while (sql_query.next())
+	{
+		Message m = Message::createChatMessage(sql_query.value(0).toString(), sql_query.value(1).toDateTime(), sql_query.value(2).toString(), sql_query.value(3).toString());
+		conversation_messages.append(m);
+	}
+
+	return conversation_messages;
 }
 
 void DatabaseHelper::register_user(const QString& user_name, const QString& encrypted_password)
