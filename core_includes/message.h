@@ -12,7 +12,8 @@ enum MessageType {
 	invalidMessageType = -1,
 	chatMessage = 0,
 	client_requestMessage,
-	server_message
+	server_message,
+	old_message
 };
 
 enum ServerMessageType {
