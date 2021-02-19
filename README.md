@@ -1,5 +1,7 @@
 # Chatbox
 
+![registration](/pictures/registration.png)
+
 ## Installtion:
 
 **download and install qt:** 
