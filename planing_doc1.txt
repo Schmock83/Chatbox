@@ -1,0 +1,8 @@
+TODO:
+
+- bugg stored messages and send messages
+
+-- > query older messages + loading animation
+-- > close chat (in client ui) 
+
+-- > remove thread-sleeps in server
