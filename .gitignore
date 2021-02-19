@@ -49,3 +49,5 @@ build*
 .qmake.stash
 *.vcxproj*
 *.sln
+
+planing_doc1.txt
