@@ -1,6 +1,6 @@
 # Chatbox
 
-![registration](/pictures/registration.png)
+![foxdemo](https://github.com/foxdemo/foxdemo.github.io/blob/master/assets/images/avatar.png)
 
 ## Installtion:
 
