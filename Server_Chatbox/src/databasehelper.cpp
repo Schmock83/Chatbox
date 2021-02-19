@@ -186,7 +186,7 @@ QList<Message> DatabaseHelper::get_stored_user_messages(const QString& user_name
 QList<Message> DatabaseHelper::get_last_conversation(const QString& user_name1, const QString& user_name2, const QDate& conversation_date)
 {
 	QMutexLocker locker(&mutex);
-	sql_query.prepare(QString("SELECT receiver_user_name, dateTime, message, sender_user_name from %1 WHERE((sender_user_name = :user_1 AND receiver_user_name = :user_2) OR(sender_user_name = :user_2 AND receiver_user_name = :user_1)) AND DATE(dateTime) = (SELECT DATE(dateTime) FROM send_messages WHERE DATE(dateTime) <= :dateTime ORDER BY dateTime DESC LIMIT 1)").arg(SEND_MESSAGES_TABLE));
+	sql_query.prepare(QString("SELECT receiver_user_name, dateTime, message, sender_user_name from %1 WHERE ((sender_user_name = :user_1 AND receiver_user_name = :user_2) OR (sender_user_name = :user_2 AND receiver_user_name = :user_1)) AND DATE(dateTime) = (SELECT DATE(dateTime) FROM send_messages WHERE ((sender_user_name = :user_1 AND receiver_user_name = :user_2) OR (sender_user_name = :user_2 AND receiver_user_name = :user_1)) AND DATE(dateTime) <= :dateTime ORDER BY dateTime DESC LIMIT 1);").arg(SEND_MESSAGES_TABLE));
 	sql_query.bindValue(":user_1", user_name1);
 	sql_query.bindValue(":user_2", user_name2);
 	sql_query.bindValue(":dateTime", conversation_date);
