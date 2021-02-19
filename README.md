@@ -1,5 +1,10 @@
 # Chatbox
 
+
+![](pictures/registration.png)
+![](pictures/writing.png)
+![](pictures/accepting_friend_request.png)
+
 ## Installtion:
 
 **download and install qt:** 
