@@ -54,6 +54,11 @@ void Chatbox_Client::establishSocketConnection()
 	socket->connectToHost(SERVER_IP, SERVER_PORT);
 }
 
+void Chatbox_Client::requestOlderMessages(Message message)
+{
+	Message::sendThroughSocket(socket, message);
+}
+
 void Chatbox_Client::searchUser(const QString& searchUser)
 {
 	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::searchUserRequest, searchUser);
@@ -167,6 +172,9 @@ void Chatbox_Client::handleMessage(const Message& message)
 				break;
 			case ServerMessageType::server_userStateChanged:
 				emit userStateChanged(message.getStringStateContent());
+				break;
+			case ServerMessageType::server_noOlderMessagesAvailable:
+				emit noOlderMessagesAvailable(message.getContent());
 				break;
 			}
 		}

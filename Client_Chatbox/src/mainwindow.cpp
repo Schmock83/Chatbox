@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget* parent)
 
 	setUpSignalSlotConnections();
 
-    initializeUI();
+	initializeUI();
 
 	emit establishSocketConnection_signal();
 }
@@ -72,6 +72,7 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(userStateChanged(QPair<QString, UserState>)), this, SLOT(userStateChanged(QPair<QString, UserState>)));
 	connect(client, SIGNAL(chatMessageReceived(const Message&)), this, SLOT(chatMessageReceived(const Message&)));
 	connect(client, SIGNAL(oldChatMessageReceived(const Message&, bool)), this, SLOT(oldChatMessageReceived(const Message&, bool)));
+	connect(client, SIGNAL(noOlderMessagesAvailable(QString)), this, SLOT(noOlderMessagesAvailable(QString)));
 }
 
 void MainWindow::initializeUI()
@@ -259,6 +260,7 @@ int MainWindow::buildChatWindow(const QString& user_name)
 	QPushButton* sendButton = new QPushButton("Send");
 
 	connect(sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
+	connect(chat, SIGNAL(queryEarlierMessages(QDateTime)), this, SLOT(requestOlderMessages(QDateTime)));
 
 	vboxLayout->addWidget(new QLabel(tr("Chat with ").append(user_name)));
 	vboxLayout->addWidget(chat);
@@ -277,6 +279,17 @@ int MainWindow::buildChatWindow(const QString& user_name)
 		addChatButton(user_name);
 
 	return index;
+}
+
+void MainWindow::requestOlderMessages(QDateTime dateTime)
+{
+	//get the current username of the open chat
+	QWidget* currentChatWindow = ui->stacked_chat_browsers->currentWidget();
+	QString username = chatWindows.key(currentChatWindow);
+
+	//delegate to client
+	Message request = Message::createClientRequstMessage(dateTime, ClientRequestType::olderMessages, username);
+	client->requestOlderMessages(request);
 }
 
 //when send button was clicked -> send message
@@ -332,6 +345,25 @@ void MainWindow::oldChatMessageReceived(const Message& message, bool receiver)
 			"<p style=\"margin-bottom:0em; margin-top:0em; text-align:left; width: 50%; font-size: 14px;\">%1"
 			"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
 			"</p>").arg(message.getDateTime().toString("hh:mm:ss"), message.getContent()), message.getMessageType());
+	}
+}
+
+void MainWindow::noOlderMessagesAvailable(QString username)
+{
+	//get the chatbrowser of the chatwindow associated with username
+
+	int index = getChatWindowIndex(username);
+
+	//no chatWindow for that user exists -> nothing to do
+	if (index == -1)
+	{
+		return;
+	}
+
+	ChatBrowser* chatBrowser = getChatForIndex(index);
+	if (chatBrowser != nullptr)
+	{
+		chatBrowser->noEarlierMessagesAvailable();
 	}
 }
 

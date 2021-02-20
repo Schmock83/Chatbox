@@ -38,7 +38,7 @@ private:
 	const int cooldown_secs = 6;
 	int cooldown_timer = cooldown_secs;
 
-    void initializeUI();
+	void initializeUI();
 	void setUpSignalSlotConnections();
 	void addTopChatButton(UserButton*);
 	void updateChatList();
@@ -107,5 +107,7 @@ private slots:
 	void userStateChanged(QPair<QString, UserState>);
 	void chatMessageReceived(const Message&);
 	void oldChatMessageReceived(const Message&, bool);
+	void requestOlderMessages(QDateTime);
+	void noOlderMessagesAvailable(QString);
 };
 #endif // MAINWINDOW_H

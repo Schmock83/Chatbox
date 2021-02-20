@@ -36,6 +36,7 @@ public slots:
 	void addContact(const QString&);
 	void removeContact(const QString&);
 	void deliver_queued_messages();
+	void requestOlderMessages(Message message);
 private slots:
 	//socket-handling
 	void disconnected();
@@ -74,6 +75,7 @@ signals:
 	void userStateChanged(QPair<QString, UserState>);
 	void chatMessageReceived(const Message&);
 	void oldChatMessageReceived(const Message&, bool);
+	void noOlderMessagesAvailable(QString);
 };
 
 #endif // CHATBOX_CLIENT_H
