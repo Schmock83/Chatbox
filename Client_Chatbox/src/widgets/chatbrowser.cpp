@@ -103,7 +103,7 @@ void ChatBrowser::noEarlierMessagesAvailable()
 	{
 		dateTime = QDateTime::fromString(tr("%1 00:00:00").arg(messages[0].first.toString("yyy-MM-dd")), "yyyy-MM-dd hh:mm:ss");
 		QString message = tr("<p style=\"text-align:center; font-size: 14px;\">"
-			"<span style=\"background-color:powderblue; padding: 10px; border-radius: 10px;\">"
+			"<span style=\"padding: 10px; border-radius: 10px;\">"
 			"No earlier messages are available"
 			"</span></p>");
 
