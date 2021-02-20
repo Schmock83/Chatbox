@@ -38,7 +38,7 @@ private:
 	const int cooldown_secs = 6;
 	int cooldown_timer = cooldown_secs;
 
-	void setUpUi();
+    void initializeUI();
 	void setUpSignalSlotConnections();
 	void addTopChatButton(UserButton*);
 	void updateChatList();

@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget* parent)
 
 	setUpSignalSlotConnections();
 
-	setUpUi();
+    initializeUI();
 
 	emit establishSocketConnection_signal();
 }
@@ -74,7 +74,7 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(oldChatMessageReceived(const Message&, bool)), this, SLOT(oldChatMessageReceived(const Message&, bool)));
 }
 
-void MainWindow::setUpUi()
+void MainWindow::initializeUI()
 {
 	ui->chats_grid_layout->setAlignment(Qt::AlignTop);
 	ui->contacts_layout->setAlignment(Qt::AlignTop);
