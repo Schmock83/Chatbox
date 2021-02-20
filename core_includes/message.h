@@ -33,7 +33,7 @@ enum ServerMessageType {
 	server_storedIncomingContactRequests,
 	server_storedOutgoingContactRequests,
 	server_userStateChanged,
-	server_initializationDone
+	server_noOlderMessagesAvailable,
 };
 
 enum ClientRequestType {
@@ -44,6 +44,7 @@ enum ClientRequestType {
 	addContact,
 	removeContact,
 	storedContacts,
+	olderMessages,
 };
 
 class Message
