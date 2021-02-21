@@ -122,14 +122,14 @@ void ChatBrowser::noEarlierMessagesAvailable()
 
 void ChatBrowser::sliderValueChanged()
 {
-	if (CursorAtTop())    //only show loadMessgesBtn, when Slider at top
+	if (CursorAtTop())    //only show loading animation, when Slider at top
 	{
 		if (loading_animation->state() == QMovie::Running)
 		{
 			loading_label->show();
 		}
 		else if (!messages.empty() && loading_animation->state() != QMovie::Running) {
-			//emit queryEarlierMessages(messages[0].first.addDays(-1));
+			emit queryEarlierMessages(messages[0].first.addDays(-1));
 			loading_animation->start();
 			loading_label->show();
 		}
