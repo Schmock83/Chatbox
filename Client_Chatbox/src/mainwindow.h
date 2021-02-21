@@ -107,7 +107,7 @@ private slots:
 	void userStateChanged(QPair<QString, UserState>);
 	void chatMessageReceived(const Message&);
 	void oldChatMessageReceived(const Message&, bool);
-	void requestOlderMessages(QDateTime);
+	void requestOlderMessages(QString, QDateTime);
 	void noOlderMessagesAvailable(QString);
 };
 #endif // MAINWINDOW_H

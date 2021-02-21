@@ -18,7 +18,7 @@ class ChatBrowser : public QTextBrowser
 {
 	Q_OBJECT
 public:
-	ChatBrowser();
+	ChatBrowser(QString chat_user_name);
 	void appendToChatHistory(QDateTime datetime, QString message);
 	bool CursorAtBottom();
 	bool CursorAtTop();
@@ -33,9 +33,10 @@ protected:
 private slots:
 	void sliderValueChanged();
 signals:
-	void queryEarlierMessages(QDateTime);
+	void queryEarlierMessages(QString, QDateTime);
 private:
 	QVector<QPair<QDateTime, QString>> messages;
+	QString chat_user_name;
 	QVector<QDate> date_messages;
 	QLabel* loading_label;
 	QMovie* loading_animation;

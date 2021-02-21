@@ -1,6 +1,7 @@
 #include "chatbrowser.h"
 
-ChatBrowser::ChatBrowser()
+ChatBrowser::ChatBrowser(QString chat_user_name)
+	:chat_user_name(chat_user_name)
 {
 	//show a 'No recorded Messages found' on an empty chat -> will be overwritten when first insertion happens
 	setHtml(tr("<p style=\"text-align:center; font-size: 14px;\">"
@@ -131,7 +132,7 @@ void ChatBrowser::sliderValueChanged()
 			loading_label->show();
 		}
 		else if (!messages.empty() && loading_animation->state() != QMovie::Running) {
-			emit queryEarlierMessages(messages[0].first.addDays(-1));
+			emit queryEarlierMessages(chat_user_name, messages[0].first.addDays(-1));
 			loading_animation->start();
 			loading_label->show();
 		}
@@ -153,7 +154,7 @@ void ChatBrowser::resizeEvent(QResizeEvent* event)
 void ChatBrowser::refreshLoadingLabel()
 {
 	//re-position label
-	loading_label->setGeometry((this->width() / 2) - 70, 10, 100, 80);
+	loading_label->setGeometry((this->width() / 2) - 70, 10, 120, 80);
 }
 
 bool ChatBrowser::CursorAtBottom()

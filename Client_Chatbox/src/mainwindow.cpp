@@ -256,11 +256,11 @@ int MainWindow::buildChatWindow(const QString& user_name)
 	//otherwise create widgets and add them to the chatStackedWidget
 	QWidget* chatWindow = new QWidget;
 	QVBoxLayout* vboxLayout = new QVBoxLayout;
-	ChatBrowser* chat = new ChatBrowser;
+	ChatBrowser* chat = new ChatBrowser(user_name);
 	QPushButton* sendButton = new QPushButton("Send");
 
 	connect(sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
-	connect(chat, SIGNAL(queryEarlierMessages(QDateTime)), this, SLOT(requestOlderMessages(QDateTime)));
+	connect(chat, SIGNAL(queryEarlierMessages(QString, QDateTime)), this, SLOT(requestOlderMessages(QString, QDateTime)));
 
 	vboxLayout->addWidget(new QLabel(tr("Chat with ").append(user_name)));
 	vboxLayout->addWidget(chat);
@@ -281,14 +281,10 @@ int MainWindow::buildChatWindow(const QString& user_name)
 	return index;
 }
 
-void MainWindow::requestOlderMessages(QDateTime dateTime)
+void MainWindow::requestOlderMessages(QString chat_user_name, QDateTime dateTime)
 {
-	//get the current username of the open chat
-	QWidget* currentChatWindow = ui->stacked_chat_browsers->currentWidget();
-	QString username = chatWindows.key(currentChatWindow);
-
 	//delegate to client
-	Message request = Message::createClientRequstMessage(dateTime, ClientRequestType::olderMessages, username);
+	Message request = Message::createClientRequstMessage(dateTime, ClientRequestType::olderMessages, chat_user_name);
 	client->requestOlderMessages(request);
 }
 
