@@ -18,7 +18,7 @@ ChatBrowser::ChatBrowser()
 	//refresh label to new center
 	refreshLoadingLabel();
 
-	//connect verticalSlider-valueChanged(int) slot with sliderValueChanged(int) --> to display the loadMessagesBtn whenever the user is at the top of the chatHistory
+	//connect verticalSlider-valueChanged(int) slot with sliderValueChanged(int) --> to display the loading animation whenever the user is at the top of the chatHistory
 	connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged()));
 }
 
@@ -32,6 +32,10 @@ void ChatBrowser::appendToChatHistory(QDateTime datetime, QString message)
 
 	if (messages.contains(pair)) //msg alredy in messages -> do nothing
 		return;
+
+	//check if date is after
+
+	return;
 
 	//if user was at the bottom of the chat -> set it to hte new bottom at the end
 
