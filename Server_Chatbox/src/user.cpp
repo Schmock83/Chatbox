@@ -32,6 +32,18 @@ QList<QString> User::get_incoming_contact_requests() const
 {
 	return database->get_user_incoming_contact_requests(user_id);
 }
+QList<Message> User::get_stored_user_messages() const
+{
+	return database->get_stored_user_messages(user_name);
+}
+QList<Message> User::get_last_conversation(const QString& conversation_user, const QDate& conversation_date)
+{
+	return database->get_last_conversation(user_name, conversation_user, conversation_date);
+}
+QList<Message> User::get_last_messages(int count, const QString& conversation_user) const
+{
+	return database->get_last_messages(count, user_name, conversation_user);
+}
 
 void User::add_user_contact(const int user_id_to_add)
 {
