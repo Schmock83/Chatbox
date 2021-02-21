@@ -229,6 +229,9 @@ void Chatbox_Server::handleUserRequest(const Message& message, QTcpSocket* clien
 	case ClientRequestType::storedContacts:
 		send_user_contacts(user);
 		break;
+	case ClientRequestType::olderMessages:
+		handleOlderMessagesRequest(message, user);
+		break;
 	}
 }
 void Chatbox_Server::handleAddContactRequest(const Message& message, User* user)
@@ -287,6 +290,30 @@ void Chatbox_Server::handleAddContactRequest(const Message& message, User* user)
 	}
 	catch (QSqlError error) {
 		qDebug() << "Error in handleAddContactRequest: " << error.text();
+	}
+}
+
+void Chatbox_Server::handleOlderMessagesRequest(const Message& message, User* user)
+{
+	QThread::currentThread()->sleep(2);
+	QList<Message> old_messages;
+	try {
+		old_messages = database->get_last_conversation(message.getContent(), user->get_user_name(), message.getDateTime().date());
+	}
+	catch (QSqlError error) {
+		qDebug() << "Error in handleOlderMessagesRequest: " << error.text();
+		Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_noOlderMessagesAvailable, message.getContent());
+		queue_message(reply, user);
+	}
+
+	if (old_messages.isEmpty()) //no older messages
+	{
+		Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_noOlderMessagesAvailable, message.getContent());
+		queue_message(reply, user);
+	}
+	else {
+		for (auto old_message : old_messages)
+			queue_message(old_message, user);
 	}
 }
 
