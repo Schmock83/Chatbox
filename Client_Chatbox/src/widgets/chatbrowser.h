@@ -11,7 +11,8 @@
 #include <QDateTime>
 #include <QVector>
 #include <QPair>
-#include <QPushButton>
+#include <QLabel>
+#include <QMovie>
 
 class ChatBrowser : public QTextBrowser
 {
@@ -25,19 +26,19 @@ public:
 	void displayMessages();
 	void insert(const QPair<QDateTime, QString>& pair);
 	void insertDateLabel(const QDateTime& datetime);
-	void refreshButton();
+	void refreshLoadingLabel();
 	void noEarlierMessagesAvailable();
 protected:
 	void resizeEvent(QResizeEvent* event);
 private slots:
-	void erlierMessagesBtnPressed();
 	void sliderValueChanged();
 signals:
 	void queryEarlierMessages(QDateTime);
 private:
 	QVector<QPair<QDateTime, QString>> messages;
 	QVector<QDate> date_messages;
-	QPushButton* loadMessagesBtn;
+	QLabel* loading_label;
+	QMovie* loading_animation;
 };
 
 #endif // CHATBROWSER_H

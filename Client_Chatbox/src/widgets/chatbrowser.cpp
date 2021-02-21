@@ -8,12 +8,15 @@ ChatBrowser::ChatBrowser()
 		"This chat is empty ..."
 		"</span></p>"));
 
-	//create a button that will be used to get earlier messages from the server
-	loadMessagesBtn = new QPushButton("Load erlier messages", this);
-	connect(loadMessagesBtn, SIGNAL(pressed()), this, SLOT(erlierMessagesBtnPressed()));
-	//loadMessagesBtn->setLayout(layout());
+	//initiate loading animation
+	loading_animation = new QMovie(":/loadingGifs/imgs/loading3.gif");
+	loading_label = new QLabel(this);
+	loading_label->setAlignment(Qt::AlignCenter);
+	loading_label->setMovie(loading_animation);
+	loading_label->hide();
+
 	//refresh button to new center
-	refreshButton();
+	refreshLoadingLabel();
 
 	//connect verticalSlider-valueChanged(int) slot with sliderValueChanged(int) --> to display the loadMessagesBtn whenever the user is at the top of the chatHistory
 	connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged()));
@@ -21,6 +24,10 @@ ChatBrowser::ChatBrowser()
 
 void ChatBrowser::appendToChatHistory(QDateTime datetime, QString message)
 {
+	//stop loading animation
+	loading_animation->stop();
+	loading_label->hide();
+
 	QPair<QDateTime, QString> pair = QPair<QDateTime, QString>(datetime, message);
 
 	if (messages.contains(pair)) //msg alredy in messages -> do nothing
@@ -94,8 +101,9 @@ void ChatBrowser::noEarlierMessagesAvailable()
 	//disconnect verticalSlider-valueChanged(int) slot with sliderValueChanged(int) --> to display the loadMessagesBtn whenever the user is at the top of the chatHistory
 	disconnect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged()));
 
-	//hide and disable button
-	loadMessagesBtn->hide();
+	//hide and disable loading animation
+	loading_animation->stop();
+	loading_label->hide();
 
 	//inform user in chatbrowser, that no erlier message are available
 	QDateTime dateTime;
@@ -112,19 +120,24 @@ void ChatBrowser::noEarlierMessagesAvailable()
 	}
 }
 
-void ChatBrowser::erlierMessagesBtnPressed()
-{
-	if (!messages.empty()) {
-		emit queryEarlierMessages(messages[0].first.addDays(-1));
-	}
-}
-
 void ChatBrowser::sliderValueChanged()
 {
 	if (CursorAtTop())    //only show loadMessgesBtn, when Slider at top
-		loadMessagesBtn->show();
+	{
+		if (loading_animation->state() == QMovie::Running)
+		{
+			loading_label->show();
+		}
+		else if (!messages.empty() && loading_animation->state() != QMovie::Running) {
+			//emit queryEarlierMessages(messages[0].first.addDays(-1));
+			loading_animation->start();
+			loading_label->show();
+		}
+	}
 	else
-		loadMessagesBtn->hide();
+	{
+		loading_label->hide();
+	}
 }
 
 void ChatBrowser::resizeEvent(QResizeEvent* event)
@@ -132,13 +145,13 @@ void ChatBrowser::resizeEvent(QResizeEvent* event)
 	QTextEdit::resizeEvent(event);
 
 	//re-size button
-	refreshButton();
+	refreshLoadingLabel();
 }
 
-void ChatBrowser::refreshButton()
+void ChatBrowser::refreshLoadingLabel()
 {
-	//re-position button
-	loadMessagesBtn->setGeometry((this->width() / 2) - 70, 0, 140, 30);
+	//re-position label
+	loading_label->setGeometry((this->width() / 2) - 70, 10, 100, 80);
 }
 
 bool ChatBrowser::CursorAtBottom()
