@@ -312,21 +312,14 @@ void MainWindow::sendMessage()
 	client->deliver_queued_messages();
 
 	//append to the chat
-	appendToChatHistory(receiver, msg.getDateTime(), tr(
-		"<p style=\"margin-bottom:0em; margin-top:0em; text-align:left; width: 50%; font-size: 14px;\">%1"
-		"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
-		"</p>"
-	).arg(msg.getDateTime().toString("hh:mm:ss"), message));
+	appendToChatHistory(receiver, msg);
 
 	lineEdit->clear();
 }
 
 void MainWindow::chatMessageReceived(const Message& message)
 {
-	appendToChatHistory(message.getSender(), message.getDateTime(), tr(
-		"<p style=\"margin-bottom:0em; margin-top:0em; text-align:right; width: 50%; font-size: 14px;\">%1"
-		"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
-		"</p>").arg(message.getDateTime().toString("hh:mm:ss"), message.getContent()), message.getMessageType());
+	appendToChatHistory(message.getSender(), message);
 }
 
 void MainWindow::oldChatMessageReceived(const Message& message, bool receiver)
@@ -337,10 +330,7 @@ void MainWindow::oldChatMessageReceived(const Message& message, bool receiver)
 	}
 	else
 	{
-		appendToChatHistory(message.getReceiver(), message.getDateTime(), tr(
-			"<p style=\"margin-bottom:0em; margin-top:0em; text-align:left; width: 50%; font-size: 14px;\">%1"
-			"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
-			"</p>").arg(message.getDateTime().toString("hh:mm:ss"), message.getContent()), message.getMessageType());
+		appendToChatHistory(message.getReceiver(), message);
 	}
 }
 
@@ -363,7 +353,7 @@ void MainWindow::noOlderMessagesAvailable(QString username)
 	}
 }
 
-void MainWindow::appendToChatHistory(QString chat_user_name, QDateTime dateTime, QString message, MessageType messageType)
+void MainWindow::appendToChatHistory(QString chat_user_name, const Message message)
 {
 	int index = getChatWindowIndex(chat_user_name);
 
@@ -385,10 +375,10 @@ void MainWindow::appendToChatHistory(QString chat_user_name, QDateTime dateTime,
 	ChatBrowser* chatBrowser = getChatForIndex(index);
 	if (chatBrowser != nullptr)
 	{
-		chatBrowser->appendToChatHistory(dateTime, message);
+		chatBrowser->appendToChatHistory(message);
 
 		//if chat is not currently shown and its a 'new' chatMessage -> show '+1 message' on chatButton
-		if (messageType == MessageType::chatMessage && ui->stacked_chat_browsers->currentIndex() != index)
+		if (message.getMessageType() == MessageType::chatMessage && ui->stacked_chat_browsers->currentIndex() != index)
 		{
 			chatButton->messageReceived();
 		}

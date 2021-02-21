@@ -14,12 +14,15 @@
 #include <QLabel>
 #include <QMovie>
 
+#include "../core_includes/message.h"
+
 class ChatBrowser : public QTextBrowser
 {
 	Q_OBJECT
 public:
 	ChatBrowser(QString chat_user_name);
 	void appendToChatHistory(QDateTime datetime, QString message);
+	void appendToChatHistory(const Message message);
 	bool CursorAtBottom();
 	bool CursorAtTop();
 	void setCursorToBottom();
