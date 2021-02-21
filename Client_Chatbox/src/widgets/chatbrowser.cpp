@@ -15,7 +15,7 @@ ChatBrowser::ChatBrowser()
 	loading_label->setMovie(loading_animation);
 	loading_label->hide();
 
-	//refresh button to new center
+	//refresh label to new center
 	refreshLoadingLabel();
 
 	//connect verticalSlider-valueChanged(int) slot with sliderValueChanged(int) --> to display the loadMessagesBtn whenever the user is at the top of the chatHistory
@@ -144,7 +144,7 @@ void ChatBrowser::resizeEvent(QResizeEvent* event)
 {
 	QTextEdit::resizeEvent(event);
 
-	//re-size button
+	//re-size label
 	refreshLoadingLabel();
 }
 
