@@ -85,12 +85,12 @@ void Chatbox_Server::user_connected(User* user)
 	send_user_contacts(user);
 
 	//send stored messages
-	for (auto stored_message : database->get_stored_user_messages(user->get_user_name()))
+	for (auto stored_message : user->get_stored_user_messages())
 		queue_message(stored_message, user->get_tcp_socket());
 
 	//send old messages (last 15)
 	for (auto chat_user_name : user->get_chats())
-		for (auto old_message : database->get_last_messages(15, user->get_user_name(), chat_user_name))
+		for (auto old_message : user->get_last_messages(15, chat_user_name))
 			queue_message(old_message, user->get_tcp_socket());
 
 	//update last_login in db
@@ -298,7 +298,7 @@ void Chatbox_Server::handleOlderMessagesRequest(const Message& message, User* us
 	QThread::currentThread()->sleep(2);
 	QList<Message> old_messages;
 	try {
-		old_messages = database->get_last_conversation(message.getContent(), user->get_user_name(), message.getDateTime().date());
+		old_messages = user->get_last_conversation(message.getContent(), message.getDateTime().date());
 	}
 	catch (QSqlError error) {
 		qDebug() << "Error in handleOlderMessagesRequest: " << error.text();
