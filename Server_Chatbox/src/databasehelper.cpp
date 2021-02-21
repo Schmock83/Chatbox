@@ -205,6 +205,35 @@ QList<Message> DatabaseHelper::get_last_conversation(const QString& user_name1, 
 	return conversation_messages;
 }
 
+QList<Message> DatabaseHelper::get_last_messages(int count, const QString& requesting_user, const QString& user_name)
+{
+	QList<Message> last_messages;
+	QDate date = QDate::currentDate();
+
+	do
+	{
+		auto last_conversation_msgs = get_last_conversation(requesting_user, user_name, date);
+
+		//no older messages
+		if (last_conversation_msgs.isEmpty())
+		{
+			Message m = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_noOlderMessagesAvailable, user_name);
+			last_messages.append(m);
+			return last_messages;
+		}
+
+		for (auto last_msg : last_conversation_msgs)
+		{
+			--count;
+			last_messages.append(last_msg);
+		}
+
+		date = last_conversation_msgs.back().getDateTime().addDays(-1).date();
+	} while (count > 0);
+
+	return last_messages;
+}
+
 void DatabaseHelper::register_user(const QString& user_name, const QString& encrypted_password)
 {
 	QMutexLocker locker(&mutex);

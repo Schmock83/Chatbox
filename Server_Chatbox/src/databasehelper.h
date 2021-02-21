@@ -44,6 +44,7 @@ public:
 	QList<QString> get_user_incoming_contact_requests(const QString& user_name);
 	QList<Message> get_stored_user_messages(const QString& user_name);
 	QList<Message> get_last_conversation(const QString& user_name1, const QString& user_name2, const QDate& conversation_date = QDate::currentDate());
+	QList<Message> get_last_messages(int count, const QString& requesting_user, const QString& user_name); //returns the last 'count' messages (full conversations - so might be more)
 	void add_user_contact(const int user_id, const int user_id_to_add); //for sending friend request + accepting incoming friend request
 	void add_user_contact(const QString& user_name, const QString& user_name_to_add);
 	void delete_user_contact(const int user_id, const int user_id_to_del); //for declining friend request + removing user
