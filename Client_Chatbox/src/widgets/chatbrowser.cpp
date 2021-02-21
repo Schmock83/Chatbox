@@ -35,8 +35,6 @@ void ChatBrowser::appendToChatHistory(QDateTime datetime, QString message)
 
 	//check if date is after
 
-	return;
-
 	//if user was at the bottom of the chat -> set it to hte new bottom at the end
 
 	//store if Cursor was at Bottom, because when we insert it will be repositioned
@@ -56,12 +54,12 @@ void ChatBrowser::appendToChatHistory(QDateTime datetime, QString message)
 //update chatBrowser (messages)
 void ChatBrowser::displayMessages()
 {
-	//clear current chatBrowser
-	clear();
+	QString html_output;
+	for (auto msg : messages) {
+		html_output += msg.second;
+	}
 
-	//display all the msgs
-	for (auto msg : messages)
-		setHtml(toHtml().append(msg.second));
+	setHtml(html_output);
 }
 
 void ChatBrowser::setCursorToBottom()
