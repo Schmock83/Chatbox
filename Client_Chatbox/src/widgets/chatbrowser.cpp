@@ -32,6 +32,10 @@ void ChatBrowser::appendToChatHistory(const Message message)
 			"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
 			"</p>"
 		).arg(message.getDateTime().toString("hh:mm:ss"), message.getContent()));
+
+		//if user just send a message -> jump back to bottom
+		if (message.getMessageType() == MessageType::chatMessage)
+			setCursorToBottom();
 	}
 	else
 	{
@@ -44,6 +48,9 @@ void ChatBrowser::appendToChatHistory(const Message message)
 
 void ChatBrowser::appendToChatHistory(QDateTime datetime, QString message)
 {
+	disconnect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged()));
+
+	int old_slider_pos = verticalScrollBar()->value();
 	//stop loading animation
 	loading_animation->stop();
 	loading_label->hide();
@@ -66,9 +73,12 @@ void ChatBrowser::appendToChatHistory(QDateTime datetime, QString message)
 	//update chatBrowser
 	displayMessages();
 
-	//when cursor was at the bottom before insertion -> re-set it to bottom
-	if (flag)
+	if (verticalScrollBar()->minimum() == verticalScrollBar()->maximum())
 		setCursorToBottom();
+	else
+		verticalScrollBar()->setValue(old_slider_pos);
+
+	connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged()));
 }
 
 //update chatBrowser (messages)
@@ -85,7 +95,9 @@ void ChatBrowser::displayMessages()
 
 void ChatBrowser::setCursorToBottom()
 {
+	disconnect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged()));
 	moveCursor(QTextCursor::MoveOperation::End);
+	connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged()));
 }
 
 bool compareFunc(const QPair<QDateTime, QString> pair1, const QPair<QDateTime, QString> pair2) {
