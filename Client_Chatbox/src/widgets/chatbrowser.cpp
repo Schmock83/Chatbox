@@ -80,11 +80,12 @@ void ChatBrowser::displayMessages()
 	}
 
 	setHtml(html_output);
+	ensureCursorVisible();
 }
 
 void ChatBrowser::setCursorToBottom()
 {
-	verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+	moveCursor(QTextCursor::MoveOperation::End);
 }
 
 bool compareFunc(const QPair<QDateTime, QString> pair1, const QPair<QDateTime, QString> pair2) {
