@@ -44,19 +44,25 @@ void Chatbox_Server::user_disconnected()
 
 void Chatbox_Server::notify_contacts(User* user)
 {
-	if (user->get_user_state() != UserState::offline)
-	{
-		auto contacts = user->get_contacts();
-		for (auto contact : contacts)
+	try {
+		if (user->get_user_state() != UserState::offline)
 		{
-			User* online_contact = get_user_for_user_name(contact);
-			//if contact online
-			if (online_contact != nullptr)
+			auto contacts = user->get_contacts();
+			for (auto contact : contacts)
 			{
-				Message contactStateChange = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_userStateChanged, QPair<QString, UserState>(user->get_user_name(), UserState::offline));
-				Message::sendThroughSocket(online_contact->get_tcp_socket(), contactStateChange);
+				User* online_contact = get_user_for_user_name(contact);
+				//if contact online
+				if (online_contact != nullptr)
+				{
+					Message contactStateChange = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_userStateChanged, QPair<QString, UserState>(user->get_user_name(), UserState::offline));
+					Message::sendThroughSocket(online_contact->get_tcp_socket(), contactStateChange);
+				}
 			}
 		}
+	}
+	catch (QSqlError error)
+	{
+		qDebug() << "error in notify_contacts: " << error.text();
 	}
 }
 
@@ -295,25 +301,24 @@ void Chatbox_Server::handleAddContactRequest(const Message& message, User* user)
 
 void Chatbox_Server::handleOlderMessagesRequest(const Message& message, User* user)
 {
-	QThread::currentThread()->sleep(2);
-	QList<Message> old_messages;
 	try {
-		old_messages = user->get_last_conversation(message.getContent(), message.getDateTime().date());
+		QThread::currentThread()->sleep(2);
+		QList<Message> old_messages = user->get_last_conversation(message.getContent(), message.getDateTime().date());
+
+		if (old_messages.isEmpty()) //no older messages
+		{
+			Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_noOlderMessagesAvailable, message.getContent());
+			queue_message(reply, user);
+		}
+		else {
+			for (auto old_message : old_messages)
+				queue_message(old_message, user);
+		}
 	}
 	catch (QSqlError error) {
 		qDebug() << "Error in handleOlderMessagesRequest: " << error.text();
 		Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_noOlderMessagesAvailable, message.getContent());
 		queue_message(reply, user);
-	}
-
-	if (old_messages.isEmpty()) //no older messages
-	{
-		Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_noOlderMessagesAvailable, message.getContent());
-		queue_message(reply, user);
-	}
-	else {
-		for (auto old_message : old_messages)
-			queue_message(old_message, user);
 	}
 }
 
