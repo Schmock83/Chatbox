@@ -11,6 +11,7 @@ CONFIG += c++11
 SOURCES += \
     ../core_includes/core.cpp \
     ../core_includes/message.cpp \
+    src/widgets/fading_information_box.cpp \
     src/chatbox_client.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
 HEADERS += \
     ../core_includes/core.h \
     ../core_includes/message.h \
+    src/widgets/fading_information_box.h \
     src/chatbox_client.h \
     src/mainwindow.h \
     src/widgets/chatbrowser.h \
@@ -28,6 +30,7 @@ HEADERS += \
     src/widgets/userbutton.h
 
 FORMS += \
+    forms/fading_information_box.ui \
     forms/mainwindow.ui
 
 RESOURCES += \
