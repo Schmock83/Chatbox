@@ -1,8 +1,9 @@
 TODO:
 
-- bugg stored messages and send messages
+-- > when enter is pressed send message
+-- > popup window for client (at the bottom - User XYZ has come online / error)
+	->send back 'an error occured on the server-side or sth' if sql error occurs
+-- > appearance button (online/offline) + icon
 
--- > query older messages + loading animation
--- > close chat (in client ui) 
 
 -- > remove thread-sleeps in server
