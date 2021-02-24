@@ -245,6 +245,10 @@ void Chatbox_Server::handleAddContactRequest(const Message& message, User* user)
 	//see if the contact is online
 	User* added_contact = get_user_for_user_name(message.getContent());
 
+	//if no user was found -> nothing to do
+	if (!user)
+		return;
+
 	try {
 		//user accepted incoming contact-request
 		if (user->has_incoming_contact_request(message.getContent()))
@@ -334,6 +338,10 @@ void Chatbox_Server::handleRemoveContactRequest(const Message& message, User* us
 {
 	//get the other user -> nullptr if offline
 	User* remove_contact = get_user_for_user_name(message.getContent());
+
+	//if no user was found -> nothing to do
+	if (!user)
+		return;
 
 	try {
 		//both users are contacts
