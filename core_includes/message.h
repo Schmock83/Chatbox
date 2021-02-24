@@ -34,6 +34,7 @@ enum ServerMessageType {
 	server_storedOutgoingContactRequests,
 	server_userStateChanged,
 	server_noOlderMessagesAvailable,
+	server_errorMessage,
 };
 
 enum ClientRequestType {
