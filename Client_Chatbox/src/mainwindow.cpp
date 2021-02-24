@@ -73,6 +73,7 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(chatMessageReceived(const Message&)), this, SLOT(chatMessageReceived(const Message&)));
 	connect(client, SIGNAL(oldChatMessageReceived(const Message&, bool)), this, SLOT(oldChatMessageReceived(const Message&, bool)));
 	connect(client, SIGNAL(noOlderMessagesAvailable(QString)), this, SLOT(noOlderMessagesAvailable(QString)));
+	connect(client, SIGNAL(showError(QString)), this, SLOT(showPopupInformationBox(QString)));
 }
 
 void MainWindow::initializeUI()

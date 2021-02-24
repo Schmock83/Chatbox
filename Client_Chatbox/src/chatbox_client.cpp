@@ -176,6 +176,9 @@ void Chatbox_Client::handleMessage(const Message& message)
 			case ServerMessageType::server_noOlderMessagesAvailable:
 				emit noOlderMessagesAvailable(message.getContent());
 				break;
+			case ServerMessageType::server_errorMessage:
+				emit showError(message.getContent());
+				break;
 			}
 		}
 		else if (message.getMessageType() == MessageType::chatMessage)

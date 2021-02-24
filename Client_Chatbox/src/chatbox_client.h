@@ -65,6 +65,7 @@ signals:
 	void setRegistrationError(QString new_error);
 	void setLoginStatus(QString new_status);
 	void setLoginError(QString new_error);
+	void showError(QString);
 	void startLoadingTimer();
 	void searchUsersSignal(QList<QString>);
 	void addContactSignal(const QString&);
