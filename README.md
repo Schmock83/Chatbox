@@ -1,9 +1,10 @@
 # Chatbox
 
-![registration](https://user-images.githubusercontent.com/60521362/108513592-1ca9a080-72c3-11eb-881d-599ba0e1e4e5.PNG)
-![writing](https://user-images.githubusercontent.com/60521362/108743987-b5495600-7539-11eb-9207-d665426d14a3.PNG)
-![accepting_friend_request](https://user-images.githubusercontent.com/60521362/109018382-5c53fc00-76b8-11eb-871e-4baadddf8215.PNG)
-![loading_older_messages](https://user-images.githubusercontent.com/60521362/108743980-b4b0bf80-7539-11eb-96f2-21ad228875da.PNG)
+![registration](https://user-images.githubusercontent.com/60521362/109019844-a8ec0700-76b9-11eb-85e6-9766fd04a65b.PNG)
+![login](https://user-images.githubusercontent.com/60521362/109019843-a8537080-76b9-11eb-9619-b1a117b6420d.PNG)
+![writing](https://user-images.githubusercontent.com/60521362/109019847-a8ec0700-76b9-11eb-94be-6a626c2f49ad.PNG)
+![accepting_friend_request](https://user-images.githubusercontent.com/60521362/109019839-a7bada00-76b9-11eb-9b4b-3da405c394c0.PNG)
+![loading_older_messages](https://user-images.githubusercontent.com/60521362/109019842-a8537080-76b9-11eb-8b23-59e88dbdf873.PNG)
 
 ## Installtion:
 
