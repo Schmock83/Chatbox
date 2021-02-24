@@ -34,7 +34,7 @@ private:
 		timer->stop();
 		hide();
 	}
-private slots:
+public slots:
 	void fade_in();
 	void fade_out();
 	void faded_out();
