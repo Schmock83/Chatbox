@@ -37,6 +37,7 @@ private:
 	mutable QMutex online_user_mutex;
 	QHash<QString, User*> authenticated_online_users;
 
+	void sendErrorMessage(User* user);
 	void handleMessage(const Message& message, QTcpSocket* client_socket);
 	void handleRegistration(const Message& message, QTcpSocket* client_socket);
 	void handleLogin(const Message& message, QTcpSocket* client_socket);

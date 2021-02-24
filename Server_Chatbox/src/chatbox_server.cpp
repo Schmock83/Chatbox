@@ -296,6 +296,7 @@ void Chatbox_Server::handleAddContactRequest(const Message& message, User* user)
 	}
 	catch (QSqlError error) {
 		qDebug() << "Error in handleAddContactRequest: " << error.text();
+		sendErrorMessage(user);
 	}
 }
 
@@ -319,7 +320,14 @@ void Chatbox_Server::handleOlderMessagesRequest(const Message& message, User* us
 		qDebug() << "Error in handleOlderMessagesRequest: " << error.text();
 		Message reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_noOlderMessagesAvailable, message.getContent());
 		queue_message(reply, user);
+		sendErrorMessage(user);
 	}
+}
+
+void Chatbox_Server::sendErrorMessage(User* user)
+{
+	Message error_reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_errorMessage, "An error occurd on the server side");
+	queue_message(error_reply, user);
 }
 
 void Chatbox_Server::handleRemoveContactRequest(const Message& message, User* user)
@@ -379,6 +387,7 @@ void Chatbox_Server::handleRemoveContactRequest(const Message& message, User* us
 	}
 	catch (QSqlError error) {
 		qDebug() << "Error in handleRemoveContactRequest: " << error.text();
+		sendErrorMessage(user);
 	}
 }
 
@@ -395,6 +404,7 @@ void Chatbox_Server::handleSearchUserRequest(const Message& message, User* user)
 		//error -> send back empty list...
 		Message error_reply = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_searchUserResult, QList<QString>());
 		queue_message(error_reply, user);
+		sendErrorMessage(user);
 	}
 	QThread::currentThread()->sleep(1);
 }
