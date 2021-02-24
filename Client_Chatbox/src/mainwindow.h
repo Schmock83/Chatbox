@@ -14,6 +14,7 @@
 #include "chatbox_client.h"
 #include "widgets/userbutton.h"
 #include "widgets/chatbrowser.h"
+#include "widgets/fading_information_box.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,6 +25,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 private:
 	Ui::MainWindow* ui;
+	Fading_Information_Box* information_box = nullptr;
 	Chatbox_Client* client;
 	QMovie* loadingAnimation;
 	QHash<QString, QWidget*> chatWindows;
@@ -57,6 +59,7 @@ private:
 	ChatBrowser* getChatForIndex(int index);
 	UserButton* getChatButton(const QString&);
 	UserButton* addChatButton(const QString&);
+	virtual void resizeEvent(QResizeEvent* event);
 public:
 	MainWindow(QWidget* parent = nullptr);
 	~MainWindow();
@@ -68,6 +71,7 @@ signals:
 	void addContactSignal(const QString&);
 
 private slots:
+	void showPopupInformationBox(const QString& str);
 	void appendToChatHistory(QString chat_user_name, const Message message);
 	void sendMessage();
 	void showChatWindow(const QString&);

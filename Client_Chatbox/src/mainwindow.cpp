@@ -163,6 +163,16 @@ void MainWindow::userStateChanged(QPair<QString, UserState> pair)
 	{
 		(*it)->setState(pair.second);
 	}
+
+	//show popup
+	if (pair.second == UserState::online)
+	{
+		showPopupInformationBox(QString("%1 went online").arg(pair.first));
+	}
+	else if (pair.second == UserState::offline)
+	{
+		showPopupInformationBox(QString("%1 went offline").arg(pair.first));
+	}
 }
 
 void MainWindow::addSearchedUsers(QList<QString> searchedUsers)
@@ -204,6 +214,22 @@ void MainWindow::setScene(UI::Scene scene)
 {
 	ui->sceneWidget->setCurrentIndex(scene);
 	emit sceneChanged(scene);
+
+	if (scene == UI::Scene::mainScene) {
+		if (!information_box)
+			information_box = new Fading_Information_Box(this);
+		information_box->setWindowFlag(Qt::WindowStaysOnTopHint);
+		information_box->setGeometry(this->width() - information_box->width(), this->height() - information_box->height(), information_box->width(), information_box->height());
+	}
+	else if (information_box) {//hide on other scenes
+		information_box->fade_out();
+	}
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+	if (ui->sceneWidget->currentIndex() == UI::Scene::mainScene && information_box)
+		information_box->setGeometry(this->width() - information_box->width(), this->height() - information_box->height(), information_box->width(), information_box->height());
 }
 
 //puts newTopButton to the front of chatButtons-list (adds or re-adds if already in list)
@@ -439,6 +465,14 @@ bool MainWindow::hasOutgoingContactRequest(const QString& user_name)
 	if (user_btn != nullptr)
 		return user_btn->outgoing_contact_request;
 	return false;
+}
+
+void MainWindow::showPopupInformationBox(const QString& str)
+{
+	if (information_box && ui->sceneWidget->currentIndex() == UI::Scene::mainScene)
+	{
+		information_box->showInfo(str);
+	}
 }
 
 void MainWindow::updateChatList()
