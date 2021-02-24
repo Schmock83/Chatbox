@@ -59,6 +59,7 @@ QDataStream& Message::writeToStream(QDataStream& stream, const Message& message)
 		case ServerMessageType::server_addOutgoingContactRequest:
 		case ServerMessageType::server_removeOutgoingContactRequest:
 		case ServerMessageType::server_noOlderMessagesAvailable:
+		case ServerMessageType::server_errorMessage:
 			stream << message.messageContents;
 			break;
 		case ServerMessageType::server_searchUserResult:
@@ -112,6 +113,7 @@ Message Message::readFromStream(QDataStream& stream)
 		case ServerMessageType::server_addOutgoingContactRequest:
 		case ServerMessageType::server_removeOutgoingContactRequest:
 		case ServerMessageType::server_noOlderMessagesAvailable:
+		case ServerMessageType::server_errorMessage:
 			stream >> messageContents;
 			return Message(messageType, serverMessageType, dateTime, messageContents);
 			break;
