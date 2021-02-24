@@ -285,13 +285,15 @@ int MainWindow::buildChatWindow(const QString& user_name)
 	QVBoxLayout* vboxLayout = new QVBoxLayout;
 	ChatBrowser* chat = new ChatBrowser(user_name);
 	QPushButton* sendButton = new QPushButton("Send");
+	QLineEdit* lineEdit = new QLineEdit;
 
 	connect(sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
 	connect(chat, SIGNAL(queryEarlierMessages(QString, QDateTime)), this, SLOT(requestOlderMessages(QString, QDateTime)));
+	connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(sendMessage()));
 
 	vboxLayout->addWidget(new QLabel(tr("Chat with ").append(user_name)));
 	vboxLayout->addWidget(chat);
-	vboxLayout->addWidget(new QLineEdit);
+	vboxLayout->addWidget(lineEdit);
 	vboxLayout->addWidget(sendButton);
 
 	chatWindow->setLayout(vboxLayout);
