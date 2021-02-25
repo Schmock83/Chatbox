@@ -119,6 +119,7 @@ void Chatbox_Client::handleMessage(const Message& message)
 				emit clearLoginPasswordEdit();
 				emit clearLoginStatusLabel();
 				current_user_name = message.getContent();
+				emit updateUserName(current_user_name);
 				break;
 
 			case ServerMessageType::server_registrationFailed:

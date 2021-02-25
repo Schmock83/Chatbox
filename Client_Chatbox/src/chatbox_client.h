@@ -47,6 +47,7 @@ private slots:
 	void sceneChanged(UI::Scene scene);
 
 signals:
+	void updateUserName(const QString&);
 	void setScene(UI::Scene);
 	void enableButtons();
 	void disableButtons();

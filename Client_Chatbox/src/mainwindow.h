@@ -71,6 +71,7 @@ signals:
 	void addContactSignal(const QString&);
 
 private slots:
+	void setUserNameLabel(const QString&);
 	void showPopupInformationBox(const QString& str);
 	void appendToChatHistory(QString chat_user_name, const Message message);
 	void sendMessage();

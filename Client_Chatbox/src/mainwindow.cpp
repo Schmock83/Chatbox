@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget* parent)
 
 	initializeUI();
 
-	emit establishSocketConnection_signal();
+	//emit establishSocketConnection_signal();
 }
 
 MainWindow::~MainWindow()
@@ -74,8 +74,9 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(oldChatMessageReceived(const Message&, bool)), this, SLOT(oldChatMessageReceived(const Message&, bool)));
 	connect(client, SIGNAL(noOlderMessagesAvailable(QString)), this, SLOT(noOlderMessagesAvailable(QString)));
 	connect(client, SIGNAL(showError(QString)), this, SLOT(showPopupInformationBox(QString)));
+	connect(client, SIGNAL(updateUserName(const QString&)), this, SLOT(setUserNameLabel(const QString&)));
 }
-
+#include <QPixmap>
 void MainWindow::initializeUI()
 {
 	ui->chats_grid_layout->setAlignment(Qt::AlignTop);
@@ -96,9 +97,12 @@ void MainWindow::initializeUI()
 
 	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::contactPage);
 
-	setScene(UI::Scene::loadingScene);
+	setScene(UI::Scene::mainScene);
 
 	updateContactList();
+
+	ui->user_state_label->setPixmap(QPixmap(":/userIcons/imgs/online.png").scaled(40, 30, Qt::AspectRatioMode::KeepAspectRatio));
+	ui->user_state_label->setToolTip("Go offline");
 }
 
 void MainWindow::clearUI()
@@ -468,6 +472,18 @@ bool MainWindow::hasOutgoingContactRequest(const QString& user_name)
 	if (user_btn != nullptr)
 		return user_btn->outgoing_contact_request;
 	return false;
+}
+
+void MainWindow::setUserNameLabel(const QString& str)
+{
+	//shorten username
+	if (str.size() > 10)
+	{
+		QStringRef shorted_user_name(&str, 0, 10);
+		ui->user_name_label->setText(shorted_user_name.toString().append("..."));
+	}
+	else
+		ui->user_name_label->setText(str);
 }
 
 void MainWindow::showPopupInformationBox(const QString& str)
