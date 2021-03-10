@@ -576,7 +576,7 @@
                      </font>
                     </property>
                     <property name="text">
-                     <string>MMMMMMMMMMMMMM</string>
+                     <string/>
                     </property>
                     <property name="scaledContents">
                      <bool>true</bool>
@@ -635,7 +635,7 @@
                         <x>0</x>
                         <y>0</y>
                         <width>187</width>
-                        <height>421</height>
+                        <height>418</height>
                        </rect>
                       </property>
                       <layout class="QGridLayout" name="gridLayout_12">
