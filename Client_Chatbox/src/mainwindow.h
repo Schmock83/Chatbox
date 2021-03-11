@@ -9,6 +9,7 @@
 #include <QHash>
 #include <QList>
 #include <QVBoxLayout>
+#include <QPixmap>
 
 #include "../core_includes/core.h"
 #include "chatbox_client.h"

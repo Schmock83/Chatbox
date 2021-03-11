@@ -76,7 +76,7 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(showError(QString)), this, SLOT(showPopupInformationBox(QString)));
 	connect(client, SIGNAL(updateUserName(const QString&)), this, SLOT(setUserNameLabel(const QString&)));
 }
-#include <QPixmap>
+
 void MainWindow::initializeUI()
 {
 	ui->chats_grid_layout->setAlignment(Qt::AlignTop);
@@ -102,7 +102,6 @@ void MainWindow::initializeUI()
 	updateContactList();
 
 	ui->user_state_label->setPixmap(QPixmap(":/userIcons/imgs/online.png").scaled(40, 30, Qt::AspectRatioMode::KeepAspectRatio));
-	ui->user_state_label->setToolTip("Go offline");
 }
 
 void MainWindow::clearUI()
