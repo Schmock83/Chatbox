@@ -107,13 +107,12 @@ private slots:
 	void search_line_edit_focussed();
 	void search_line_edit_unfocussed();
 	void search_line_edit_returnPressed();
-	void addSearchedUsers(QList<QString>);
+	void addSearchUserResults(QList<QString>);
 	void login_button_pressed();
 	void registration_button_pressed();
 	void userStateChanged(QPair<QString, UserState>);
 	void chatMessageReceived(const Message&);
 	void oldChatMessageReceived(const Message&, bool);
-	void requestOlderMessages(QString, QDateTime);
 	void noOlderMessagesAvailable(QString);
 };
 #endif // MAINWINDOW_H

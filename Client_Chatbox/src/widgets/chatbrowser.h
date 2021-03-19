@@ -36,7 +36,7 @@ protected:
 private slots:
 	void sliderValueChanged();
 signals:
-	void queryEarlierMessages(QString, QDateTime);
+	void requestOlderMessages(QString, QDateTime);
 private:
 	QVector<QPair<QDateTime, QString>> messages;
 	QString chat_user_name;

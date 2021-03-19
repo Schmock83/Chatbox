@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget* parent)
 
 	initializeUI();
 
-	//emit establishSocketConnection_signal();
+	emit establishSocketConnection_signal();
 }
 
 MainWindow::~MainWindow()
@@ -62,18 +62,18 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(setRegistrationError(QString)), this, SLOT(setRegistrationError(QString)));
 
 	connect(this, SIGNAL(searchUserSignal(const QString&)), client, SLOT(searchUser(const QString&)));
-	connect(client, SIGNAL(searchUsersSignal(QList<QString>)), this, SLOT(addSearchedUsers(QList<QString>)));
+	connect(client, SIGNAL(searchUserResultsReceived(QList<QString>)), this, SLOT(addSearchUserResults(QList<QString>)));
 	connect(this, SIGNAL(addContactSignal(const QString&)), client, SLOT(addContact(const QString&)));
 	connect(client, SIGNAL(addContactSignal(const QString&)), this, SLOT(addContact(const QString&)));
 	connect(client, SIGNAL(removeContactSignal(const QString&)), this, SLOT(removeContact(const QString&)));
-	connect(client, SIGNAL(addContactRequestSignal(const QString&, ServerMessageType)), this, SLOT(addContactRequest(const QString&, ServerMessageType)));
+	connect(client, SIGNAL(addContactRequest(const QString&, ServerMessageType)), this, SLOT(addContactRequest(const QString&, ServerMessageType)));
 	connect(client, SIGNAL(removeContactRequestSignal(const QString&)), this, SLOT(removeContactRequest(const QString&)));
 	connect(client, SIGNAL(clearUI()), this, SLOT(clearUI()));
 	connect(client, SIGNAL(userStateChanged(QPair<QString, UserState>)), this, SLOT(userStateChanged(QPair<QString, UserState>)));
 	connect(client, SIGNAL(chatMessageReceived(const Message&)), this, SLOT(chatMessageReceived(const Message&)));
 	connect(client, SIGNAL(oldChatMessageReceived(const Message&, bool)), this, SLOT(oldChatMessageReceived(const Message&, bool)));
 	connect(client, SIGNAL(noOlderMessagesAvailable(QString)), this, SLOT(noOlderMessagesAvailable(QString)));
-	connect(client, SIGNAL(showError(QString)), this, SLOT(showPopupInformationBox(QString)));
+	connect(client, SIGNAL(showMainWindowError(QString)), this, SLOT(showPopupInformationBox(QString)));
 	connect(client, SIGNAL(updateUserName(const QString&)), this, SLOT(setUserNameLabel(const QString&)));
 }
 
@@ -179,15 +179,15 @@ void MainWindow::userStateChanged(QPair<QString, UserState> pair)
 	}
 }
 
-void MainWindow::addSearchedUsers(QList<QString> searchedUsers)
+void MainWindow::addSearchUserResults(QList<QString> searchedUserResults)
 {
 	//delete everything from the searchUser-layout - including the loading label
 	deleteWidgetsFromLayout(ui->user_search_layout->layout());
 
 	UserButton* user_btn;
-	for (auto searchedUser : searchedUsers)
+	for (auto searchedUserResult : searchedUserResults)
 	{
-		user_btn = new UserButton(searchedUser, isContact(searchedUser), hasIncomingContactRequest(searchedUser), hasOutgoingContactRequest(searchedUser));
+		user_btn = new UserButton(searchedUserResult, isContact(searchedUserResult), hasIncomingContactRequest(searchedUserResult), hasOutgoingContactRequest(searchedUserResult));
 		connect(user_btn, SIGNAL(addContact(const QString&)), client, SLOT(addContact(const QString&)));
 		connect(user_btn, SIGNAL(removeContact(const QString&)), client, SLOT(removeContact(const QString&)));
 		connect(user_btn, SIGNAL(userbutton_clicked(const QString&)), this, SLOT(showChatWindow(const QString&)));
@@ -291,7 +291,7 @@ int MainWindow::buildChatWindow(const QString& user_name)
 	QLineEdit* lineEdit = new QLineEdit;
 
 	connect(sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
-	connect(chat, SIGNAL(queryEarlierMessages(QString, QDateTime)), this, SLOT(requestOlderMessages(QString, QDateTime)));
+	connect(chat, SIGNAL(requestOlderMessages(QString, QDateTime)), client, SLOT(requestOlderMessages(QString, QDateTime)));
 	connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(sendMessage()));
 
 	vboxLayout->addWidget(new QLabel(tr("Chat with ").append(user_name)));
@@ -311,13 +311,6 @@ int MainWindow::buildChatWindow(const QString& user_name)
 		addChatButton(user_name);
 
 	return index;
-}
-
-void MainWindow::requestOlderMessages(QString chat_user_name, QDateTime dateTime)
-{
-	//delegate to client
-	Message request = Message::createClientRequstMessage(dateTime, ClientRequestType::olderMessages, chat_user_name);
-	client->requestOlderMessages(request);
 }
 
 //when send button was clicked -> send message
@@ -676,11 +669,11 @@ void MainWindow::startLoadingPageAnimation() {
 void MainWindow::clearLoadingErrorLabel() { ui->loadingErrorLabel->clear(); }
 void MainWindow::clearLoginStatusLabel() { ui->login_statusLabel->clear(); }
 void MainWindow::clearRegistrationStatusLabel() { ui->registration_statusLabel->clear(); }
-void MainWindow::setLoadingStatus(QString new_status) { ui->loadingStatusLabel->setText(new_status); }
+void MainWindow::setLoadingStatus(QString new_status) { clearLoadingErrorLabel(); ui->loadingStatusLabel->setText(new_status); }
 void MainWindow::setLoadingError(QString new_error) { ui->loadingErrorLabel->setText(new_error); }
-void MainWindow::setRegistrationStatus(QString new_status) { ui->registration_statusLabel->setText(new_status); }
+void MainWindow::setRegistrationStatus(QString new_status) { clearLoginStatusLabel(); ui->registration_statusLabel->setText(new_status); }
 void MainWindow::setRegistrationError(QString new_error) { ui->registration_statusLabel->setText(QString("<div style='color: red'>%1</div>").arg(new_error)); }
-void MainWindow::setLoginStatus(QString new_status) { ui->login_statusLabel->setText(new_status); }
+void MainWindow::setLoginStatus(QString new_status) { clearRegistrationStatusLabel(); ui->login_statusLabel->setText(new_status); }
 void MainWindow::setLoginError(QString new_error) { ui->login_statusLabel->setText(QString("<div style='color: red'>%1</div>").arg(new_error)); }
 void MainWindow::startWelcomePageAnimation() { ui->welcomePage_loading_label->show(); }
 void MainWindow::stopLoadingPageAnimation() { ui->loadingPage_loading_label->hide(); }

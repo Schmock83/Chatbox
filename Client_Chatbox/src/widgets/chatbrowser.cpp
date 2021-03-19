@@ -164,7 +164,7 @@ void ChatBrowser::sliderValueChanged()
 			loading_label->show();
 		}
 		else if (!messages.empty() && loading_animation->state() != QMovie::Running) {
-			emit queryEarlierMessages(chat_user_name, messages[0].first.addDays(-1));
+			emit requestOlderMessages(chat_user_name, messages[0].first.addDays(-1));
 			loading_animation->start();
 			loading_label->show();
 		}
