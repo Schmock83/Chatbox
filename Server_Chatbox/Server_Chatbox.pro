@@ -46,6 +46,13 @@ message("Clear your project when changing kits")
     PRE_TARGETDEPS += $$PWD/../dependencies/libsodium/libsodium-msvc-2019/x64/Release/v142/dynamic/libsodium.lib
 }
 
+#FOR CLANG
+*-clang*{
+    message("Change your libsodium path (include & lib) for your libsodium installation - if not install do so with: brew install libsodium")
+    INCLUDEPATH += /usr/local/Cellar/libsodium/1.0.18_1/include
+    LIBS += /usr/local/Cellar/libsodium/1.0.18_1/lib/libsodium.a
+}
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
