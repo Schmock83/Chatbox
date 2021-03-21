@@ -28,6 +28,16 @@ enum UserState
 	online
 };
 
+enum ContactRequestType
+{
+    addIncomingContactRequest=0,
+    removeIncomingContactRequest,
+    addContact,
+    removeContact,
+    addOutgoingContactRequest,
+    removeOutgoingContactRequest
+};
+
 //UI-includes
 #include <QFile>
 #include <QTextStream>
