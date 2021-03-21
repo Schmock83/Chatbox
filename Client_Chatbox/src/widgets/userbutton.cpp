@@ -84,19 +84,19 @@ void UserButton::mousePressEvent(QMouseEvent* e)
 	}
 }
 
-void UserButton::setFlags(ServerMessageType serverMessageType)
+void UserButton::setFlags(ContactRequestType requestType)
 {
-	switch (serverMessageType)
+    switch (requestType)
 	{
-	case ServerMessageType::server_addContact:
+    case ContactRequestType::addContact:
 		is_contact = true;
 		outgoing_contact_request = incoming_contact_request = false;
 		break;
-	case ServerMessageType::server_addIncomingContactRequest:
+    case ContactRequestType::addIncomingContactRequest:
 		incoming_contact_request = true;
 		outgoing_contact_request = is_contact = false;
 		break;
-	case ServerMessageType::server_addOutgoingContactRequest:
+    case ContactRequestType::addOutgoingContactRequest:
 		outgoing_contact_request = true;
 		incoming_contact_request = is_contact = false;
 		break;

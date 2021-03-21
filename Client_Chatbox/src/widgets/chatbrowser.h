@@ -14,7 +14,7 @@
 #include <QLabel>
 #include <QMovie>
 
-#include "../core_includes/message.h"
+#include "../core_includes/messages/messagewrapper.h"
 
 class ChatBrowser : public QTextBrowser
 {
@@ -22,7 +22,7 @@ class ChatBrowser : public QTextBrowser
 public:
 	ChatBrowser(QString chat_user_name);
 	void appendToChatHistory(QDateTime datetime, QString message);
-	void appendToChatHistory(const Message message);
+    void appendToChatHistory(Client_Chat_Message* chat_Message);
 	bool CursorAtBottom();
 	bool CursorAtTop();
 	void setCursorToBottom();

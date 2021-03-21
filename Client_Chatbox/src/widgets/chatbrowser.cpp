@@ -23,26 +23,22 @@ ChatBrowser::ChatBrowser(QString chat_user_name)
 	connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged()));
 }
 
-void ChatBrowser::appendToChatHistory(const Message message)
+void ChatBrowser::appendToChatHistory(Client_Chat_Message* chat_Message)
 {
-	if (message.getReceiver() == chat_user_name)
+    if (chat_Message->getReceiver() == chat_user_name)
 	{
-		appendToChatHistory(message.getDateTime(), tr(
+        appendToChatHistory(chat_Message->getDateTime(), tr(
 			"<p style=\"margin-bottom:0em; margin-top:0em; text-align:left; width: 50%; font-size: 14px;\">%1"
 			"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
 			"</p>"
-		).arg(message.getDateTime().toString("hh:mm:ss"), message.getContent()));
-
-		//if user just send a message -> jump back to bottom
-		if (message.getMessageType() == MessageType::chatMessage)
-			setCursorToBottom();
+        ).arg(chat_Message->getDateTime().toString("hh:mm:ss"), chat_Message->getContent()));
 	}
 	else
 	{
-		appendToChatHistory(message.getDateTime(), tr(
+        appendToChatHistory(chat_Message->getDateTime(), tr(
 			"<p style=\"margin-bottom:0em; margin-top:0em; text-align:right; width: 50%; font-size: 14px;\">%1"
 			"<div style=\"font-size: 18px; margin-bottom: 1em;\">%2</div>"
-			"</p>").arg(message.getDateTime().toString("hh:mm:ss"), message.getContent()));
+            "</p>").arg(chat_Message->getDateTime().toString("hh:mm:ss"), chat_Message->getContent()));
 	}
 }
 

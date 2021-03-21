@@ -10,6 +10,7 @@
 #include <QList>
 #include <QVBoxLayout>
 #include <QPixmap>
+#include <QDateTime>
 
 #include "../core_includes/core.h"
 #include "chatbox_client.h"
@@ -47,9 +48,9 @@ private:
 	void updateChatList();
 	void updateContactList();
 	void updateSearchedUser(const QString&, bool = false, bool = false, bool = false);
-	void updateSearchedUser(const QString&, ServerMessageType);
+    void updateSearchedUser(const QString&, ContactRequestType);
 	void updateChatButton(const QString&, bool = false, bool = false, bool = false);
-	void updateChatButton(const QString&, ServerMessageType);
+    void updateChatButton(const QString&, ContactRequestType);
 	void deleteWidgetsFromLayout(QLayout*, bool = true);
 	bool isContact(const QString&);
 	bool hasIncomingContactRequest(const QString&);
@@ -74,7 +75,7 @@ signals:
 private slots:
 	void setUserNameLabel(const QString&);
 	void showPopupInformationBox(const QString& str);
-	void appendToChatHistory(QString chat_user_name, const Message message);
+    void appendToChatHistory(QString chat_user_name, Client_Chat_Message* chat_Message);
 	void sendMessage();
 	void showChatWindow(const QString&);
 	void clearUI();
@@ -82,7 +83,7 @@ private slots:
 	void on_contacts_button_clicked();
 	void addContact(const QString& contact);
 	void removeContact(const QString& contact);
-	void addContactRequest(const QString& contact, ServerMessageType serverMessageType);
+    void addContactRequest(const QString& contact, ContactRequestType requestType);
 	void removeContactRequest(const QString& contact);
 	void setScene(UI::Scene scene);
 	void setLoadingStatus(QString new_status);
@@ -111,8 +112,7 @@ private slots:
 	void login_button_pressed();
 	void registration_button_pressed();
 	void userStateChanged(QPair<QString, UserState>);
-	void chatMessageReceived(const Message&);
-	void oldChatMessageReceived(const Message&, bool);
+    void chatMessageReceived(Client_Chat_Message* chat_Message, QString current_Username);
 	void noOlderMessagesAvailable(QString);
 };
 #endif // MAINWINDOW_H

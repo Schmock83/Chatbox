@@ -1,5 +1,7 @@
 #include "chatbox_client.h"
 
+#include "../core_includes/messages/messagewrapper.h"
+
 Chatbox_Client::Chatbox_Client(QWidget* parent)
 	:QWidget(parent)
 	, socket(new QTcpSocket(this))
@@ -19,8 +21,8 @@ void Chatbox_Client::setUpSignalSlotConnections()
 void Chatbox_Client::new_data_in_socket()
 {
 	do {
-		Message message = Message::readFromSocket(socket);
-		handleMessage(message);
+        Base_Message* message = MessageWrapper::readMessageFromSocket(socket);
+        //handleMessage(message); //TODO
 	} while (!socket->atEnd());
 }
 
@@ -65,26 +67,26 @@ void Chatbox_Client::showLoadingScene()
 
 void Chatbox_Client::requestOlderMessages(QString chat_user_name, QDateTime dateTime)
 {
-	Message request = Message::createClientRequstMessage(dateTime, ClientRequestType::olderMessages, chat_user_name);
-	Message::sendThroughSocket(socket, request);
+    Base_Message* request_Message = new Send_Older_Messages_Request(chat_user_name, dateTime);
+    MessageWrapper::sendMessageThroughSocket(socket, request_Message);
 }
 
 void Chatbox_Client::searchUser(const QString& searchUser)
 {
-	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::searchUserRequest, searchUser);
-	Message::sendThroughSocket(socket, request);
+    Base_Message* request_Message = new Search_User_Request_Message(searchUser);
+    MessageWrapper::sendMessageThroughSocket(socket, request_Message);
 }
 
 void Chatbox_Client::addContact(const QString& contact)
 {
-	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::addContact, contact);
-	Message::sendThroughSocket(socket, request);
+    Base_Message* request_Message = new Add_Contact_Request_Message(contact);
+    MessageWrapper::sendMessageThroughSocket(socket, request_Message);
 }
 
 void Chatbox_Client::removeContact(const QString& contact)
 {
-	Message request = Message::createClientRequstMessage(QDateTime::currentDateTime(), ClientRequestType::removeContact, contact);
-	Message::sendThroughSocket(socket, request);
+    Base_Message* request_Message = new Remove_Contact_Request_Message(contact);
+    MessageWrapper::sendMessageThroughSocket(socket, request_Message);
 }
 
 void Chatbox_Client::sceneChanged(UI::Scene scene)
@@ -107,6 +109,8 @@ void Chatbox_Client::disconnected()
 	establishSocketConnection();
 }
 
+//TODO substitute by Message->handleMessage()
+/*
 void Chatbox_Client::handleMessage(const Message& message)
 {
 	//login and registration - response from server
@@ -163,16 +167,18 @@ void Chatbox_Client::handleMessage(const Message& message)
 			handleOldChatMessage(message);
 	}
 }
+*/
 
-void Chatbox_Client::handleLoginFailedMessage(const Message& message)
+//TODO ...
+/*void Chatbox_Client::handleLoginFailedMessage()
 {
-	setLoginError(message.getContent());
+    //setLoginError(message.getContent());
 	emit stopWelcomePageAnimation();
 	emit clearLoginPasswordEdit();
 	emit enableButtons();
-}
+}*/
 
-void Chatbox_Client::handleLoginSucceededMessage(const Message& message)
+/*void Chatbox_Client::handleLoginSucceededMessage()
 {
 	//delete all old items (e.g. contacts, contact_requests, chats...)
 	emit clearUI();
@@ -181,93 +187,88 @@ void Chatbox_Client::handleLoginSucceededMessage(const Message& message)
 	emit enableButtons();
 	emit clearLoginPasswordEdit();
 	emit clearLoginStatusLabel();
-	current_user_name = message.getContent();
+    //current_user_name = message.getContent();
 	emit updateUserName(current_user_name);
-}
+}*/
 
-void Chatbox_Client::handleRegistrationFailedMessage(const Message& message)
+/*void Chatbox_Client::handleRegistrationFailedMessage()
 {
 	emit stopWelcomePageAnimation();
-	setRegistrationError(message.getContent());
+    //setRegistrationError(message.getContent());
 	emit clearRegistrationPasswordEdit();
 	emit enableButtons();
-}
+}*/
 
-void Chatbox_Client::handleRegistrationSucceededMessage()
+/*void Chatbox_Client::handleRegistrationSucceededMessage()
 {
 	emit stopWelcomePageAnimation();
 	setRegistrationStatus("Successfully registered!");
 	emit clearRegistrationPasswordEdit();
 	emit enableButtons();
-}
+}*/
 
-void Chatbox_Client::handleStoredContactsMessage(const Message& message)
+/*void Chatbox_Client::handleStoredContactsMessage()
 {
-	for (const auto& contact : message.getStringList())
-		emit addContactSignal(contact);
-}
+    for (const auto& contact : message.getStringList())
+        emit addContactSignal(contact);
+}*/
 
-void Chatbox_Client::handleStoredIncomingContactRequestsMessage(const Message& message)
+/*void Chatbox_Client::handleStoredIncomingContactRequestsMessage()
 {
-	for (const auto& contact_request : message.getStringList())
-		emit addContactRequest(contact_request, ServerMessageType::server_addIncomingContactRequest);
-}
+    for (const auto& contact_request : message.getStringList())
+        emit addContactRequest(contact_request, ServerMessageType::server_addIncomingContactRequest);
+}*/
 
-void Chatbox_Client::handleStoredOutgoingContactRequestsMessaage(const Message& message)
+/*void Chatbox_Client::handleStoredOutgoingContactRequestsMessaage()
 {
-	for (const auto& contact_request : message.getStringList())
-		emit addContactRequest(contact_request, ServerMessageType::server_addOutgoingContactRequest);
-}
+    for (const auto& contact_request : message.getStringList())
+        emit addContactRequest(contact_request, ServerMessageType::server_addOutgoingContactRequest);
+}*/
 
-void Chatbox_Client::handleSearchUserResultMessage(const Message& message)
+/*void Chatbox_Client::handleSearchUserResultMessage()
 {
-	emit searchUserResultsReceived(message.getStringList());
-}
+    emit searchUserResultsReceived(message.getStringList());
+}*/
 
-void Chatbox_Client::handleAddContactMessage(const Message& message)
+/*void Chatbox_Client::handleAddContactMessage()
 {
-	emit addContactSignal(message.getContent());
-}
+    emit addContactSignal(message.getContent());
+}*/
 
-void Chatbox_Client::handleRemoveContactMessage(const Message& message)
+/*void Chatbox_Client::handleRemoveContactMessage()
 {
-	emit removeContactSignal(message.getContent());
-}
+    emit removeContactSignal(message.getContent());
+}*/
 
-void Chatbox_Client::handleAddContactRequestMessage(const Message& message)
+/*void Chatbox_Client::handleAddContactRequestMessage()
 {
-	emit addContactRequest(message.getContent(), message.getServerMessageType());
-}
+    emit addContactRequest(message.getContent(), message.getServerMessageType());
+}*/
 
-void Chatbox_Client::handleRemoveContactRequestMessage(const Message& message)
+/*void Chatbox_Client::handleRemoveContactRequestMessage()
 {
-	emit removeContactRequestSignal(message.getContent());
-}
+    emit removeContactRequestSignal(message.getContent());
+}*/
 
-void Chatbox_Client::handleUserStateChangedMessage(const Message& message)
+/*void Chatbox_Client::handleUserStateChangedMessage()
 {
-	emit userStateChanged(message.getStringStateContent());
-}
+    emit userStateChanged(message.getStringStateContent());
+}*/
 
-void Chatbox_Client::handleNoOlderMessagesAvailable(const Message& message)
+/*void Chatbox_Client::handleNoOlderMessagesAvailable()
 {
-	emit noOlderMessagesAvailable(message.getContent());
-}
+    emit noOlderMessagesAvailable(message.getContent());
+}*/
 
-void Chatbox_Client::handleErrorMessage(const Message& message)
+/*void Chatbox_Client::handleErrorMessage()
 {
-	emit showMainWindowError(message.getContent());
-}
+    emit showMainWindowError(message.getContent());
+}*/
 
-void Chatbox_Client::handleChatMessage(const Message& message)
+/*void Chatbox_Client::handleChatMessage()
 {
-	emit chatMessageReceived(message);
-}
-
-void Chatbox_Client::handleOldChatMessage(const Message& message)
-{
-	emit oldChatMessageReceived(message, (message.getReceiver() == current_user_name) ? true : false);
-}
+    emit chatMessageReceived(message);
+}*/
 
 void Chatbox_Client::handleLogin(const QString& username, const QString& unhashed_password)
 {
@@ -275,10 +276,11 @@ void Chatbox_Client::handleLogin(const QString& username, const QString& unhashe
 		emit setLoginStatus("Encrypting your password ...");
 
 		//hashes password -> might result in an Crypto_Error
-		Message loginMessage = Message::createLoginMessage(QDateTime::currentDateTime(), username, unhashed_password);
+        Login_Request_Message* login_Message = new Login_Request_Message(username, unhashed_password);//TODO hash+encrypt password
+        login_Message->hashPassword();
 
 		//queue message, so it gets send after thread execution
-		queue_message(loginMessage);
+        queue_message(login_Message);
 
 		emit clearLoginPasswordEdit();
 
@@ -315,10 +317,11 @@ void Chatbox_Client::handleRegistration(const QString& username, const QString& 
 		emit setRegistrationStatus("Encrypting your password ...");
 
 		//hashes password -> might result in an Crypto_Error
-		Message registrationMessage = Message::createRegistrationMessage(QDateTime::currentDateTime(), username, unencrypted_password);
+        Registration_Request_Message* registration_Message = new Registration_Request_Message(username, unencrypted_password);//todo hash+encrypt
+        registration_Message->encryptPassword();
 
 		//queue message, so it gets send after thread execution
-		queue_message(registrationMessage);
+        queue_message(registration_Message);
 
 		emit clearRegistrationPasswordEdit();
 
@@ -352,7 +355,7 @@ void Chatbox_Client::attemptRegistration(const QString& username, const QString&
 }
 
 //stores queued messages from different threads, so that mainThread can safely send them through the socket
-void Chatbox_Client::queue_message(Message message)
+void Chatbox_Client::queue_message(Base_Message* message)
 {
 	QMutexLocker locker(&mutex);
 	queued_messages.append(message);
@@ -362,9 +365,9 @@ void Chatbox_Client::queue_message(Message message)
 void Chatbox_Client::deliver_queued_messages()
 {
 	QMutexLocker locker(&mutex);
-	QList<Message>::iterator it = queued_messages.begin();
+    QList<Base_Message*>::iterator it = queued_messages.begin();
 	while (it != queued_messages.end()) {
-		Message::sendThroughSocket(socket, *it);
+        MessageWrapper::sendMessageThroughSocket(socket, *it);
 		it = queued_messages.erase(it);
 	}
 }
