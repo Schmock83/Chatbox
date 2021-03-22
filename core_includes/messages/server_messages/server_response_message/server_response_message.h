@@ -5,6 +5,8 @@
 
 class Server_Response_Message : public Server_Message
 {
+protected:
+    Server_Response_Message() {}
 public:
     enum Server_Response_Message_Type
     {
@@ -16,7 +18,6 @@ public:
         Search_User_Response_Message,
         Error_Response_Message
     };
-    Server_Response_Message() {}
     virtual QDataStream& writeToStream(QDataStream& stream) const
     {
         Server_Message::writeToStream(stream);

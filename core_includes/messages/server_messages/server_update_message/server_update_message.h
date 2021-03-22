@@ -5,6 +5,8 @@
 
 class Server_Update_Message : public Server_Message
 {
+protected:
+    Server_Update_Message() {}
 public:
     enum Server_Update_Message_Type
     {
@@ -19,7 +21,6 @@ public:
         User_Remove_Outgoing_Contact_Request_Update_Message,
         User_State_Changed_Update_Message
     };
-    Server_Update_Message() {}
     virtual QDataStream& writeToStream(QDataStream& stream) const
     {
         Server_Message::writeToStream(stream);

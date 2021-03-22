@@ -5,13 +5,14 @@
 
 class Client_Message : public Base_Message
 {
+protected:
+    Client_Message() {}
 public:
     enum Client_Message_Type
     {
         Client_Request_Message=0,
         Client_Chat_Message
     };
-    Client_Message() {}
     Base_Message_Type getBase_Message_Type()
     {
         return Base_Message_Type::Client_Message;

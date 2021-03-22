@@ -5,6 +5,8 @@
 
 class Client_Request_Message : public Client_Message
 {
+protected:
+    Client_Request_Message() {}
 public:
     enum Client_Request_Message_Type
     {
@@ -15,7 +17,6 @@ public:
         Remove_Contact_Request_Message,
         Search_User_Request_Message
     };
-    Client_Request_Message() {}
     virtual QDataStream& writeToStream(QDataStream& stream) const
     {
         Client_Message::writeToStream(stream);
