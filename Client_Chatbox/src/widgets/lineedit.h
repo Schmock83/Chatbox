@@ -1,6 +1,8 @@
 #ifndef LINEEDIT_H
 #define LINEEDIT_H
 
+//overloaded QLineEdit-class, that signals if its un-/focused etc.
+
 #include <QObject>
 #include <QLineEdit>
 #include <QEvent>
@@ -16,8 +18,7 @@ protected:
 	virtual void focusOutEvent(QFocusEvent* e);
 	virtual bool event(QEvent* e);
 private slots:
-	void textChanged_slot(const QString&);
-
+    void textChanged_slot(QString);
 signals:
 	void focussed();
 	void unfocussed();

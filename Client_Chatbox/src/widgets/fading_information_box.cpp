@@ -12,9 +12,9 @@ Fading_Information_Box::Fading_Information_Box(QWidget* parent) :
 	ui->label->setMouseTracking(true);
 
 	//intervall for timer
-	timer->setInterval(2000);
+    fadeTimer->setInterval(2000);
 
-	connect(timer, SIGNAL(timeout()), this, SLOT(fade_out()));
+    connect(fadeTimer, SIGNAL(timeout()), this, SLOT(fade_out()));
 
 	hide();
 }
@@ -25,7 +25,7 @@ Fading_Information_Box::~Fading_Information_Box()
 }
 
 void Fading_Information_Box::mouseMoveEvent(QMouseEvent* event) {
-	timer->stop();
+    fadeTimer->stop();
 
 	//if fade_out-animation is playing -> make it re-appear again
 	if (propertyAnimation && propertyAnimation->state() == QPropertyAnimation::Running)
@@ -39,14 +39,19 @@ void Fading_Information_Box::mouseMoveEvent(QMouseEvent* event) {
 	}
 
 	show();
-	timer->start();
+    fadeTimer->start();
+}
+
+void Fading_Information_Box::mousePressEvent(QMouseEvent* event) {
+    fadeTimer->stop();
+    hide();
 }
 
 //Code from https://stackoverflow.com/questions/19087822/how-to-make-qt-widgets-fade-in-or-fade-out
 void Fading_Information_Box::fade_in()
 {
 	//stop timer from previous fade_in
-	timer->stop();
+    fadeTimer->stop();
 
 	this->show();
 	this->setGraphicsEffect(eff);
@@ -80,7 +85,7 @@ void Fading_Information_Box::faded_in()
 {
 	disconnect(propertyAnimation, SIGNAL(finished()), this, SLOT(faded_in()));
 
-	timer->start();
+    fadeTimer->start();
 }
 
 void Fading_Information_Box::showInfo(const QString& string)

@@ -4,7 +4,7 @@ LineEdit::LineEdit(QWidget* parent)
 	:QLineEdit(parent)
 {
 	this->clearFocus();
-	connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged_slot(const QString&)));
+    connect(this, SIGNAL(textChanged(QString)), this, SLOT(textChanged_slot(QString)));
 }
 
 void LineEdit::focusInEvent(QFocusEvent* e)
@@ -19,7 +19,7 @@ void LineEdit::focusOutEvent(QFocusEvent* e)
 	emit unfocussed();
 }
 
-void LineEdit::textChanged_slot(const QString& newText)
+void LineEdit::textChanged_slot(QString newText)
 {
 	if (newText.isEmpty())
 	{
@@ -27,6 +27,7 @@ void LineEdit::textChanged_slot(const QString& newText)
 		emit clearButtonPressed();
 	}
 }
+
 bool LineEdit::event(QEvent* e)
 {
 	if (e->type() == QEvent::KeyPress)

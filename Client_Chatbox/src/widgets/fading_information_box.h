@@ -1,6 +1,10 @@
 #ifndef FADING_INFORMATION_BOX_H
 #define FADING_INFORMATION_BOX_H
 
+//class, that shows a little information-box that fades out after time
+//when mouse is moving over it, it will fade back in
+//when its clicked, it will disappear
+
 #include <QWidget>
 
 //for opacity effect
@@ -23,14 +27,11 @@ public:
 	void showInfo(const QString& string);
 private:
 	Ui::Fading_Information_Box* ui;
-	QTimer* timer = new QTimer(this);
+    QTimer* fadeTimer = new QTimer(this);
 	QGraphicsOpacityEffect* eff = new QGraphicsOpacityEffect(this);
 	QPropertyAnimation* propertyAnimation = nullptr;
 	void mouseMoveEvent(QMouseEvent* event);
-	void mousePressEvent(QMouseEvent* event) {
-		timer->stop();
-		hide();
-	}
+    void mousePressEvent(QMouseEvent* event);
 public slots:
 	void fade_in();
 	void fade_out();

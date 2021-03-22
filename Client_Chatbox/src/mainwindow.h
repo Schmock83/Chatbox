@@ -11,6 +11,7 @@
 #include <QVBoxLayout>
 #include <QPixmap>
 #include <QDateTime>
+#include <QLineEdit>
 
 #include "../core_includes/core.h"
 #include "chatbox_client.h"
@@ -62,6 +63,10 @@ private:
 	UserButton* getChatButton(const QString&);
 	UserButton* addChatButton(const QString&);
 	virtual void resizeEvent(QResizeEvent* event);
+    void showOnlineIcon();
+    void repositionInformationBox();
+    QWidget* getCurrentChatWindow();
+    QLineEdit* getCurrentLineEdit();
 public:
 	MainWindow(QWidget* parent = nullptr);
 	~MainWindow();

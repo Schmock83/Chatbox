@@ -13,6 +13,65 @@ void UserButton::messageReceived()
 	setText(tr("%1 (%2)").arg(original_text, QString::number(unreadMessageCount)));
 }
 
+void UserButton::showContactContextMenu(QMouseEvent* e)
+{
+    QMenu contextMenu(this);
+    QAction action1("remove friend", this);
+    QAction cancel_action("cancel", this);
+
+    connect(&action1, SIGNAL(triggered()), this, SLOT(removeContactClicked()));
+    connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
+
+    contextMenu.addAction(&action1);
+    contextMenu.addAction(&cancel_action);
+    contextMenu.exec(e->globalPos());
+}
+
+void UserButton::showIncomingContactRequestContextMenu(QMouseEvent* e)
+{
+    QMenu contextMenu(this);
+    QAction action1("accept friend request", this);
+    QAction action2("decline friend request", this);
+    QAction cancel_action("Cancel", this);
+
+    connect(&action1, SIGNAL(triggered()), this, SLOT(addContactClicked()));
+    connect(&action2, SIGNAL(triggered()), this, SLOT(removeContactClicked()));
+    connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
+
+    contextMenu.addAction(&action1);
+    contextMenu.addAction(&action2);
+    contextMenu.addAction(&cancel_action);
+    contextMenu.exec(e->globalPos());
+}
+
+void UserButton::showOutgoingContactRequestContextMenu(QMouseEvent* e)
+{
+    QMenu contextMenu(this);
+    QAction action1("cancel friend request", this);
+    QAction cancel_action("cancel", this);
+
+    connect(&action1, SIGNAL(triggered()), this, SLOT(removeContactClicked()));
+    connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
+
+    contextMenu.addAction(&action1);
+    contextMenu.addAction(&cancel_action);
+    contextMenu.exec(e->globalPos());
+}
+
+void UserButton::showDefaultContextMessage(QMouseEvent* e)
+{
+    QMenu contextMenu(this);
+    QAction action1("send friend request", this);
+    QAction cancel_action("cancel", this);
+
+    connect(&action1, SIGNAL(triggered()), this, SLOT(addContactClicked()));
+    connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
+
+    contextMenu.addAction(&action1);
+    contextMenu.addAction(&cancel_action);
+    contextMenu.exec(e->globalPos());
+}
+
 void UserButton::mousePressEvent(QMouseEvent* e)
 {
 	QPushButton::mousePressEvent(e);
@@ -20,58 +79,19 @@ void UserButton::mousePressEvent(QMouseEvent* e)
 	{
 		if (is_contact)
 		{
-			QMenu contextMenu(this);
-			QAction action1("remove friend", this);
-			QAction cancel_action("cancel", this);
-
-			connect(&action1, SIGNAL(triggered()), this, SLOT(removeContactClicked()));
-			connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
-
-			contextMenu.addAction(&action1);
-			contextMenu.addAction(&cancel_action);
-			contextMenu.exec(e->globalPos());
+            showContactContextMenu(e);
 		}
         else if (incoming_contact_request)
 		{
-			QMenu contextMenu(this);
-			QAction action1("accept friend request", this);
-			QAction action2("decline friend request", this);
-			QAction cancel_action("Cancel", this);
-
-			connect(&action1, SIGNAL(triggered()), this, SLOT(addContactClicked()));
-			connect(&action2, SIGNAL(triggered()), this, SLOT(removeContactClicked()));
-			connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
-
-			contextMenu.addAction(&action1);
-			contextMenu.addAction(&action2);
-			contextMenu.addAction(&cancel_action);
-			contextMenu.exec(e->globalPos());
+            showIncomingContactRequestContextMenu(e);
 		}
 		else if (outgoing_contact_request)
 		{
-			QMenu contextMenu(this);
-			QAction action1("cancel friend request", this);
-			QAction cancel_action("cancel", this);
-
-			connect(&action1, SIGNAL(triggered()), this, SLOT(removeContactClicked()));
-			connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
-
-			contextMenu.addAction(&action1);
-			contextMenu.addAction(&cancel_action);
-			contextMenu.exec(e->globalPos());
+            showOutgoingContactRequestContextMenu(e);
 		}
 		else
 		{
-			QMenu contextMenu(this);
-			QAction action1("send friend request", this);
-			QAction cancel_action("cancel", this);
-
-			connect(&action1, SIGNAL(triggered()), this, SLOT(addContactClicked()));
-			connect(&cancel_action, SIGNAL(triggered()), &contextMenu, SLOT(close()));
-
-			contextMenu.addAction(&action1);
-			contextMenu.addAction(&cancel_action);
-			contextMenu.exec(e->globalPos());
+            showDefaultContextMessage(e);
 		}
 	}
 	else if (e->button() == Qt::LeftButton)
@@ -126,5 +146,6 @@ void UserButton::setState(UserState newState)
 		break;
 	case UserState::unknown:
 		this->setIcon(QIcon());
+        break;
 	}
 }

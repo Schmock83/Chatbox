@@ -1,6 +1,8 @@
 #ifndef USERBUTTON_H
 #define USERBUTTON_H
 
+//Overloaded QPushButton, to display other users in the ui + show if they`re online/offline
+
 #include <QObject>
 #include <QPushButton>
 #include <QMouseEvent>
@@ -27,6 +29,12 @@ private:
 	UserState userState = UserState::unknown;
 	QString original_text;
 	int unreadMessageCount = 0;
+    void showContactContextMenu(QMouseEvent* e);
+    void showIncomingContactRequestContextMenu(QMouseEvent* e);
+    void showOutgoingContactRequestContextMenu(QMouseEvent* e);
+    void showDefaultContextMenu(QMouseEvent* e);
+    void showDefaultContextMessage(QMouseEvent* e);
+
 private slots:
 	void removeContactClicked();
 	void addContactClicked();

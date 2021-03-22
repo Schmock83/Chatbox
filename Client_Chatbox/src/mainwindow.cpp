@@ -76,6 +76,11 @@ void MainWindow::setUpSignalSlotConnections()
 	connect(client, SIGNAL(updateUserName(const QString&)), this, SLOT(setUserNameLabel(const QString&)));
 }
 
+void MainWindow::showOnlineIcon()
+{
+    ui->user_state_label->setPixmap(QPixmap(":/userIcons/imgs/online.png").scaled(40, 30, Qt::AspectRatioMode::KeepAspectRatio));
+}
+
 void MainWindow::initializeUI()
 {
 	ui->chats_grid_layout->setAlignment(Qt::AlignTop);
@@ -100,7 +105,7 @@ void MainWindow::initializeUI()
 
 	updateContactList();
 
-	ui->user_state_label->setPixmap(QPixmap(":/userIcons/imgs/online.png").scaled(40, 30, Qt::AspectRatioMode::KeepAspectRatio));
+    showOnlineIcon();
 }
 
 void MainWindow::clearUI()
@@ -149,7 +154,7 @@ void MainWindow::search_line_edit_returnPressed()
 	deleteWidgetsFromLayout(ui->user_search_layout->layout());
 
 	//show loading animation
-	QLabel* loadingLabel = new QLabel("Hello");
+    QLabel* loadingLabel = new QLabel();
 	loadingLabel->setAlignment(Qt::AlignCenter);
 	loadingLabel->setMovie(loadingAnimation);
 	loadingAnimation->start();
@@ -229,10 +234,16 @@ void MainWindow::setScene(UI::Scene scene)
 	}
 }
 
+void MainWindow::repositionInformationBox()
+{
+    if(information_box)
+        information_box->setGeometry(this->width() - information_box->width(), this->height() - information_box->height(), information_box->width(), information_box->height());
+}
+
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
-	if (ui->sceneWidget->currentIndex() == UI::Scene::mainScene && information_box)
-		information_box->setGeometry(this->width() - information_box->width(), this->height() - information_box->height(), information_box->width(), information_box->height());
+    if (ui->sceneWidget->currentIndex() == UI::Scene::mainScene)
+        repositionInformationBox();
 }
 
 //puts newTopButton to the front of chatButtons-list (adds or re-adds if already in list)
@@ -263,7 +274,7 @@ void MainWindow::showChatWindow(const QString& user_name)
 	UserButton* chat_btn = getChatButton(user_name);
 	if (chat_btn != nullptr)
 	{
-		//reset text
+        //reset text
 		chat_btn->setText(chat_btn->text());
 	}
 }
@@ -305,7 +316,7 @@ int MainWindow::buildChatWindow(const QString& user_name)
 
 	chatWindows[user_name] = chatWindow;
 
-	//create chat-button
+    //create chat-button if theres none
 	if (getChatButton(user_name) == nullptr)
 		addChatButton(user_name);
 
@@ -315,35 +326,47 @@ int MainWindow::buildChatWindow(const QString& user_name)
 //when send button was clicked -> send message
 void MainWindow::sendMessage()
 {
-	//get the current line-edit field containing the message
-	QWidget* currentChatWindow = ui->stacked_chat_browsers->currentWidget();
-	QLineEdit* lineEdit = qobject_cast<QLineEdit*>(currentChatWindow->layout()->itemAt(2)->widget());
+    //get the current line-edit field containing the message - might return nullptr if no current_ChatWindow exists
+    QLineEdit* currentLineEdit = getCurrentLineEdit();
 
-	QString receiver = chatWindows.key(currentChatWindow);
-	QString message = lineEdit->text();
+    //check if theres a current ChatWindow & lineEdit
+    if(getCurrentChatWindow() == nullptr || currentLineEdit == nullptr)
+        return;
+
+    QString receiver = chatWindows.key(getCurrentChatWindow());
+    QString message = currentLineEdit->text();
 
 	if (message.isEmpty())
 	{
-		//empty message
 		return;
 	}
 
-	//build message
-    //Message msg = Message::createChatMessage(receiver, QDateTime::currentDateTime(), message);
+    //actually build + send message
     Client_Chat_Message* chat_Message = new Client_Chat_Message(receiver, message, QDateTime::currentDateTime());
-
-	//send message
-    client->queue_message(chat_Message);
-	client->deliver_queued_messages();
+    MessageWrapper::sendMessageThroughSocket(client->getSocket(), chat_Message);
 
 	//append to the chat
     appendToChatHistory(receiver, chat_Message);
 
-	lineEdit->clear();
+    currentLineEdit->clear();
+}
+
+QWidget* MainWindow::getCurrentChatWindow()
+{
+    return ui->stacked_chat_browsers->currentWidget();
+}
+
+QLineEdit* MainWindow::getCurrentLineEdit()
+{
+    if(getCurrentChatWindow() != nullptr)
+        return qobject_cast<QLineEdit*>(getCurrentChatWindow()->layout()->itemAt(2)->widget());
+    else
+        return nullptr;
 }
 
 void MainWindow::chatMessageReceived(Client_Chat_Message* chat_Message, QString current_Username)
 {
+    //check if the client is receiver or sender
     if(chat_Message->getReceiver() == current_Username)
         appendToChatHistory(chat_Message->getSender(), chat_Message);
     else

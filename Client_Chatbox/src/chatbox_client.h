@@ -22,9 +22,9 @@ private:
     mutable QMutex mutex;
     QString current_user_name;
 
-    void handleLogin(const QString& username, const QString& unhashed_password);	//called by Mainwindow
+    void handleLogin(const QString& username, const QString& unhashed_password);
     void showLoginError(QString error_msg);
-    void handleRegistration(const QString& username, const QString& unencrypted_password); //called by MainWindow
+    void handleRegistration(const QString& username, const QString& unencrypted_password);
     void showRegistrationError(QString error_msg);
     void handleLoginSucceededMessage();
     void handleRegistrationFailedMessage();
@@ -47,9 +47,10 @@ public:
     void setUpSignalSlotConnections();
     void attemptLogin(const QString& username, const QString& unhashed_password);
     void attemptRegistration(const QString& username, const QString& unencrypted_password);
-    void queue_message(Base_Message* message);	//queue?s messages from threads, so that the main thread can safely send them through the socket
+    void queue_message(Base_Message* message);	//queue`s messages from threads, so that the main thread can safely send them through the socket
     void setCurrentUserName(QString user_name) {this->current_user_name = user_name;}
     QString getCurrentUserName() {return this->current_user_name;}
+    QTcpSocket* getSocket() {return socket;}
 public slots:
     void establishSocketConnection();
     void deliver_queued_messages();

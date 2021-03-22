@@ -23,6 +23,7 @@ void Chatbox_Client::new_data_in_socket()
 	do {
         Base_Message* message = MessageWrapper::readMessageFromSocket(socket);
         message->handleOnClientSide(this);
+        //free memory, allocated by readMessageFromSocket()
         delete message;
 	} while (!socket->atEnd());
 }
@@ -31,11 +32,7 @@ void Chatbox_Client::socketError()
 {
 	//show error in loading-screen
 	if (current_scene == UI::Scene::loadingScene) {
-        emit setLoadingError(tr("Error establishing connection: %1").arg(socket->errorString()));
-        //start cooldown-timer in mainWindow
-        emit startLoadingTimer();
-
-        //showLoadingSceneError();
+        showLoadingSceneError();
 	}
 	//if the socket is not valid - act as if its disconnected
 	else if (!socket->isValid())

@@ -3,7 +3,6 @@
 
 //Overloaded class of QTextBrowser - representing a chat
 //messages will be sorted by dateTime automatically
-//also give the user the possibility of requesting older messages, by pressing a button at the top of the chat
 
 #include <QObject>
 #include <QTextBrowser>
@@ -29,7 +28,7 @@ public:
 	void displayMessages();
 	void insert(const QPair<QDateTime, QString>& pair);
 	void insertDateLabel(const QDateTime& datetime);
-	void refreshLoadingLabel();
+    void repositionLoadingLabel();
 	void noEarlierMessagesAvailable();
 protected:
 	void resizeEvent(QResizeEvent* event);
@@ -43,6 +42,8 @@ private:
 	QVector<QDate> date_messages;
 	QLabel* loading_label;
 	QMovie* loading_animation;
+    void disableLoadingLabel();
+    void showNoEarlierMessagesAvailableInChat();
 };
 
 #endif // CHATBROWSER_H

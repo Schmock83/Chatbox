@@ -17,7 +17,7 @@ ChatBrowser::ChatBrowser(QString chat_user_name)
 	loading_label->hide();
 
 	//refresh label to new center
-	refreshLoadingLabel();
+    repositionLoadingLabel();
 
 	//connect verticalSlider-valueChanged(int) slot with sliderValueChanged(int) --> to display the loading animation whenever the user is at the top of the chatHistory
 	connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged()));
@@ -60,8 +60,6 @@ void ChatBrowser::appendToChatHistory(QDateTime datetime, QString message)
 
 	//if user was at the bottom of the chat -> set it to hte new bottom at the end
 
-	//store if Cursor was at Bottom, because when we insert it will be repositioned
-	bool flag = CursorAtBottom();
 	//insert message -> for display later
 	insert(pair);
 	//insert dateLabel into chatBrowser
@@ -81,7 +79,7 @@ void ChatBrowser::appendToChatHistory(QDateTime datetime, QString message)
 void ChatBrowser::displayMessages()
 {
 	QString html_output;
-	for (auto msg : messages) {
+    for (auto msg : messages) {
 		html_output += msg.second;
 	}
 
@@ -127,39 +125,45 @@ void ChatBrowser::insertDateLabel(const QDateTime& datetime)
 	}
 }
 
+void ChatBrowser::disableLoadingLabel()
+{
+    //hide and disable loading animation
+    loading_animation->stop();
+    loading_label->hide();
+}
+
+void ChatBrowser::showNoEarlierMessagesAvailableInChat()
+{
+    QDateTime dateTime;
+    dateTime = QDateTime::fromString(tr("%1 00:00:00").arg(messages[0].first.toString("yyy-MM-dd")), "yyyy-MM-dd hh:mm:ss");
+    QString message = tr("<p style=\"text-align:center; font-size: 14px;\">"
+        "<span style=\"padding: 10px; border-radius: 10px;\">"
+        "No earlier messages are available"
+        "</span></p>");
+
+    appendToChatHistory(dateTime, message);
+}
+
 void ChatBrowser::noEarlierMessagesAvailable()
 {
-	//disconnect verticalSlider-valueChanged(int) slot with sliderValueChanged(int) --> to display the loadMessagesBtn whenever the user is at the top of the chatHistory
+    //disconnect verticalSlider so that loadingAnimation isnt displayed
 	disconnect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged()));
 
-	//hide and disable loading animation
-	loading_animation->stop();
-	loading_label->hide();
+    disableLoadingLabel();
 
-	//inform user in chatbrowser, that no erlier message are available
-	QDateTime dateTime;
-	if (messages.size() > 0)
-	{
-		dateTime = QDateTime::fromString(tr("%1 00:00:00").arg(messages[0].first.toString("yyy-MM-dd")), "yyyy-MM-dd hh:mm:ss");
-		QString message = tr("<p style=\"text-align:center; font-size: 14px;\">"
-			"<span style=\"padding: 10px; border-radius: 10px;\">"
-			"No earlier messages are available"
-			"</span></p>");
-
-		//append message to chat
-		appendToChatHistory(dateTime, message);
-	}
+    //print out message "no earlier messages available"
+    showNoEarlierMessagesAvailableInChat();
 }
 
 void ChatBrowser::sliderValueChanged()
 {
-	if (CursorAtTop())    //only show loading animation, when Slider at top
+    if (CursorAtTop())  //only show loading animation, when Slider at top
 	{
-		if (loading_animation->state() == QMovie::Running)
+        if (loading_animation->state() == QMovie::Running)  //when user reached the top - show loadingAnimation if its running
 		{
 			loading_label->show();
 		}
-		else if (!messages.empty() && loading_animation->state() != QMovie::Running) {
+        else if (!messages.empty() && loading_animation->state() != QMovie::Running) {  //if the loadingAnimation isnt running -> start it
 			emit requestOlderMessages(chat_user_name, messages[0].first.addDays(-1));
 			loading_animation->start();
 			loading_label->show();
@@ -175,13 +179,11 @@ void ChatBrowser::resizeEvent(QResizeEvent* event)
 {
 	QTextEdit::resizeEvent(event);
 
-	//re-size label
-	refreshLoadingLabel();
+    repositionLoadingLabel();
 }
 
-void ChatBrowser::refreshLoadingLabel()
+void ChatBrowser::repositionLoadingLabel()
 {
-	//re-position label
 	loading_label->setGeometry((this->width() / 2) - 70, 10, 120, 80);
 }
 
