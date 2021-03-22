@@ -22,7 +22,7 @@ void Chatbox_Client::new_data_in_socket()
 {
 	do {
         Base_Message* message = MessageWrapper::readMessageFromSocket(socket);
-        //handleMessage(message); //TODO
+        message->handleOnClientSide(this);
 	} while (!socket->atEnd());
 }
 
@@ -109,174 +109,13 @@ void Chatbox_Client::disconnected()
 	establishSocketConnection();
 }
 
-//TODO substitute by Message->handleMessage()
-/*
-void Chatbox_Client::handleMessage(const Message& message)
-{
-	//login and registration - response from server
-	if (current_scene == UI::Scene::welcomeScene) {
-		if (message.getMessageType() == MessageType::server_message) {
-			switch (message.getServerMessageType()) {
-			case ServerMessageType::server_loginFailed:
-				handleLoginFailedMessage(message); break;
-
-			case ServerMessageType::server_loginSucceeded:
-				handleLoginSucceededMessage(message); break;
-
-			case ServerMessageType::server_registrationFailed:
-				handleRegistrationFailedMessage(message); break;
-
-			case ServerMessageType::server_registrationSucceeded:
-				handleRegistrationSucceededMessage(); break;
-			}
-		}
-	}
-	else if (current_scene == UI::Scene::mainScene) {
-		if (message.getMessageType() == MessageType::server_message) {
-			switch (message.getServerMessageType())
-			{
-			case ServerMessageType::server_storedContacts:
-				handleStoredContactsMessage(message); break;
-			case ServerMessageType::server_storedIncomingContactRequests:
-				handleStoredIncomingContactRequestsMessage(message); break;
-			case ServerMessageType::server_storedOutgoingContactRequests:
-				handleStoredOutgoingContactRequestsMessaage(message); break;
-			case ServerMessageType::server_searchUserResult:
-				handleSearchUserResultMessage(message); break;
-			case ServerMessageType::server_addContact:
-				handleAddContactMessage(message); break;
-			case ServerMessageType::server_removeContact:
-				handleRemoveContactMessage(message); break;
-			case ServerMessageType::server_addIncomingContactRequest:
-			case ServerMessageType::server_addOutgoingContactRequest:
-				handleAddContactRequestMessage(message); break;
-			case ServerMessageType::server_removeIncomingContactRequest:
-			case ServerMessageType::server_removeOutgoingContactRequest:
-				handleRemoveContactRequestMessage(message); break;
-			case ServerMessageType::server_userStateChanged:
-				handleUserStateChangedMessage(message); break;
-			case ServerMessageType::server_noOlderMessagesAvailable:
-				handleNoOlderMessagesAvailable(message); break;
-			case ServerMessageType::server_errorMessage:
-				handleErrorMessage(message); break;
-			}
-		}
-		else if (message.getMessageType() == MessageType::chatMessage)
-			handleChatMessage(message);
-		else if (message.getMessageType() == MessageType::old_message)
-			handleOldChatMessage(message);
-	}
-}
-*/
-
-//TODO ...
-/*void Chatbox_Client::handleLoginFailedMessage()
-{
-    //setLoginError(message.getContent());
-	emit stopWelcomePageAnimation();
-	emit clearLoginPasswordEdit();
-	emit enableButtons();
-}*/
-
-/*void Chatbox_Client::handleLoginSucceededMessage()
-{
-	//delete all old items (e.g. contacts, contact_requests, chats...)
-	emit clearUI();
-	emit setScene(UI::Scene::mainScene);
-	emit stopWelcomePageAnimation();
-	emit enableButtons();
-	emit clearLoginPasswordEdit();
-	emit clearLoginStatusLabel();
-    //current_user_name = message.getContent();
-	emit updateUserName(current_user_name);
-}*/
-
-/*void Chatbox_Client::handleRegistrationFailedMessage()
-{
-	emit stopWelcomePageAnimation();
-    //setRegistrationError(message.getContent());
-	emit clearRegistrationPasswordEdit();
-	emit enableButtons();
-}*/
-
-/*void Chatbox_Client::handleRegistrationSucceededMessage()
-{
-	emit stopWelcomePageAnimation();
-	setRegistrationStatus("Successfully registered!");
-	emit clearRegistrationPasswordEdit();
-	emit enableButtons();
-}*/
-
-/*void Chatbox_Client::handleStoredContactsMessage()
-{
-    for (const auto& contact : message.getStringList())
-        emit addContactSignal(contact);
-}*/
-
-/*void Chatbox_Client::handleStoredIncomingContactRequestsMessage()
-{
-    for (const auto& contact_request : message.getStringList())
-        emit addContactRequest(contact_request, ServerMessageType::server_addIncomingContactRequest);
-}*/
-
-/*void Chatbox_Client::handleStoredOutgoingContactRequestsMessaage()
-{
-    for (const auto& contact_request : message.getStringList())
-        emit addContactRequest(contact_request, ServerMessageType::server_addOutgoingContactRequest);
-}*/
-
-/*void Chatbox_Client::handleSearchUserResultMessage()
-{
-    emit searchUserResultsReceived(message.getStringList());
-}*/
-
-/*void Chatbox_Client::handleAddContactMessage()
-{
-    emit addContactSignal(message.getContent());
-}*/
-
-/*void Chatbox_Client::handleRemoveContactMessage()
-{
-    emit removeContactSignal(message.getContent());
-}*/
-
-/*void Chatbox_Client::handleAddContactRequestMessage()
-{
-    emit addContactRequest(message.getContent(), message.getServerMessageType());
-}*/
-
-/*void Chatbox_Client::handleRemoveContactRequestMessage()
-{
-    emit removeContactRequestSignal(message.getContent());
-}*/
-
-/*void Chatbox_Client::handleUserStateChangedMessage()
-{
-    emit userStateChanged(message.getStringStateContent());
-}*/
-
-/*void Chatbox_Client::handleNoOlderMessagesAvailable()
-{
-    emit noOlderMessagesAvailable(message.getContent());
-}*/
-
-/*void Chatbox_Client::handleErrorMessage()
-{
-    emit showMainWindowError(message.getContent());
-}*/
-
-/*void Chatbox_Client::handleChatMessage()
-{
-    emit chatMessageReceived(message);
-}*/
-
 void Chatbox_Client::handleLogin(const QString& username, const QString& unhashed_password)
 {
 	try {
 		emit setLoginStatus("Encrypting your password ...");
 
 		//hashes password -> might result in an Crypto_Error
-        Login_Request_Message* login_Message = new Login_Request_Message(username, unhashed_password);//TODO hash+encrypt password
+        Login_Request_Message* login_Message = new Login_Request_Message(username, unhashed_password);
         login_Message->hashPassword();
 
 		//queue message, so it gets send after thread execution
@@ -317,7 +156,7 @@ void Chatbox_Client::handleRegistration(const QString& username, const QString& 
 		emit setRegistrationStatus("Encrypting your password ...");
 
 		//hashes password -> might result in an Crypto_Error
-        Registration_Request_Message* registration_Message = new Registration_Request_Message(username, unencrypted_password);//todo hash+encrypt
+        Registration_Request_Message* registration_Message = new Registration_Request_Message(username, unencrypted_password);
         registration_Message->encryptPassword();
 
 		//queue message, so it gets send after thread execution

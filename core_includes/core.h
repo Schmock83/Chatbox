@@ -63,21 +63,21 @@ namespace UI {
 #include <sodium.h>
 
 namespace CRYPTO {
-	class Crypto_Error {
-	private:
-		QString error_msg;
-	public:
-		Crypto_Error(QString error_msg)
-			:error_msg(error_msg)
-		{}
-		QString get_error_message()const { return error_msg; }
-	};
-	bool hashPassword(unsigned char* hashed_password, const unsigned char* unhashed_pass);
-	QString hashPassword(const QString& unhashed_pass);
-	bool encryptPassword(char* hashed_password, char* unhashed_password);
-	QString encryptPassword(const QString& unhashed_password);
-	bool verifyPassword(const char* hashed_password, const char* password_to_verify);
-	bool verifyPassword(const QString& hashed_password, const QString& password_to_verify);
+    class Crypto_Error {
+    private:
+        QString error_msg;
+    public:
+        Crypto_Error(QString error_msg)
+            :error_msg(error_msg)
+        {}
+        QString get_error_message()const { return error_msg; }
+    };
+    bool hashPassword(unsigned char* hashed_password, const unsigned char* unhashed_pass);
+    QString hashPassword(const QString& unhashed_pass);
+    bool encryptPassword(char* hashed_password, char* unhashed_password);
+    QString encryptPassword(const QString& unhashed_password);
+    bool verifyPassword(const char* hashed_password, const char* password_to_verify);
+    bool verifyPassword(const QString& hashed_password, const QString& password_to_verify);
 }
 
 //Helper-Functions
