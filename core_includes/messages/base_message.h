@@ -3,7 +3,6 @@
 
 #include <QDataStream>
 #include <QTcpSocket>
-#include <QDebug>
 
 class Chatbox_Client;
 class Chatbox_Server;
