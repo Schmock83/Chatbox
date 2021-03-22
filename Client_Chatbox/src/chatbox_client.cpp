@@ -23,6 +23,7 @@ void Chatbox_Client::new_data_in_socket()
 	do {
         Base_Message* message = MessageWrapper::readMessageFromSocket(socket);
         message->handleOnClientSide(this);
+        delete message;
 	} while (!socket->atEnd());
 }
 
