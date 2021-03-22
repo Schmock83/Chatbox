@@ -22,7 +22,6 @@ public:
         stream << Client_Message::Client_Message_Type::Client_Request_Message;
         return stream;
     }
-    virtual void handleOnClientSide(Chatbox_Client* chatbox_Client) {}
     virtual void print() {qDebug() << "Client_Request_Message";}
 };
 

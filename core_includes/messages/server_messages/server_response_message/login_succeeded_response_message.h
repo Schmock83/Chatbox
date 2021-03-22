@@ -2,7 +2,6 @@
 #define LOGIN_SUCCEEDED_RESPONSE_MESSAGE_H
 
 #include "server_response_message.h"
-
 #include "../../../../Client_Chatbox/src/chatbox_client.h"
 
 class Login_Succeeded_Response_Message : public Server_Response_Message

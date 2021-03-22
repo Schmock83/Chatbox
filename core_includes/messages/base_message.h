@@ -2,9 +2,11 @@
 #define BASE_MESSAGE_H
 
 #include <QDataStream>
+#include <QTcpSocket>
 #include <QDebug>
 
 class Chatbox_Client;
+class Chatbox_Server;
 
 class Base_Message
 {
@@ -17,6 +19,7 @@ public:
 
     virtual QDataStream& writeToStream(QDataStream& stream) const { return stream; }
     virtual void handleOnClientSide(Chatbox_Client* chatbox_Client) {}
+    virtual void handleOnServerSide(Chatbox_Server* chatbox_Server, QTcpSocket* client_Socket) {}
     virtual void print() {}
 };
 

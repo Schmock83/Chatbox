@@ -2,6 +2,7 @@
 #define USER_ADD_CONTACT_UPDATE_MESSAGE_H
 
 #include "server_update_message.h"
+#include "../../../../Client_Chatbox/src/chatbox_client.h"
 
 class User_Add_Contact_Update_Message : public Server_Update_Message
 {

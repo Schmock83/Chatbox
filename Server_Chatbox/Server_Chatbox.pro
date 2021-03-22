@@ -9,8 +9,8 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../Client_Chatbox/src/chatbox_client.cpp \
     ../core_includes/core.cpp \
-    ../core_includes/message.cpp \
     src/chatbox_server.cpp \
     src/databasehelper.cpp \
     src/main.cpp \
@@ -18,8 +18,39 @@ SOURCES += \
     src/user.cpp
 
 HEADERS += \
+    ../Client_Chatbox/src/chatbox_client.h \
     ../core_includes/core.h \
-    ../core_includes/message.h \
+    ../core_includes/messages/base_message.h \
+    ../core_includes/messages/client_messages/client_chat_message.h \
+    ../core_includes/messages/client_messages/client_message.h \
+    ../core_includes/messages/client_messages/client_request_message/add_contact_request_message.h \
+    ../core_includes/messages/client_messages/client_request_message/client_request_message.h \
+    ../core_includes/messages/client_messages/client_request_message/login_request_message.h \
+    ../core_includes/messages/client_messages/client_request_message/registration_request_message.h \
+    ../core_includes/messages/client_messages/client_request_message/remove_contact_request_message.h \
+    ../core_includes/messages/client_messages/client_request_message/search_user_request_message.h \
+    ../core_includes/messages/client_messages/client_request_message/send_older_messages_request.h \
+    ../core_includes/messages/messagewrapper.h \
+    ../core_includes/messages/server_messages/server_message.h \
+    ../core_includes/messages/server_messages/server_response_message/error_response_message.h \
+    ../core_includes/messages/server_messages/server_response_message/login_failed_response_message.h \
+    ../core_includes/messages/server_messages/server_response_message/login_succeeded_response_message.h \
+    ../core_includes/messages/server_messages/server_response_message/no_older_messages_available_response_message.h \
+    ../core_includes/messages/server_messages/server_response_message/registration_failed_response_message.h \
+    ../core_includes/messages/server_messages/server_response_message/registration_succeeded_response_message.h \
+    ../core_includes/messages/server_messages/server_response_message/search_user_response_message.h \
+    ../core_includes/messages/server_messages/server_response_message/server_response_message.h \
+    ../core_includes/messages/server_messages/server_update_message/server_update_message.h \
+    ../core_includes/messages/server_messages/server_update_message/user_add_contact_update_message.h \
+    ../core_includes/messages/server_messages/server_update_message/user_add_incoming_contact_request_update_message.h \
+    ../core_includes/messages/server_messages/server_update_message/user_add_outgoing_contact_request_update_message.h \
+    ../core_includes/messages/server_messages/server_update_message/user_remove_contact_update_message.h \
+    ../core_includes/messages/server_messages/server_update_message/user_remove_incoming_contact_request_update_message.h \
+    ../core_includes/messages/server_messages/server_update_message/user_remove_outgoing_contact_request_update_message.h \
+    ../core_includes/messages/server_messages/server_update_message/user_state_changed_update_message.h \
+    ../core_includes/messages/server_messages/server_update_message/user_stored_contacts_update_message.h \
+    ../core_includes/messages/server_messages/server_update_message/user_stored_incoming_contact_requests_update_message.h \
+    ../core_includes/messages/server_messages/server_update_message/user_stored_outgoing_contact_requests_update_message.h \
     src/chatbox_server.h \
     src/databasehelper.h \
     src/mainwindow.h \

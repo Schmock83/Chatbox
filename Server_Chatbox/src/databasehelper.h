@@ -3,7 +3,6 @@
 
 //include core for defines (database_name + table schema)
 #include "../core_includes/core.h"
-#include "../core_includes/message.h"
 
 #include <QString>
 #include <QSqlDatabase>
@@ -12,6 +11,8 @@
 #include <QMutex>
 #include <QDateTime>
 #include <QList>
+
+class Base_Message;
 
 class DatabaseHelper
 {
@@ -42,15 +43,15 @@ public:
 	QList<QString> get_user_outgoing_contact_requests(const QString& user_name);
 	QList<QString> get_user_incoming_contact_requests(const int user_id);
 	QList<QString> get_user_incoming_contact_requests(const QString& user_name);
-	QList<Message> get_stored_user_messages(const QString& user_name);
-	QList<Message> get_last_conversation(const QString& user_name1, const QString& user_name2, const QDate& conversation_date = QDate::currentDate());
-	QList<Message> get_last_messages(int count, const QString& requesting_user, const QString& user_name); //returns the last 'count' messages (full conversations - so might be more)
+    QList<Base_Message*> get_stored_user_messages(const QString& user_name);
+    QList<Base_Message*> get_last_conversation(const QString& user_name1, const QString& user_name2, const QDate& conversation_date = QDate::currentDate());
+    QList<Base_Message*> get_last_messages(int count, const QString& requesting_user, const QString& user_name); //returns the last 'count' messages (full conversations - so might be more)
 	void add_user_contact(const int user_id, const int user_id_to_add); //for sending friend request + accepting incoming friend request
 	void add_user_contact(const QString& user_name, const QString& user_name_to_add);
 	void delete_user_contact(const int user_id, const int user_id_to_del); //for declining friend request + removing user
 	void delete_user_contact(const QString& user_name, const QString& user_name_to_del);
-	void add_user_message(const Message& message);
-	void store_user_message(const Message& message);
+    void add_user_message(const Base_Message* message);
+    void store_user_message(const Base_Message* message);
 	bool user_has_contact(const int user_id, const int contact_user_id);
 	bool user_has_contact(const QString& user_name, const QString& contact);
 	bool user_has_outgoing_contact_request(const int user_id, const int outgoing_user_id);

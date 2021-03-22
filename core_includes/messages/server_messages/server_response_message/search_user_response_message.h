@@ -2,6 +2,7 @@
 #define SEARCH_USER_RESPONSE_MESSAGE_H
 
 #include "server_response_message.h"
+#include "../../../../Client_Chatbox/src/chatbox_client.h"
 
 #include <QList>
 

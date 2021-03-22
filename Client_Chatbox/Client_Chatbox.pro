@@ -1,4 +1,4 @@
-QT       += core gui network
+QT       += core gui network sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -9,6 +9,9 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../Server_Chatbox/src/chatbox_server.cpp \
+    ../Server_Chatbox/src/databasehelper.cpp \
+    ../Server_Chatbox/src/user.cpp \
     ../core_includes/core.cpp \
     src/widgets/fading_information_box.cpp \
     src/chatbox_client.cpp \
@@ -19,6 +22,9 @@ SOURCES += \
     src/widgets/userbutton.cpp
 
 HEADERS += \
+    ../Server_Chatbox/src/chatbox_server.h \
+    ../Server_Chatbox/src/databasehelper.h \
+    ../Server_Chatbox/src/user.h \
     ../core_includes/core.h \
     ../core_includes/messages/base_message.h \
     ../core_includes/messages/client_messages/client_chat_message.h \

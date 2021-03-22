@@ -3,6 +3,7 @@
 
 #include "client_message.h"
 #include "../Client_Chatbox/src/chatbox_client.h"
+#include "../../../Server_Chatbox/src/chatbox_server.h"
 
 #include <QDateTime>
 #include <QDebug>
@@ -44,6 +45,40 @@ public:
     virtual void handleOnClientSide(Chatbox_Client* chatbox_Client)
     {
         emit chatbox_Client->chatMessageReceived(this, chatbox_Client->getCurrentUserName());
+    }
+    virtual void handleOnServerSide(Chatbox_Server* chatbox_Server, QTcpSocket* client_Socket)
+    {
+        //check if message came from authenticated user
+        User* user = chatbox_Server->get_user_for_socket(client_Socket);
+        if (user == nullptr)
+        {
+            client_Socket->abort();
+            return;
+        }
+
+        //add sender to message
+        sender = user->get_user_name();
+
+        //store in db
+        try {
+            chatbox_Server->getDatabase()->add_user_message(this);
+
+            //see if receiver is online
+            User* user_Receiver = chatbox_Server->get_user_for_user_name(receiver);
+            //user_Receiver online -> deliver message
+            if (user_Receiver != nullptr)
+            {
+                chatbox_Server->queue_message(this, user_Receiver);
+            }
+            //receiver NOT online -> store message
+            else
+            {
+                chatbox_Server->getDatabase()->store_user_message(this);
+            }
+        }
+        catch (QSqlError error) {
+            qDebug() << "Error in handleChatMessage: " << error.text();
+        }
     }
     virtual void print() {qDebug() << "Client_Chat_Message: " << receiver << " - " << sender << " - " << content << " - " << dateTime << "- " << newMessage;}
 };

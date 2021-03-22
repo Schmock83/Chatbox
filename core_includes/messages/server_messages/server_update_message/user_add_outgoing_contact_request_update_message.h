@@ -3,6 +3,7 @@
 
 #include "server_update_message.h"
 #include "../../../core.h"
+#include "../../../../Client_Chatbox/src/chatbox_client.h"
 
 class User_Add_Outgoing_Contact_Request_Update_Message : public Server_Update_Message
 {

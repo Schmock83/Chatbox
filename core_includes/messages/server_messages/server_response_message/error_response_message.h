@@ -2,6 +2,7 @@
 #define ERROR_RESPONSE_MESSAGE_H
 
 #include "server_response_message.h"
+#include "../../../../Client_Chatbox/src/chatbox_client.h"
 
 class Error_Response_Message : public Server_Response_Message
 {

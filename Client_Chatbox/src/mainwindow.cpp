@@ -196,6 +196,7 @@ void MainWindow::addSearchUserResults(QList<QString> searchedUserResults)
 
 void MainWindow::startLoadingTimer()
 {
+    qDebug() << "startLoadingTimer called";
 	//wait 6 seconds and then call establishSocketConnection again...
 	cooldown_timer = cooldown_secs;
 

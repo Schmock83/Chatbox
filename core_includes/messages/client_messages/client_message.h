@@ -21,7 +21,6 @@ public:
         stream << Base_Message_Type::Client_Message;
         return stream;
     }
-    virtual void handleOnClientSide(Chatbox_Client* chatbox_Client) {}
     virtual void print() {}
 };
 

@@ -8,7 +8,6 @@
 #include <QDebug>
 
 #include "databasehelper.h"
-
 #include "../core_includes/core.h"
 
 class NoUserInDatabase {
@@ -64,9 +63,9 @@ public:
 	QList<QString> get_chats()const;
 	QList<QString> get_outgoing_contact_requests()const;
 	QList<QString> get_incoming_contact_requests()const;
-	QList<Message> get_stored_user_messages()const;
-	QList<Message> get_last_messages(int count, const QString& conversation_user)const;
-	QList<Message> get_last_conversation(const QString& conversation_user, const QDate& conversation_date = QDate::currentDate());
+    QList<Base_Message*> get_stored_user_messages()const;
+    QList<Base_Message*> get_last_messages(int count, const QString& conversation_user)const;
+    QList<Base_Message*> get_last_conversation(const QString& conversation_user, const QDate& conversation_date = QDate::currentDate());
 	void add_user_contact(const int user_id_to_add);
 	void add_user_contact(const QString& user_name_to_add);
 	void delete_user_contact(const int user_id_to_del);

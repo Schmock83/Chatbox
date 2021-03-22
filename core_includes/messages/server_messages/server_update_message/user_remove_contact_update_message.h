@@ -2,6 +2,7 @@
 #define USER_REMOVE_CONTACT_UPDATE_MESSAGE_H
 
 #include "server_update_message.h"
+#include "../../../../Client_Chatbox/src/chatbox_client.h"
 
 class User_Remove_Contact_Update_Message : public Server_Update_Message
 {

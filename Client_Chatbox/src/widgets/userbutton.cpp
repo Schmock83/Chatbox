@@ -31,7 +31,7 @@ void UserButton::mousePressEvent(QMouseEvent* e)
 			contextMenu.addAction(&cancel_action);
 			contextMenu.exec(e->globalPos());
 		}
-		else if (incoming_contact_request)
+        else if (incoming_contact_request)
 		{
 			QMenu contextMenu(this);
 			QAction action1("accept friend request", this);

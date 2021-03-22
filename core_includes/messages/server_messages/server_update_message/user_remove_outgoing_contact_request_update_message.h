@@ -3,6 +3,7 @@
 
 #include "server_update_message.h"
 #include "../../../core.h"
+#include "../../../../Client_Chatbox/src/chatbox_client.h"
 
 class User_Remove_Outgoing_Contact_Request_Update_Message : public Server_Update_Message
 {
@@ -22,7 +23,10 @@ public:
         stream >> contactName;
         return new User_Remove_Outgoing_Contact_Request_Update_Message(contactName);
     }
-    virtual void handleOnClientSide(Chatbox_Client* chatbox_Client) {}
+    virtual void handleOnClientSide(Chatbox_Client* chatbox_Client)
+    {
+        emit chatbox_Client->removeContactRequestSignal(contactName);
+    }
     virtual void print() {qDebug() << "User_Remove_Outgoing_Contact_Request_Update_Message: " << contactName;}
 };
 

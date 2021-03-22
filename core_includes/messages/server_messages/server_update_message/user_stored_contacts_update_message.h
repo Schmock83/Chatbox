@@ -2,6 +2,7 @@
 #define USER_STORED_CONTACTS_UPDATE_MESSAGE_H
 
 #include "server_update_message.h"
+#include "../../../../Client_Chatbox/src/chatbox_client.h"
 
 #include <QList>
 

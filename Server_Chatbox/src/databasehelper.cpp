@@ -1,4 +1,5 @@
 #include "databasehelper.h"
+#include "../core_includes/messages/messagewrapper.h"
 
 void DatabaseHelper::initiate_sqlite_database()
 {
@@ -156,7 +157,7 @@ QList<QString> DatabaseHelper::get_user_incoming_contact_requests(const QString&
 	return get_user_incoming_contact_requests(user_id);
 }
 
-QList<Message> DatabaseHelper::get_stored_user_messages(const QString& user_name)
+QList<Base_Message*> DatabaseHelper::get_stored_user_messages(const QString& user_name)
 {
 	QMutexLocker locker(&mutex);
 	sql_query.prepare(QString("SELECT dateTime, message, sender_user_name FROM %1 WHERE receiver_user_name == :receiver_user_name;").arg(STORED_MESSAGES_TABLE));
@@ -165,12 +166,12 @@ QList<Message> DatabaseHelper::get_stored_user_messages(const QString& user_name
 	if (!sql_query.exec())
 		throw sql_query.lastError();
 
-	QList<Message> stored_messages;
+    QList<Base_Message*> stored_messages;
 
 	while (sql_query.next())
 	{
-		Message m = Message::createChatMessage(user_name, sql_query.value(0).toDateTime(), sql_query.value(1).toString(), sql_query.value(2).toString());
-		stored_messages.append(m);
+        Base_Message* chat_Message = new Client_Chat_Message(user_name, sql_query.value(1).toString(), sql_query.value(0).toDateTime(), sql_query.value(2).toString());
+        stored_messages.append(chat_Message);
 	}
 
 	//delete the messages
@@ -183,7 +184,7 @@ QList<Message> DatabaseHelper::get_stored_user_messages(const QString& user_name
 	return stored_messages;
 }
 
-QList<Message> DatabaseHelper::get_last_conversation(const QString& user_name1, const QString& user_name2, const QDate& conversation_date)
+QList<Base_Message*> DatabaseHelper::get_last_conversation(const QString& user_name1, const QString& user_name2, const QDate& conversation_date)
 {
 	QMutexLocker locker(&mutex);
 	sql_query.prepare(QString("SELECT receiver_user_name, dateTime, message, sender_user_name from %1 WHERE ((sender_user_name = :user_1 AND receiver_user_name = :user_2) OR (sender_user_name = :user_2 AND receiver_user_name = :user_1)) AND DATE(dateTime) = (SELECT DATE(dateTime) FROM send_messages WHERE ((sender_user_name = :user_1 AND receiver_user_name = :user_2) OR (sender_user_name = :user_2 AND receiver_user_name = :user_1)) AND DATE(dateTime) <= :dateTime ORDER BY dateTime DESC LIMIT 1);").arg(SEND_MESSAGES_TABLE));
@@ -194,21 +195,21 @@ QList<Message> DatabaseHelper::get_last_conversation(const QString& user_name1, 
 	if (!sql_query.exec())
 		throw sql_query.lastError();
 
-	QList<Message> conversation_messages;
+    QList<Base_Message*> conversation_messages;
 
 	while (sql_query.next())
 	{
-		Message m = Message::createOldChatMessage(sql_query.value(0).toString(), sql_query.value(1).toDateTime(), sql_query.value(2).toString(), sql_query.value(3).toString());
-		conversation_messages.append(m);
+        Base_Message* chat_Message = new Client_Chat_Message(sql_query.value(0).toString(), sql_query.value(2).toString(), sql_query.value(1).toDateTime(), sql_query.value(3).toString(), false);
+        conversation_messages.append(chat_Message);
 	}
 
 	return conversation_messages;
 }
 
-QList<Message> DatabaseHelper::get_last_messages(int count, const QString& requesting_user, const QString& user_name)
+QList<Base_Message*> DatabaseHelper::get_last_messages(int count, const QString& requesting_user, const QString& user_name)
 {
-	QList<Message> last_messages;
-	QDate date = QDate::currentDate();
+    QList<Base_Message*> last_messages;
+    QDate date = QDate::currentDate();
 
 	do
 	{
@@ -217,8 +218,8 @@ QList<Message> DatabaseHelper::get_last_messages(int count, const QString& reque
 		//no older messages
 		if (last_conversation_msgs.isEmpty())
 		{
-			Message m = Message::createServerMessage(QDateTime::currentDateTime(), ServerMessageType::server_noOlderMessagesAvailable, user_name);
-			last_messages.append(m);
+            Base_Message* no_Older_Messages_Response = new No_Older_Messages_Available_Response_Message(user_name);
+            last_messages.append(no_Older_Messages_Response);
 			return last_messages;
 		}
 
@@ -226,9 +227,8 @@ QList<Message> DatabaseHelper::get_last_messages(int count, const QString& reque
 		{
 			--count;
 			last_messages.append(last_msg);
-		}
-
-		date = last_conversation_msgs.back().getDateTime().addDays(-1).date();
+        }
+        date = static_cast<Client_Chat_Message*>(last_conversation_msgs.back())->getDateTime().addDays(-1).date();
 	} while (count > 0);
 
 	return last_messages;
@@ -322,27 +322,29 @@ void DatabaseHelper::add_user_contact(const QString& user_name, const QString& u
 	add_user_contact(user_id, user_id_to_add);
 }
 
-void DatabaseHelper::add_user_message(const Message& message)
+void DatabaseHelper::add_user_message(const Base_Message* message)
 {
 	QMutexLocker locker(&mutex);
+    const Client_Chat_Message* chat_Message = static_cast<const Client_Chat_Message*>(message);
 	sql_query.prepare(QString("INSERT INTO %1 (sender_user_name, receiver_user_name, dateTime, message) VALUES (:sender_user_name, :receiver_user_name, :dateTime, :message);").arg(SEND_MESSAGES_TABLE));
-	sql_query.bindValue(":sender_user_name", message.getSender());
-	sql_query.bindValue(":receiver_user_name", message.getReceiver());
-	sql_query.bindValue(":dateTime", message.getDateTime());
-	sql_query.bindValue(":message", message.getContent());
+    sql_query.bindValue(":sender_user_name", chat_Message->getSender());
+    sql_query.bindValue(":receiver_user_name", chat_Message->getReceiver());
+    sql_query.bindValue(":dateTime", chat_Message->getDateTime());
+    sql_query.bindValue(":message", chat_Message->getContent());
 
 	if (!sql_query.exec())
 		throw sql_query.lastError();
 }
 
-void DatabaseHelper::store_user_message(const Message& message)
+void DatabaseHelper::store_user_message(const Base_Message* message)
 {
 	QMutexLocker locker(&mutex);
+    const Client_Chat_Message* chat_Message = static_cast<const Client_Chat_Message*>(message);
 	sql_query.prepare(QString("INSERT INTO %1 (sender_user_name, receiver_user_name, dateTime, message) VALUES (:sender_user_name, :receiver_user_name, :dateTime, :message);").arg(STORED_MESSAGES_TABLE));
-	sql_query.bindValue(":sender_user_name", message.getSender());
-	sql_query.bindValue(":receiver_user_name", message.getReceiver());
-	sql_query.bindValue(":dateTime", message.getDateTime());
-	sql_query.bindValue(":message", message.getContent());
+    sql_query.bindValue(":sender_user_name", chat_Message->getSender());
+    sql_query.bindValue(":receiver_user_name", chat_Message->getReceiver());
+    sql_query.bindValue(":dateTime", chat_Message->getDateTime());
+    sql_query.bindValue(":message", chat_Message->getContent());
 
 	if (!sql_query.exec())
 		throw sql_query.lastError();
