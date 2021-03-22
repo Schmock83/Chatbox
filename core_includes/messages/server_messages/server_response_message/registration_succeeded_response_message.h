@@ -25,7 +25,6 @@ public:
         emit chatbox_Client->clearRegistrationPasswordEdit();
         emit chatbox_Client->enableButtons();
     }
-    virtual void print() {qDebug() << "Registration_Succeeded_Response_Message";}
 };
 
 #endif // REGISTRATION_SUCCEEDED_RESPONSE_MESSAGE_H

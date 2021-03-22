@@ -35,7 +35,6 @@ public:
     {
         emit chatbox_Client->userStateChanged(QPair<QString, UserState>(userName, userState));
     }
-    virtual void print() {qDebug() << "User_State_Changed_Update_Message: " << userName << userState;}
 };
 
 #endif // USER_STATE_CHANGED_UPDATE_MESSAGE_H

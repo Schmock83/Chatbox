@@ -31,7 +31,6 @@ public:
         for (const auto& stored_Incoming_Contact_Request : stored_Incoming_Contact_Requests)
                 emit chatbox_Client->addContactRequest(stored_Incoming_Contact_Request, ContactRequestType::addIncomingContactRequest);
     }
-    virtual void print() {qDebug() << "User_Stored_Incoming_Contact_Requests_Update_Message: " << stored_Incoming_Contact_Requests;}
 };
 
 #endif // USER_STORED_INCOMING_CONTACT_REQUESTS_UPDATE_MESSAGE_H

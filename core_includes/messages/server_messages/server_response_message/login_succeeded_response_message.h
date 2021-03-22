@@ -34,7 +34,6 @@ public:
         chatbox_Client->setCurrentUserName(username);
         emit chatbox_Client->updateUserName(username);
     }
-    virtual void print() {qDebug() << "Login_Succeeded_Response_Message: " << username;}
 };
 
 #endif // LOGIN_SUCCEEDED_RESPONSE_MESSAGE_H

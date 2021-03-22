@@ -29,7 +29,6 @@ public:
         for(const auto& stored_Contact : stored_Contacts)
             emit chatbox_Client->addContactSignal(stored_Contact);
     }
-    virtual void print() {qDebug() << "User_Stored_Contacts_Update_Message: " << stored_Contacts;}
 };
 
 #endif // USER_STORED_CONTACTS_UPDATE_MESSAGE_H

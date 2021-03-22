@@ -28,7 +28,6 @@ public:
     {
         emit chatbox_Client->searchUserResultsReceived(search_Results);
     }
-    virtual void print() {qDebug() << "Search_User_Response_Message: " << search_Results;}
 };
 
 #endif // SEARCH_USER_RESPONSE_MESSAGE_H

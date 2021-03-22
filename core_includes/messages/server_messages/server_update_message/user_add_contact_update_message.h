@@ -26,7 +26,6 @@ public:
     {
         emit chatbox_Client->addContactSignal(contactName);
     }
-    virtual void print() {qDebug() << "User_Add_Contact_Update_Message: " << contactName;}
 };
 
 #endif // USER_ADD_CONTACT_UPDATE_MESSAGE_H

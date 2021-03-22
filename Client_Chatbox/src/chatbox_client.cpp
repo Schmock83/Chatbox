@@ -22,7 +22,6 @@ void Chatbox_Client::new_data_in_socket()
 {
 	do {
         Base_Message* message = MessageWrapper::readMessageFromSocket(socket);
-        message->print();
         message->handleOnClientSide(this);
 	} while (!socket->atEnd());
 }

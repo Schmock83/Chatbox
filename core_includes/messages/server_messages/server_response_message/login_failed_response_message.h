@@ -29,7 +29,6 @@ public:
         emit chatbox_Client->clearLoginPasswordEdit();
         emit chatbox_Client->enableButtons();
     }
-    virtual void print() {qDebug() << "Login_Failed_Response_Message: " << responseString;}
 };
 
 #endif // LOGIN_FAILED_RESPONSE_MESSAGE_H

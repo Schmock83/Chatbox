@@ -27,7 +27,6 @@ public:
     {
         emit chatbox_Client->removeContactRequestSignal(contactName);
     }
-    virtual void print() {qDebug() << "User_Remove_Outgoing_Contact_Request_Update_Message: " << contactName;}
 };
 
 #endif // USER_REMOVE_OUTGOING_CONTACT_REQUEST_UPDATE_MESSAGE_H

@@ -48,7 +48,6 @@ public:
         }
         QThread::currentThread()->sleep(1);
     }
-    void print() { qDebug() << "Search_User_Request_Message: " << username; }
 };
 
 #endif // SEARCH_USER_REQUEST_MESSAGE_H

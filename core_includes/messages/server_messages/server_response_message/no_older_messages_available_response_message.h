@@ -26,7 +26,6 @@ public:
     {
         emit chatbox_Client->noOlderMessagesAvailable(chatUserName);
     }
-    virtual void print() {qDebug() << "No_Older_Messages_Available_Response_Message: " << chatUserName;}
 };
 
 #endif // NO_OLDER_MESSAGES_AVAILABLE_RESPONSE_MESSAGE_H

@@ -80,7 +80,6 @@ public:
             qDebug() << "Error in handleChatMessage: " << error.text();
         }
     }
-    virtual void print() {qDebug() << "Client_Chat_Message: " << receiver << " - " << sender << " - " << content << " - " << dateTime << "- " << newMessage;}
 };
 
 #endif // CLIENT_CHAT_MESSAGE_H

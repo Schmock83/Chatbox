@@ -150,7 +150,7 @@ void Chatbox_Server::new_data_in_socket()
 	QTcpSocket* clientSocket = (QTcpSocket*)sender();
     do{
         Base_Message* message = MessageWrapper::readMessageFromSocket(clientSocket);
-        message->print();
+
         QThread* thread = QThread::create([&, message, clientSocket] { message->handleOnServerSide(this, clientSocket); });
 
         //connect finished with deliver_queued_messages, so that after thread the main-thread can deliver possible messages through the socket (for thread-safety)
@@ -195,7 +195,6 @@ void Chatbox_Server::deliver_queued_messages()
 	while (it != queued_messages.end()) {
 		if (it->second->isValid()) {
             qDebug() << "delivering message....";
-            it->first->print();
             MessageWrapper::sendMessageThroughSocket(it->second, it->first);
 		}
 		it = queued_messages.erase(it);

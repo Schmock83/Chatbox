@@ -62,7 +62,6 @@ public:
             chatbox_Server->sendErrorMessage(user);
         }
     }
-    void print() { qDebug() << "Send_Older_Messages_Request: " << chatUserName << dateTime; }
 };
 
 #endif // SEND_OLDER_MESSAGES_REQUEST_H

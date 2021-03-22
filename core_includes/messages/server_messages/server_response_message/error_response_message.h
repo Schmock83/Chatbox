@@ -26,7 +26,6 @@ public:
     {
         emit chatbox_Client->showMainWindowError(error_Message);
     }
-    virtual void print() {qDebug() << "Error_Response_Message: " << error_Message;}
 };
 
 #endif // ERROR_RESPONSE_MESSAGE_H

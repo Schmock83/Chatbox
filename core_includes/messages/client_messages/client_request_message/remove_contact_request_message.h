@@ -96,7 +96,6 @@ public:
             chatbox_Server->sendErrorMessage(user);
         }
     }
-    void print() { qDebug() << "Remove_Contact_Request_Message: " << contactName; }
 };
 
 #endif // REMOVE_CONTACT_REQUEST_MESSAGE_H

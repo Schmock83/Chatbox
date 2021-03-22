@@ -67,7 +67,6 @@ public:
             chatbox_Server->queue_message(response_Message, client_Socket);
         }
     }
-    void print() { qDebug() << "Registration_Request_Message: " << username << " - " << password; }
 };
 
 #endif // REGISTRATION_REQUEST_MESSAGE_H

@@ -79,7 +79,6 @@ public:
             chatbox_Server->queue_message(response_Message, client_Socket);
         }
     }
-    void print() { Client_Request_Message::print(); qDebug() << "Login_Request_Message: " << username << " - " << password; }
 };
 
 #endif // LOGIN_REQUEST_MESSAGE_H

@@ -27,7 +27,6 @@ public:
     {
         emit chatbox_Client->addContactRequest(contactName, ContactRequestType::addOutgoingContactRequest);
     }
-    virtual void print() {qDebug() << "User_Add_Outgoing_Contact_Request_Update_Message: " << contactName;}
 };
 
 #endif // USER_ADD_OUTGOING_CONTACT_REQUEST_UPDATE_MESSAGE_H
