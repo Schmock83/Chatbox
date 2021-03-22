@@ -17,7 +17,6 @@ public:
         stream << Base_Message_Type::Server_Message;
         return stream;
     }
-    virtual void print() {}
 };
 
 #endif // SERVER_MESSAGE_H

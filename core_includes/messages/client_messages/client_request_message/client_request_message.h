@@ -22,7 +22,6 @@ public:
         stream << Client_Message::Client_Message_Type::Client_Request_Message;
         return stream;
     }
-    virtual void print() {qDebug() << "Client_Request_Message";}
 };
 
 #endif // CLIENT_REQUEST_MESSAGE_H

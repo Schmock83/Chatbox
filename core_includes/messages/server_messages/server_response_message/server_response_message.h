@@ -23,7 +23,6 @@ public:
         stream << Server_Message::Server_Message_Type::Server_Response_Message;
         return stream;
     }
-    virtual void print() {qDebug() << "Server_Response_Message";}
 };
 
 #endif // SERVER_RESPONSE_MESSAGE_H

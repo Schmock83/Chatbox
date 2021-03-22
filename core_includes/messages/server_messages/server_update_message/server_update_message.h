@@ -26,7 +26,6 @@ public:
         stream << Server_Message::Server_Message_Type::Server_Update_Message;
         return stream;
     }
-    virtual void print() {qDebug() << "Server_Update_Message";}
 };
 
 #endif // SERVER_UPDATE_MESSAGE_H
