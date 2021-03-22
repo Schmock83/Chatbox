@@ -6,8 +6,6 @@
 #include <QMouseEvent>
 #include <QMenu>
 
-#include <QDebug>
-
 #include "../core_includes/core.h"
 
 class UserButton : public QPushButton

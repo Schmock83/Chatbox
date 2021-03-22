@@ -9,9 +9,6 @@
 
 #include <QTimer>
 
-//TODO remove
-#include <qDebug>
-
 namespace Ui {
 	class Fading_Information_Box;
 }
