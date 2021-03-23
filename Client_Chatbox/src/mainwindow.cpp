@@ -141,6 +141,13 @@ void MainWindow::search_line_edit_focussed()
 	if (ui->chat_contacts_stackedWidget->currentIndex() != UI::ChatContactPage::user_search_page)
 		previous_left_page = (UI::ChatContactPage)ui->chat_contacts_stackedWidget->currentIndex();
 	ui->chat_contacts_stackedWidget->setCurrentIndex(UI::ChatContactPage::user_search_page);
+
+    if(ui->user_search_layout->count() == 0)
+    {
+        QLabel* label = new QLabel("Type a username and press enter");
+        label->setWordWrap(true);
+        ui->user_search_layout->addWidget(label);
+    }
 }
 void MainWindow::search_line_edit_unfocussed()
 {
